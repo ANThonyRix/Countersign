@@ -25,6 +25,8 @@
 <!-- page CSS: the question index, code, commands and the small reference tables inside answers -->
 <style>
   .faq-page { padding-top: var(--s-8, 64px); }
+  /* the kit sizes each section to one screen; this page is one long reading section, so it grows with its content */
+  main.faq-page > .section { height: auto; min-height: 100vh; min-height: 100svh; }
   .faq-head { max-width: 760px; display: grid; gap: var(--s-4); margin-bottom: var(--s-8, 64px); }
   .faq-head p { color: var(--ink); font-size: var(--t-lead); line-height: 1.5; max-width: 60ch; margin: 0; }
 
