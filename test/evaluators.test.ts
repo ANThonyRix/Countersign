@@ -83,3 +83,50 @@ test("identity headquarters: a city inside a reviewed country is in scope, anoth
   assert.equal(hqInScope("Springfield", ["Singapore"]), true);
   assert.equal(hqInScope("", ["Singapore"]), true);
 });
+
+test("sanctions fails closed on a non-boolean matched value", () => {
+  assert.equal(sanctions("Acme")(shaped({ matched: "true" })).verdict, "unknown");
+  assert.equal(sanctions("Acme")(shaped({ matched: 1 })).verdict, "unknown");
+  assert.equal(sanctions("Acme")(shaped({ matched: null })).verdict, "unknown");
+});
+
+test("judgment evaluators fail closed on values outside the intent enum", async () => {
+  const { botDetection, codeReview } = await import("../src/core/evaluators.ts");
+  assert.equal(documentAuthenticity()(shaped({ verdict: "Likely authentic" })).verdict, "clear");
+  assert.equal(documentAuthenticity()(shaped({ verdict: "forged" })).verdict, "unknown");
+  assert.equal(documentAuthenticity()(shaped({ verdict: "Altered" })).verdict, "unknown");
+  assert.equal(botDetection("@acme")(shaped({ verdict: "human" })).verdict, "clear");
+  assert.equal(botDetection("@acme")(shaped({ verdict: "likely_human" })).verdict, "clear");
+  assert.equal(botDetection("@acme")(shaped({ verdict: "likely_bot" })).verdict, "flag");
+  assert.equal(botDetection("@acme")(shaped({ verdict: "suspicious" })).verdict, "unknown");
+  assert.equal(codeReview()(shaped({ verdict: "Approve" })).verdict, "clear");
+  assert.equal(codeReview()(shaped({ verdict: "Request changes" })).verdict, "flag");
+  assert.equal(codeReview()(shaped({ verdict: "Reject" })).verdict, "unknown");
+});
+
+test("hqInScope treats regex metacharacters in a jurisdiction as plain text", async () => {
+  const { hqInScope } = await import("../src/packs/checks.ts");
+  assert.doesNotThrow(() => hqInScope("Dubai, UAE", ["c++ (offshore"]));
+  assert.equal(hqInScope("Acme c++ (offshore) desk", ["c++ (offshore"]), true);
+  // A pathological pattern must not backtrack: it is matched literally.
+  const started = Date.now();
+  hqInScope(`${"a".repeat(5000)}!`, ["(a+)+$"]);
+  assert.ok(Date.now() - started < 1000);
+});
+
+test("assess turns an evaluator crash into unknown", async () => {
+  const { assess } = await import("../src/core/agent.ts");
+  const check = {
+    id: "x",
+    title: "Crashy check",
+    why: "",
+    intent: "NEWS_SEARCH_GENERAL",
+    input: { query: "q" },
+    evaluate: () => {
+      throw new Error("boom");
+    },
+  };
+  const a = assess(check, shaped({}));
+  assert.equal(a.verdict, "unknown");
+  assert.match(a.summary, /boom/);
+});

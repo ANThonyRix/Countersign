@@ -14,6 +14,15 @@ import { verifySignal } from "./telegraph/client.ts";
 const WEB = path.join(ROOT, "web");
 // The run endpoint spends from the agent wallet, so listen on loopback unless told otherwise.
 const HOST = process.env.HOST ?? "127.0.0.1";
+// Host names the server answers to. Blocks DNS rebinding: a hostile page that points its own
+// domain at 127.0.0.1 still sends its own Host header. Extra names come from ALLOWED_HOSTS.
+const ALLOWED_HOSTS = new Set(
+  ["localhost", "127.0.0.1", "[::1]", HOST, ...(process.env.ALLOWED_HOSTS ?? "").split(",")]
+    .map((h) => h.trim().toLowerCase())
+    .filter((h) => h && h !== "0.0.0.0" && h !== "::"),
+);
+const MAX_FINISHED_RUNS = 20;
+const SECURITY_HEADERS = { "x-content-type-options": "nosniff", "referrer-policy": "no-referrer", "x-frame-options": "DENY" };
 
 interface Run {
   id: string;
@@ -38,8 +47,36 @@ const MIME: Record<string, string> = {
 };
 
 function send(res: ServerResponse, status: number, body: unknown) {
-  res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
+  res.writeHead(status, { ...SECURITY_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
   res.end(JSON.stringify(body, (_k, v) => (typeof v === "bigint" ? v.toString() : v)));
+}
+
+const httpError = (status: number, message: string) => Object.assign(new Error(message), { status });
+
+function hostnameOf(host: string | undefined): string | undefined {
+  if (!host) return undefined;
+  try {
+    return new URL(`http://${host}`).hostname.toLowerCase();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Cross-site request guard. POST endpoints spend from the agent wallet, so:
+ *  - the Host header must name this server (DNS rebinding);
+ *  - a browser Origin, when sent, must be this same server (CSRF);
+ *  - POST bodies must be application/json, which a cross-site form or no-cors fetch cannot send
+ *    without a CORS preflight, and this server never answers preflights.
+ */
+function guardRequest(req: IncomingMessage): void {
+  const hostname = hostnameOf(req.headers.host);
+  if (!hostname || !ALLOWED_HOSTS.has(hostname)) throw httpError(403, "host not allowed");
+  if (req.method === "GET" || req.method === "HEAD") return;
+  const origin = req.headers.origin;
+  if (origin !== undefined && origin !== `http://${req.headers.host}`) throw httpError(403, "cross-origin request refused");
+  const type = (req.headers["content-type"] ?? "").split(";")[0].trim().toLowerCase();
+  if (type !== "application/json") throw httpError(415, "content-type must be application/json");
 }
 
 async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
@@ -50,11 +87,18 @@ async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> 
     if (size > 64 * 1024) throw Object.assign(new Error("request body too large"), { status: 413 });
     chunks.push(chunk as Buffer);
   }
+  let parsed: unknown;
   try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+    parsed = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
   } catch {
-    throw Object.assign(new Error("invalid JSON body"), { status: 400 });
+    throw httpError(400, "invalid JSON body");
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw httpError(400, "JSON body must be an object");
+  const body = parsed as Record<string, unknown>;
+  if (body.subject !== undefined && (!body.subject || typeof body.subject !== "object" || Array.isArray(body.subject))) {
+    throw httpError(400, "subject must be an object");
+  }
+  return body;
 }
 
 function packView() {
@@ -83,6 +127,9 @@ function finish(run: Run) {
   }
   run.listeners.clear();
   if (activeRun === run) activeRun = undefined;
+  // Keep only the most recent finished runs in memory; memos themselves are on disk.
+  const finished = [...runs.values()].filter((r) => r.done);
+  for (const old of finished.slice(0, Math.max(0, finished.length - MAX_FINISHED_RUNS))) runs.delete(old.id);
 }
 
 async function startRun(body: Record<string, unknown>) {
@@ -108,7 +155,7 @@ async function startRun(body: Record<string, unknown>) {
 function streamRun(req: IncomingMessage, res: ServerResponse, id: string) {
   const run = runs.get(id);
   if (!run) return send(res, 404, { error: "run not found" });
-  res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
+  res.writeHead(200, { ...SECURITY_HEADERS, "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
   for (const e of run.events) res.write(`data: ${JSON.stringify(e)}\n\n`);
   if (run.done) {
     res.write(`event: end\ndata: ${JSON.stringify({ memoId: run.memoId, error: run.error })}\n\n`);
@@ -130,13 +177,21 @@ async function verifyMemo(id: string) {
 }
 
 function serveStatic(res: ServerResponse, urlPath: string) {
-  const rel = urlPath === "/" ? "index.html" : decodeURIComponent(urlPath).replace(/^\/+/, "");
+  let rel: string;
+  try {
+    rel = urlPath === "/" ? "index.html" : decodeURIComponent(urlPath).replace(/^\/+/, "");
+  } catch {
+    res.writeHead(400, { ...SECURITY_HEADERS, "content-type": "text/plain" });
+    return res.end("bad request");
+  }
   const file = path.resolve(WEB, rel);
-  if (!file.startsWith(WEB + path.sep) || !existsSync(file) || !statSync(file).isFile()) {
-    res.writeHead(404, { "content-type": "text/plain" });
+  // Dot segments (.taste-skill, .git, .env and the like) are tooling, never site content.
+  const hidden = path.relative(WEB, file).split(path.sep).some((s) => s.startsWith("."));
+  if (hidden || !file.startsWith(WEB + path.sep) || !existsSync(file) || !statSync(file).isFile()) {
+    res.writeHead(404, { ...SECURITY_HEADERS, "content-type": "text/plain" });
     return res.end("not found");
   }
-  res.writeHead(200, { "content-type": MIME[path.extname(file)] ?? "application/octet-stream", "cache-control": "no-cache" });
+  res.writeHead(200, { ...SECURITY_HEADERS, "content-type": MIME[path.extname(file)] ?? "application/octet-stream", "cache-control": "no-cache" });
   createReadStream(file).pipe(res);
 }
 
@@ -144,6 +199,7 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   const p = url.pathname;
   try {
+    guardRequest(req);
     if (req.method === "GET" && p === "/api/status") {
       const wallet = hasAgentKey() ? await walletStatus().catch((e: Error) => ({ error: e.message })) : null;
       return send(res, 200, {

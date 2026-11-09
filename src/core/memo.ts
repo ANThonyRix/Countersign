@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import path from "node:path";
 import { keccak256, recoverMessageAddress, toBytes } from "viem";
 import type { LocalAccount } from "viem/accounts";
-import { config } from "../config.ts";
+import { config, ROOT } from "../config.ts";
 import type { Decision, Evidence, Finding } from "./types.ts";
 
 export interface MemoBody {
@@ -70,7 +70,8 @@ export function saveMemo(memo: Memo): string {
   return file;
 }
 
-const EXAMPLES_DIR = path.join(path.dirname(config.dataDir), "examples");
+// Examples ship with the repo, so they resolve from ROOT even when COUNTERSIGN_DATA_DIR points elsewhere.
+const EXAMPLES_DIR = path.join(ROOT, "examples");
 
 export function loadMemo(id: string): Memo | undefined {
   if (!/^[a-z0-9-]+$/i.test(id)) return undefined;

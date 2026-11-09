@@ -4,7 +4,7 @@ import { mainnet } from "viem/chains";
 import { privateKeyToAccount, type LocalAccount } from "viem/accounts";
 import { agentKey, config } from "../config.ts";
 import { ask, quote, rankedMiners, verifySignal, type AskOutcome } from "../telegraph/client.ts";
-import { EngineError, type AskInput } from "../telegraph/types.ts";
+import { EngineError, type AskInput, type AskResponse } from "../telegraph/types.ts";
 import type { PackDefinition } from "./types.ts";
 import { Budget, atomicToUsd } from "./budget.ts";
 import { agrees } from "./evaluators.ts";
@@ -153,7 +153,7 @@ class Runner {
       return [];
     }
 
-    let a: Assessment = check.evaluate(primary.outcome.response);
+    let a: Assessment = assess(check, primary.outcome.response);
     if (check.pinIntent && primary.outcome.response.intent && primary.outcome.response.intent !== check.intent && a.verdict !== "unknown") {
       a = { ...a, summary: `${a.summary} (router answered as ${primary.outcome.response.intent})` };
     }
@@ -169,7 +169,7 @@ class Runner {
       const ev2 = this.record(check.id, "crosscheck", check.intent, second.outcome, second.error);
       finding.evidence.push(ev2.id);
       if (second.outcome) {
-        const b = check.evaluate(second.outcome.response);
+        const b = assess(check, second.outcome.response);
         ev2.verdict = b.verdict;
         const agreement = agrees(a, b);
         if (a.verdict === "unknown" && b.verdict !== "unknown") {
@@ -213,7 +213,25 @@ class Runner {
             queue.push(m);
           }
         })
-        .catch((err) => this.emit({ type: "error", message: `${c.id}: ${describe(err)}` }))
+        .catch((err) => {
+          this.emit({ type: "error", message: `${c.id}: ${describe(err)}` });
+          // A check that crashed must still reach the policy as unknown, never silently vanish.
+          if (!this.findings.has(c.id)) {
+            const finding: Finding = {
+              checkId: c.id,
+              title: c.title,
+              why: c.why,
+              verdict: "unknown",
+              summary: `Check failed: ${describe(err)}`,
+              critical: !!c.critical,
+              corroboration: "single",
+              evidence: this.evidence.filter((e) => e.checkId === c.id).map((e) => e.id),
+              escalatedFrom: c.escalatedFrom,
+            };
+            this.findings.set(c.id, finding);
+            this.emit({ type: "finding", finding });
+          }
+        })
         .finally(() => active.delete(p));
       active.add(p);
     };
@@ -300,6 +318,15 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
 }
 
 const round = (n: number) => Math.round(n * 1e6) / 1e6;
+
+/** Runs a check's evaluator. An evaluator that throws on a paid answer yields unknown (fail closed). */
+export function assess(check: CheckSpec, response: AskResponse): Assessment {
+  try {
+    return check.evaluate(response);
+  } catch (err) {
+    return { verdict: "unknown", summary: `${check.title}: the answer could not be evaluated (${describe(err)}).` };
+  }
+}
 
 function describe(err: unknown): string {
   if (!err) return "unknown error";

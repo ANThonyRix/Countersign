@@ -182,6 +182,11 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
   covered, and a memo lists only the checks it actually bought.
 - **Testnet only.** Payments are in Telegraph test USDC on Sepolia. Mainnet would need a funded wallet,
   real-money spend caps reviewed by the operator, and miners priced for production.
+- **A valid signature proves authorship, not correctness.** `verify` proves that the wallet in
+  `memo.agent` signed this exact memo and that every cited signal exists, matches its keccak hash and
+  was paid by that wallet. It does not re-derive findings or the decision from the signal payloads,
+  and it does not pin which wallet counts as "the" Countersign agent. Check the agent address
+  against the one you expect.
 - **Requests are public.** See Safety.
 - **One agent at a time.** The local server runs one run at a time and keeps memos on disk in
   `data/`. It has no accounts and is not meant to be exposed beyond 127.0.0.1.
@@ -194,7 +199,11 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
 - Spend caps live in `.env`: `MAX_USD_PER_RUN`, `MAX_USD_PER_DAY` and `MAX_ATOMIC_PER_PAYMENT`. The
   agent refuses to sign any payment that would cross a cap. Engine errors (400, 422, 429, 503) come
   back before payment and cost nothing.
-- The server binds to 127.0.0.1 and runs one agent at a time.
+- The server binds to 127.0.0.1 and runs one agent at a time. It answers only to loopback Host
+  names (add more with `ALLOWED_HOSTS`), refuses cross-origin POSTs and accepts only
+  `application/json` bodies, so another site open in the browser cannot start a paid run.
+- An evaluator never fails open: a verdict outside the intent's enum, or an evaluator error, is
+  `unknown`, and a crashed check still reaches the policy as `unknown`.
 
 ## Tests
 

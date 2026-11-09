@@ -29,7 +29,9 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   "british virgin islands": ["british virgin islands", "bvi"],
 };
 
-const mentions = (text: string, alias: string) => new RegExp(`(^|[^a-z])${alias.replace(/[.]/g, "\\.")}($|[^a-z])`).test(text);
+// Aliases can come from user input (an unlisted jurisdiction), so every regex metacharacter is escaped.
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const mentions = (text: string, alias: string) => new RegExp(`(^|[^a-z])${escapeRegExp(alias)}($|[^a-z])`).test(text);
 
 /** True unless the headquarters string names a known country that is not under review. */
 export function hqInScope(headquarters: string, expectedJurisdictions: string[]): boolean {

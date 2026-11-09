@@ -27,9 +27,11 @@ export function sanctions(subject: string) {
     if (!res || !ok(r, "matched")) return unknown(r, "matched", `Sanctions screen for "${subject}"`);
     const score = typeof res.match_score === "number" ? res.match_score : undefined;
     const facts = { matched: res.matched, lists: res.lists, matches: res.matches, match_score: score };
-    if (res.matched !== true) {
+    if (res.matched === false) {
       return { verdict: "clear", summary: `No sanctions match for "${subject}".`, facts };
     }
+    // Fail closed: only a real boolean counts. Anything else is unreadable, not clean.
+    if (res.matched !== true) return unknown(r, "matched", `Sanctions screen for "${subject}"`);
     const where = list(res.lists) || list(res.matches) || "an unnamed list";
     if (score !== undefined && score < 0.85) {
       return { verdict: "flag", summary: `Possible sanctions match for "${subject}" (score ${score}) on ${where}. Needs analyst review.`, facts };
@@ -92,8 +94,9 @@ export function botDetection(account: string) {
     const facts = { verdict: res.verdict, bot_score: res.bot_score, signals: res.signals };
     const v = String(res.verdict).toLowerCase();
     if (v === "bot" || v === "likely_bot") return { verdict: "flag", summary: `${account} looks automated (${v}${res.bot_score != null ? `, score ${res.bot_score}` : ""}).`, facts };
-    if (v === "inconclusive") return { verdict: "unknown", summary: `Bot check for ${account} was inconclusive.`, facts };
-    return { verdict: "clear", summary: `${account} looks human-run (${v}).`, facts };
+    if (v === "human" || v === "likely_human") return { verdict: "clear", summary: `${account} looks human-run (${v}).`, facts };
+    // "inconclusive" and any value outside the intent's enum stay unknown (fail closed).
+    return { verdict: "unknown", summary: `Bot check for ${account} was inconclusive (${v}).`, facts };
   };
 }
 
@@ -107,10 +110,12 @@ export function documentAuthenticity() {
         return { verdict: "block", summary: "Document judged forged.", facts };
       case "Likely forged":
         return { verdict: "flag", summary: "Document judged likely forged.", facts };
-      case "Inconclusive":
-        return { verdict: "unknown", summary: "Document authenticity inconclusive.", facts };
-      default:
+      case "Authentic":
+      case "Likely authentic":
         return { verdict: "clear", summary: `Document judged ${String(res.verdict).toLowerCase()}.`, facts };
+      default:
+        // "Inconclusive" and any value outside the intent's enum stay unknown (fail closed).
+        return { verdict: "unknown", summary: `Document authenticity inconclusive (${String(res.verdict)}).`, facts };
     }
   };
 }
@@ -137,8 +142,11 @@ export function codeReview() {
     const res = shaped(r);
     if (!res || !ok(r, "verdict")) return unknown(r, "verdict", "Code review");
     const facts = { verdict: res.verdict, findings: res.findings, summary: res.summary };
-    if (String(res.verdict) === "Request changes") return { verdict: "flag", summary: `Code review requests changes: ${list(res.findings) || res.summary}`.slice(0, 400), facts };
-    return { verdict: "clear", summary: `Code review: ${res.verdict}. ${res.summary ?? ""}`.trim().slice(0, 400), facts };
+    const v = String(res.verdict);
+    if (v === "Request changes") return { verdict: "flag", summary: `Code review requests changes: ${list(res.findings) || res.summary}`.slice(0, 400), facts };
+    if (v === "Approve" || v === "Comment") return { verdict: "clear", summary: `Code review: ${v}. ${res.summary ?? ""}`.trim().slice(0, 400), facts };
+    // Any value outside the intent's enum stays unknown (fail closed).
+    return { verdict: "unknown", summary: `Code review returned an unrecognised verdict (${v}).`, facts };
   };
 }
 
