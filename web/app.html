@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" data-radius="sharp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Countersign · counterparty diligence on Telegraph</title>
+  <meta name="description" content="An agent that buys sanctions, registry, vessel and contract checks from Telegraph miners, pays per answer in test USDC and signs a memo you can re-verify.">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#stage">Skip to results</a>
+
+  <header class="bar">
+    <a class="brand" href="./" aria-label="Countersign home">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5 9.5 18 20 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/><path d="M4 6h7" stroke="currentColor" stroke-width="2.4"/></svg>
+      <span>Countersign</span>
+    </a>
+    <div class="bar-meta">
+      <a class="bar-link" href="faq.html">FAQ</a>
+      <span class="chip" id="network-chip"><span class="dot" aria-hidden="true"></span><span>Sepolia · Telegraph devnode</span></span>
+      <div class="wallet" id="wallet" aria-live="polite"><span class="muted">Loading wallet…</span></div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="side">
+      <section class="panel composer" aria-labelledby="composer-title">
+        <h2 id="composer-title">New review</h2>
+        <fieldset class="packs" id="packs">
+          <legend class="sr-only">Diligence pack</legend>
+        </fieldset>
+        <p class="pack-tagline" id="pack-tagline"></p>
+
+        <form id="subject-form" novalidate>
+          <div id="fields"></div>
+          <div class="form-foot">
+            <button type="button" class="link-btn" id="fill-example">Fill example subject</button>
+            <span class="muted small" id="estimate" aria-live="polite"></span>
+          </div>
+          <div class="dock">
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+            <div class="actions">
+              <button type="submit" class="btn btn-primary" id="run-btn">Run diligence</button>
+              <button type="button" class="btn btn-ghost" id="quote-btn">Get free quote</button>
+            </div>
+            <p class="hint" id="run-hint" hidden></p>
+            <p class="notice small">Requests are public on the Telegraph feed. Use public company and vessel names only.</p>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel history" aria-labelledby="history-title">
+        <h2 id="history-title">Memos</h2>
+        <ul class="memo-list" id="memo-list"><li class="muted small">Loading…</li></ul>
+      </section>
+    </aside>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+  </div>
+
+  <template id="intro-tpl">
+    <section class="intro" aria-labelledby="intro-title">
+      <p class="eyebrow">Telegraph Hackathon S2 · Apps &amp; Agents</p>
+      <h1 id="intro-title">Counterparty diligence, bought per answer and signed.</h1>
+      <p class="lede">Countersign plans the checks a listing desk, a commodities trader or a legal team would order, buys each one from a Telegraph miner for $0.01 in test USDC, asks a second miner whenever a critical answer is not clean, and signs a memo that anyone can re-verify against the node.</p>
+      <ol class="steps">
+        <li><span class="step-n">1</span><div><h2>Quote for free</h2><p>The node prices every request before payment. Bad inputs fail at no cost.</p></div></li>
+        <li><span class="step-n">2</span><div><h2>Buy and cross-check</h2><p>Sanctions, registry, vessel and contract hits get an independent second miner.</p></div></li>
+        <li><span class="step-n">3</span><div><h2>Sign the memo</h2><p>Every finding links to a signal hash recomputed with keccak256 on verify.</p></div></li>
+      </ol>
+    </section>
+  </template>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

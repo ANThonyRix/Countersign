@@ -1,0 +1,548 @@
+{
+  "memo_version": 1,
+  "id": "legal-2026-11-09-3b328f17",
+  "created_at": "2026-11-09T10:33:01.948Z",
+  "pack": "legal",
+  "mission": "Legal: multi-jurisdiction diligence",
+  "subject": {
+    "name": "Revolut Ltd",
+    "fields": {
+      "entity": "Revolut Ltd",
+      "jurisdictions": "United Kingdom, Lithuania",
+      "people": "Nikolay Storonsky",
+      "period": "last 12 months"
+    }
+  },
+  "decision": "GO",
+  "decision_label": "CLEAR",
+  "reasons": [
+    "Every answered check came back clean; 2 non-critical checks returned no usable answer."
+  ],
+  "findings": [
+    {
+      "checkId": "sanctions:officer:nikolay-storonsky",
+      "title": "Sanctions screen: Nikolay Storonsky",
+      "why": "A sanctioned officer ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Nikolay Storonsky\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev1"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "sanctions:entity:revolut-ltd",
+      "title": "Sanctions screen: Revolut Ltd",
+      "why": "A sanctioned entity ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Revolut Ltd\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev2"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "registry:united-kingdom:revolut-ltd",
+      "title": "Registry lookup: Revolut Ltd (United Kingdom)",
+      "why": "Confirms the legal entity exists and is in good standing in United Kingdom.",
+      "verdict": "clear",
+      "summary": "\"REVOLUT LTD\" is registered and active in United Kingdom, reg. 213800MQORWPL582SW82.",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev3"
+      ],
+      "facts": {
+        "legal_name": "REVOLUT LTD",
+        "registration_id": "213800MQORWPL582SW82",
+        "jurisdiction": "GB",
+        "registered_address": "30 SOUTH COLONNADE, LONDON, GB-LND, E14 5HX, GB",
+        "incorporated": "2013-12-06",
+        "active": true
+      }
+    },
+    {
+      "checkId": "news:adverse:revolut-ltd",
+      "title": "Adverse media: Revolut Ltd",
+      "why": "Public reporting of fraud, enforcement or litigation changes the risk picture.",
+      "verdict": "unknown",
+      "summary": "Adverse-media search for \"Revolut Ltd\": the miner's answer did not contain a usable `answer` (status: missing).",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev5"
+      ]
+    },
+    {
+      "checkId": "filings:revolut-ltd",
+      "title": "Regulatory filings: Revolut Ltd (last 12 months)",
+      "why": "Recent filings show regulatory exposure, enforcement and reporting discipline.",
+      "verdict": "unknown",
+      "summary": "Filing count for \"Revolut Ltd\" could not be read.",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev6"
+      ]
+    },
+    {
+      "checkId": "identity:revolut-ltd",
+      "title": "Business identity: Revolut Ltd",
+      "why": "Cross-checks the operating footprint (domain, size, HQ) against the registered entity.",
+      "verdict": "clear",
+      "summary": "\"Revolut Ltd\": revolut.com, Revolut.",
+      "critical": false,
+      "corroboration": "not_needed",
+      "evidence": [
+        "ev7"
+      ],
+      "facts": {
+        "domain": "revolut.com",
+        "industry": "Revolut",
+        "headquarters": null,
+        "employee_count": null
+      }
+    },
+    {
+      "checkId": "registry:lithuania:revolut-ltd",
+      "title": "Registry lookup: Revolut Ltd (Lithuania)",
+      "why": "Confirms the legal entity exists and is in good standing in Lithuania.",
+      "verdict": "clear",
+      "summary": "\"REVOLUT LTD\" is registered and active in Lithuania, reg. 213800MQORWPL582SW82. (second miner; first returned no usable answer)",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev4",
+        "ev8"
+      ],
+      "facts": {
+        "legal_name": "REVOLUT LTD",
+        "registration_id": "213800MQORWPL582SW82",
+        "jurisdiction": "GB",
+        "registered_address": "30 SOUTH COLONNADE, LONDON, GB-LND, E14 5HX, GB",
+        "incorporated": "2013-12-06",
+        "active": true
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev1",
+      "checkId": "sanctions:officer:nikolay-storonsky",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "78022",
+      "minerName": "UN Consolidated Sanctions Screen",
+      "signalHash": "0x7f673b3d3ff85b0561bfc4dd0fcaa59188ed05adcd8342002f6e94db467a6921",
+      "receipt": {
+        "receipt_hash": "0x0d4e4c0102cc85827df152d05eddbae264e940063c607bdfeca77e398bf09add",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "2860",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x30f0d603d2d9fdb5bc612d4daf534a8803be5ef8a1b44b1ce3f505b439732840",
+        "timestamp": 1794220350
+      },
+      "costUsd": 0.01,
+      "durationMs": 337,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "Nikolay Storonsky",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for a sanctions screening match, and the provided miner configuration has an endpoint '/query' that explicitly supports the SANCTIONS_SCREENING_MATCH intent. The question provides the necessary 'entity' parameter for this endpoint.",
+      "at": "2026-11-09T10:32:23.402Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev2",
+      "checkId": "sanctions:entity:revolut-ltd",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "78022",
+      "minerName": "UN Consolidated Sanctions Screen",
+      "signalHash": "0x6604f7fd059250cc4c97ed861974f7105da3b4a77581c200ab890f28c0afd37b",
+      "receipt": {
+        "receipt_hash": "0xe365e06960493c43b7567f78dc5e84cd08e25e36e19ce586650ae310608c4fcc",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "2860",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xd19462c25ef59d5e742fccb3c2ec5b43f7361d6c4eb048b7e953670769cf9e4a",
+        "timestamp": 1794220360
+      },
+      "costUsd": 0.01,
+      "durationMs": 10,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "Revolut Ltd",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user wants to perform a sanctions screening. The provided miner configuration has an endpoint '/query' that explicitly states it is for 'SANCTIONS_SCREENING_MATCH' intent. The question provides the necessary 'entity' parameter as 'Revolut Ltd', which maps directly to the 'entity' field required by the endpoint.",
+      "at": "2026-11-09T10:32:33.524Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev3",
+      "checkId": "registry:united-kingdom:revolut-ltd",
+      "role": "primary",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "20260828",
+      "minerName": "PREFLIGHT Infrastructure Signals",
+      "signalHash": "0x8b7a659fa196e0fcdf7503f6d967c409a446df544541f941ac9d65b1ae0400e1",
+      "receipt": {
+        "receipt_hash": "0x99ad12c106e04a9c6721d1b79f0f2918cef13ba7c69d3e54427331834b64e7b8",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "5144",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xa7c706efa797118c9648e6a9f36883c2aabad79bb5ffca7fd7f92d16f840cf33",
+        "timestamp": 1794220363
+      },
+      "costUsd": 0.01,
+      "durationMs": 710,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "ok",
+        "registration_id": "ok",
+        "active": "ok",
+        "jurisdiction": "ok",
+        "registered_address": "ok",
+        "incorporated": "ok"
+      },
+      "result": {
+        "legal_name": "REVOLUT LTD",
+        "registration_id": "213800MQORWPL582SW82",
+        "active": true,
+        "jurisdiction": "GB",
+        "registered_address": "30 SOUTH COLONNADE, LONDON, GB-LND, E14 5HX, GB",
+        "incorporated": "2013-12-06"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for corporate registry information, which aligns with the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. The PREFLIGHT Infrastructure Signals miner has an endpoint '/company' that explicitly serves this intent. The question includes specific parameters for 'company' and 'jurisdiction', which are directly mapped to the optional 'company' and 'jurisdiction' parameters of the '/company' endpoint. The 'query' parameter is populated with the verbatim question as required by the endpoint's documentation.",
+      "at": "2026-11-09T10:32:36.768Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev4",
+      "checkId": "registry:lithuania:revolut-ltd",
+      "role": "primary",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "302",
+      "minerName": "ChainSight — Universal Intelligence & Data Oracle",
+      "signalHash": "0x0b3fde8e7ddbeebed23a014f153f3c031492975dfe53d11f962b9279adf9c096",
+      "receipt": {
+        "receipt_hash": "0x651ed4e466bf5194cbccde1ee96dae75a98307e028d1087fc5c8e08c55ef0288",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "4893",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x51b62c53070879b9a740c4801f9fd6dbe1689a1012564355506428b83849a74c",
+        "timestamp": 1794220371
+      },
+      "costUsd": 0.01,
+      "durationMs": 7719,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "missing",
+        "registration_id": "missing",
+        "active": "missing",
+        "jurisdiction": "ok",
+        "registered_address": "missing",
+        "incorporated": "missing"
+      },
+      "result": {
+        "legal_name": null,
+        "registration_id": null,
+        "active": null,
+        "jurisdiction": "Lithuania",
+        "registered_address": null,
+        "incorporated": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for a corporate registry lookup with specific company and jurisdiction parameters. The ChainSight miner's '/corp' endpoint is designed for 'Company lookup in the global GLEIF LEI registry' and explicitly lists 'corporate registry' as a use case. The intent CORPORATE_REGISTRY_LOOKUP_GENERAL matches this endpoint's description. The query parameter is used to pass the structured input provided by the user.",
+      "at": "2026-11-09T10:32:44.520Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev5",
+      "checkId": "news:adverse:revolut-ltd",
+      "role": "primary",
+      "intent": "NEWS_SEARCH_GENERAL",
+      "routedIntent": "NEWS_SEARCH_GENERAL",
+      "minerId": "43001",
+      "minerName": "HN Algolia Search",
+      "signalHash": "0xd39a7e352d8b2da364399d55f76aa3e420692b9aceb0ed6ffd9347dcedd23fb6",
+      "receipt": {
+        "receipt_hash": "0xa45c3c6c09d056af97c0e425e10ac4874ee0d4297cd7ff022e5ec51a5b43dc86",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "3619",
+        "intent": "NEWS_SEARCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x10e84bdfb68464f6737f454a3e6fd1e36863b5329ceb5c77f054b9e79c066d7f",
+        "timestamp": 1794220372
+      },
+      "costUsd": 0.01,
+      "durationMs": 549,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "answer": "missing",
+        "result_count": "ok",
+        "sources": "missing",
+        "brief": "missing"
+      },
+      "result": {
+        "answer": null,
+        "result_count": 0,
+        "sources": null,
+        "brief": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The intent is NEWS_SEARCH_GENERAL, and the HN Algolia Search miner has an endpoint that serves NEWS_SEARCH. The query parameters provided in the question are directly mapped to the 'query' and 'tags' fields of this endpoint.",
+      "at": "2026-11-09T10:32:45.115Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev6",
+      "checkId": "filings:revolut-ltd",
+      "role": "primary",
+      "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+      "routedIntent": "REGULATORY_FILING_MONITOR_GENERAL",
+      "minerId": "84009",
+      "minerName": "UK Legislation Feed",
+      "signalHash": "0xe8f544739a9feae64952f5cd8c23a3ded5aa5cb334bce48033a9b7452b0dbe5d",
+      "receipt": {
+        "receipt_hash": "0x9c1142da27656f2befab8021b894cc41830c69dbffcfe10a0cb4f8c74483a843",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "3743",
+        "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x471cf01f03c271b2fe0201a128c356c767d97eb8aa9733223d125b1145a0a8e2",
+        "timestamp": 1794220371
+      },
+      "costUsd": 0.01,
+      "durationMs": 112,
+      "resultShape": "raw",
+      "result": {
+        "truncated": true,
+        "excerpt": "\"<?xml version=\\\"1.0\\\" encoding=\\\"utf-8\\\"?><feed xmlns=\\\"http://www.w3.org/2005/Atom\\\" xmlns:leg=\\\"http://www.legislation.gov.uk/namespaces/legislation\\\" xmlns:ukm=\\\"http://www.legislation.gov.uk/namespaces/metadata\\\" xmlns:theme=\\\"http://www.legislation.gov.uk/namespaces/theme\\\" xmlns:openSearch=\\\"http://a9.com/-/spec/opensearch/1.1/\\\" xmlns:parameters=\\\"http://a9.com/-/spec/opensearch/extensions/parameters/1.0/\\\">\\n\\t\\t\\t<id>http://www.legislation.gov.uk/all/data.feed</id>\\n\\t\\t\\t<link rel=\\\"self\\\" type=\\\"application/atom+xml\\\" href=\\\"http://www.legislation.gov.uk/all/data.feed?sort=published\\\"/>\\n\\t\\t\\t\\n\\t\\t\\t<link rel=\\\"alternate\\\" type=\\\"text/csv\\\" href=\\\"http://www.legislation.gov.uk/all/data.csv?sort=published\\\"/>\\n\\t\\t\\t<updated>2026-11-09T10:28:03.203635Z</updated>\\n\\t\\t\\t<title>Search Results</title>\\n\\t\\t\\t<openSearch:Query role=\\\"request\\\" leg:type=\\\"*\\\" leg:omit-silent=\\\"true\\\"> </openSearch:Query>\\n\\t\\t\\t<openSearch:itemsPerPage>20</openSearch:itemsPerPage>\\n\\t\\t\\t<openSearch:startIndex>1</openSearch:startIndex>\\n\\t\\t\\t<leg:page>1</leg:page>\\n\\t\\t\\t<leg:morePages>12</leg:morePages>\\n\\t\\t\\t<leg:facets>\\n\\t\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\t<leg:facetTypes><leg:facetType type=\\\"UnitedKingdomStatutoryInstrument\\\" href=\\\"http://www.legislation.gov.uk/uksi/data.feed?sort=published\\\" value=\\\"71589\\\"/><leg:facetType type=\\\"NorthernIrelandStatutoryRule\\\" href=\\\"http://www.legislation.gov.uk/nisr/data.feed?sort=published\\\" value=\\\"17517\\\"/><leg:facetType type=\\\"ScottishStatutoryInstrument\\\" href=\\\"http://www.legislation.gov.uk/ssi/data.feed?sort=published\\\" value=\\\"10638\\\"/><leg:facetType type=\\\"NorthernIrelandStatutoryRuleOrOrder\\\" href=\\\"http://www.legislation.gov.uk/nisro/data.feed?sort=published\\\" value=\\\"8789\\\"/><leg:facetType type=\\\"WelshStatutoryInstrument\\\" href=\\\"http://www.legislation.gov.uk/wsi/data.feed?sort=published\\\" value=\\\"5753\\\"/><leg:facetType type=\\\"UnitedKingdomPublicGeneralAct\\\" href=\\\"http://www.legislation.gov.uk/ukpga/data.feed?sort=published\\\" value=\\\"1356\\\"/><leg:facetType type=\\\"NorthernIrelandOrderInCouncil\\\" href=\\\"http://www.legislation.gov.uk/nisi/data.feed?sort=published\\\" value=\\\"461\\\"/><leg:facetType type=\\\"ScottishAct\\\" href=\\\"http://www.legislation.gov.uk/asp/data.feed?sort=published\\\" value=\\\"328\\\"/><leg:facetType type=\\\"NorthernIrelandParliamentAct\\\" href=\\\"http://www.legislation.gov.uk/apni/data.feed?sort=published\\\" value=\\\"287\\\"/><leg:facetType type=\\\"NorthernIrelandAct\\\" href=\\\"http://www.legislation.gov.uk/nia/data.feed?sort=published\\\" value=\\\"229\\\"/><leg:facetType type=\\\"UnitedKingdomLocalAct\\\" href=\\\"http://www.legislation.gov.uk/ukla/data.feed?sort=published\\\" value=\\\"187\\\"/><leg:facetType type=\\\"ScottishOldAct\\\" href=\\\"http://www.legislation.gov.uk/aosp/data.feed?sort=published\\\" value=\\\"109\\\"/><leg:facetType type=\\\"EnglandAct\\\" href=\\\"http://www.legislation.gov.uk/aep/data.feed?sort=published\\\" value=\\\"76\\\"/><leg:facetType type=\\\"UnitedKingdomChurchMeasure\\\" href=\\\"http://www.legislation.gov.uk/ukcm/data.feed?sort=published\\\" value=\\\"65\\\"/><leg:facetType type=\\\"UnitedKingdomChurchInstrument\\\" href=\\\"http://www.legislation.gov.uk/ukci/data.feed?sort=published\\\" value=\\\"60\\\"/><leg:facetType type=\\\"GreatBritainAct\\\" href=\\\"http://www.legislation.gov.uk/apgb/data.feed?sort=published\\\" value=\\\"42\\\"/><leg:facetType type=\\\"WelshNationalAssemblyAct\\\" href=\\\"http://www.legislation.gov.uk/anaw/data.feed?sort=published\\\" value=\\\"23\\\"/><leg:facetType type=\\\"WelshParliamentAct\\\" href=\\\"http://www.legislation.gov.uk/asc/data.feed?sort=published\\\" value=\\\"22\\\"/><leg:facetType type=\\\"WelshAssemblyMeasure\\\" href=\\\"http://www.legislation.gov.uk/mwa/data.feed?sort=published\\\" value=\\\"15\\\"/><leg:facetType type=\\\"IrelandAct\\\" href=\\\"http://www.legislation.gov.uk/aip/data.feed?sort=published\\\" value=\\\"11\\\"/><leg:facetType type=\\\"UnitedKingdomMinisterialOrder\\\" href=\\\"http://www.legislation.gov.uk/ukmo/data.feed?sort=published\\\" value=\\\"7\\\"/><leg:facetType type=\\\"NorthernIrelandAssemblyMeasure\\\" h"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user has provided a question that has been classified with the intent REGULATORY_FILING_MONITOR_GENERAL. The miner 'UK Legislation Feed' has an endpoint '/query' that serves this exact intent. The user has also provided specific parameters for the query: 'entity' and 'period', which are directly mapped to the query parameters for this endpoint.",
+      "at": "2026-11-09T10:32:48.767Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev7",
+      "checkId": "identity:revolut-ltd",
+      "role": "primary",
+      "intent": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+      "routedIntent": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+      "minerId": "95003",
+      "minerName": "Brandfetch Search",
+      "signalHash": "0x31189586ac9d47f6af23741f81f0f5297dd99f960d9933cdf166dba7fc9b8db7",
+      "receipt": {
+        "receipt_hash": "0x8a1a3bf8cc53c81a62cc929d870884a2177fb1ba974a765e79a383a51d91dd60",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "3022",
+        "intent": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xa40c7b2cfed25aab15993803a45e7ce4168ce5e974144b16a4624c2df3be2e94",
+        "timestamp": 1794220379
+      },
+      "costUsd": 0.01,
+      "durationMs": 2751,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "company": "rejected",
+        "domain": "ok",
+        "employee_count": "missing",
+        "industry": "ok",
+        "headquarters": "missing"
+      },
+      "result": {
+        "company": null,
+        "domain": "revolut.com",
+        "employee_count": null,
+        "industry": "Revolut",
+        "headquarters": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for B2B identity enrichment, and the Brandfetch Search miner has an endpoint specifically for this intent. The question includes parameters that should be passed as the query 'q' to the '/query' endpoint.",
+      "at": "2026-11-09T10:32:51.946Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev8",
+      "checkId": "registry:lithuania:revolut-ltd",
+      "role": "crosscheck",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0xa617c485d4dc62542577a262d949a7b9e68a5f8a574880b458e04b8284b85e26",
+      "receipt": {
+        "receipt_hash": "0x43601dcea1833dab54fe4f22bfdfaa5814433edbb18539777ee29e85ff120e3f",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "5078",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x42c0abeb8dab461d7d8edd4bde981bf12edd41873e34a0963934dab1dc88ea9b",
+        "timestamp": 1794220385
+      },
+      "costUsd": 0.01,
+      "durationMs": 201,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "ok",
+        "registration_id": "ok",
+        "active": "ok",
+        "jurisdiction": "ok",
+        "registered_address": "ok",
+        "incorporated": "ok"
+      },
+      "result": {
+        "legal_name": "REVOLUT LTD",
+        "registration_id": "213800MQORWPL582SW82",
+        "active": true,
+        "jurisdiction": "GB",
+        "registered_address": "30 SOUTH COLONNADE, LONDON, GB-LND, E14 5HX, GB",
+        "incorporated": "2013-12-06"
+      },
+      "reasoning": "Intent: miner txlens given by the caller\nMiner: The user is asking for corporate registry information about 'Revolut Ltd' in 'Lithuania'. The TxLens miner's `/corporate-registry` endpoint is designed for CORPORATE_REGISTRY_LOOKUP_GENERAL intent and accepts `name` and `jurisdiction` as parameters, which directly map to the provided company and jurisdiction.",
+      "at": "2026-11-09T10:32:57.988Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    }
+  ],
+  "coverage": {
+    "total": 7,
+    "answered": 5,
+    "unknown": 2,
+    "skipped": 0
+  },
+  "cost": {
+    "total_usd": 0.08,
+    "paid_calls": 8,
+    "budget_usd": 0.25,
+    "per_finding_usd": 0.011429
+  },
+  "network": {
+    "node": "https://devnode.telegraphprotocol.com",
+    "chain": "eip155:11155111",
+    "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17"
+  },
+  "agent": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+  "digest": "0x55c0998cdacde98973dadbbbcab8c62a8893d92e204d3b80982cfd0ed0834bae",
+  "signature": "0xf918894d5bec6273354420d193511c5e952aa79fe5c07c3ba4fbd320a41c413155c682d514b7362806df242991993c27eef6fbd10692e4f48b0a2015551735511c"
+}

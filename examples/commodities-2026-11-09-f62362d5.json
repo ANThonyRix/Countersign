@@ -1,0 +1,360 @@
+{
+  "memo_version": 1,
+  "id": "commodities-2026-11-09-f62362d5",
+  "created_at": "2026-11-09T10:29:58.320Z",
+  "pack": "commodities",
+  "mission": "Commodities: cargo and counterparty",
+  "subject": {
+    "name": "Trafigura Pte Ltd / EVER GIVEN",
+    "fields": {
+      "seller": "Trafigura Pte Ltd",
+      "jurisdiction": "Singapore",
+      "vessel": "EVER GIVEN",
+      "imo": "9811000",
+      "port": "Rotterdam",
+      "document": ""
+    }
+  },
+  "decision": "GO",
+  "decision_label": "PROCEED",
+  "reasons": [
+    "Every answered check came back clean; 1 non-critical check returned no usable answer."
+  ],
+  "findings": [
+    {
+      "checkId": "sanctions:seller:trafigura-pte-ltd",
+      "title": "Sanctions screen: Trafigura Pte Ltd",
+      "why": "A sanctioned seller ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Trafigura Pte Ltd\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev1"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "sanctions:vessel:ever-given",
+      "title": "Sanctions screen: EVER GIVEN",
+      "why": "A sanctioned vessel ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"EVER GIVEN\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev2"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": [
+          "EVER GIVEN"
+        ]
+      }
+    },
+    {
+      "checkId": "registry:singapore:trafigura-pte-ltd",
+      "title": "Registry lookup: Trafigura Pte Ltd (Singapore)",
+      "why": "Confirms the legal entity exists and is in good standing in Singapore.",
+      "verdict": "clear",
+      "summary": "\"TRAFIGURA PTE LTD\" is registered and active in Singapore, reg. 549300Z2X1L1L3MID765.",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev3"
+      ],
+      "facts": {
+        "legal_name": "TRAFIGURA PTE LTD",
+        "registration_id": "549300Z2X1L1L3MID765",
+        "jurisdiction": "SG",
+        "registered_address": "10 COLLYER QUAY, #29-01/05, OCEAN FINANCIAL CENTRE, SINGAPORE, SG-01, 049315, SG",
+        "incorporated": "2013-05-28",
+        "active": true
+      }
+    },
+    {
+      "checkId": "vessel:9811000",
+      "title": "Vessel telemetry: EVER GIVEN (IMO 9811000)",
+      "why": "Confirms the named ship exists, is where the seller says, and has no AIS dark periods.",
+      "verdict": "clear",
+      "summary": "Vessel telemetry: no risk indicators in the miner's answer (raw answer, heuristic scan).",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev4"
+      ],
+      "facts": {
+        "routed_intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+        "excerpt": "{\"ac\":[{\"alert\":0,\"alt_baro\":30800,\"alt_geom\":30850,\"baro_rate\":-1280,\"category\":\"A3\",\"dir\":268.4,\"dst\":35.36,\"emergency\":\"none\",\"flight\":\"VTAHI   \",\"geom_rate\":-1408,\"gs\":396.3,\"gva\":2,\"hex\":\"800b7e\",\"ias\":299,\"lat\":51.90358,\"lon\":3.523712,\"mach\":0.8,\"mag_heading\":287.23,\"messages\":200423,\"mlat\":[],\"nac_p\":11,\"nac_v\":1,\"nav_altitude_fms\":28000,\"nav_altitude_mcp\":28000,\"nav_heading\":288.98,\"nav_qnh\":1012.8,\"nic\":8,\"nic_baro\":1,\"oat\":-44,\"r\":\"VT-AHI\",\"rc\":186,\"roll\":0,\"rssi\":-12.2,\"sda\":2,\"seen\":0,\"seen_pos\":0.007,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"3114\",\"t\":\"GLEX\",\"tas\":472,\"tat\":-"
+      }
+    },
+    {
+      "checkId": "port:rotterdam",
+      "title": "Port congestion: Rotterdam",
+      "why": "Congestion at the discharge port drives delay and demurrage exposure.",
+      "verdict": "unknown",
+      "summary": "Congestion at Rotterdam: the miner's answer did not contain a usable `congestion_level` (status: raw (parser_unavailable)).",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev5"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev1",
+      "checkId": "sanctions:seller:trafigura-pte-ltd",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "78022",
+      "minerName": "UN Consolidated Sanctions Screen",
+      "signalHash": "0xe7b11952dce761e437736ca535aed420d4d1b2edc6c631d9ed4083265d5f3192",
+      "receipt": {
+        "receipt_hash": "0x636884a6ae07678ee7abbb2e1484e6314c6f2cede6c29c03333f4b14137d79be",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "2860",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xcf5a0f1dfa369b9408202102c8fcd06f6c6b51b380570e3ad21ce42cb5fe0439",
+        "timestamp": 1794220179
+      },
+      "costUsd": 0.01,
+      "durationMs": 18,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "Trafigura Pte Ltd",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for a sanctions screening match, and the provided miner configuration has an endpoint specifically for SANCTIONS_SCREENING_MATCH. The question explicitly states the intent and provides the necessary parameters, which are mapped to the 'entity' field of the miner's query endpoint.",
+      "at": "2026-11-09T10:29:32.027Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev2",
+      "checkId": "sanctions:vessel:ever-given",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "78022",
+      "minerName": "UN Consolidated Sanctions Screen",
+      "signalHash": "0x39f5719ff17e33a40232aa16d879a0b53224aefce1252127815b18b91ee2cfff",
+      "receipt": {
+        "receipt_hash": "0xa11367437cd3edebb0052fa3c4be0ea332e32e80cdaae0d71721456436665aca",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "2860",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x5332c2a8077d77daf16a304ce04873e15c66175cf31e38146a12a12835e7ae43",
+        "timestamp": 1794220180
+      },
+      "costUsd": 0.01,
+      "durationMs": 1005,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "ok",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "EVER GIVEN",
+        "matched": false,
+        "matches": [
+          "EVER GIVEN"
+        ],
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for a sanctions screening match, and the intent has been classified as SANCTIONS_SCREENING_MATCH_GENERAL. The UN Consolidated Sanctions Screen miner has an endpoint '/query' that serves the SANCTIONS_SCREENING_MATCH intent. The question specifies the entity name as 'EVER GIVEN', which maps directly to the 'entity' parameter required by this endpoint.",
+      "at": "2026-11-09T10:29:32.995Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev3",
+      "checkId": "registry:singapore:trafigura-pte-ltd",
+      "role": "primary",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "20260828",
+      "minerName": "PREFLIGHT Infrastructure Signals",
+      "signalHash": "0xacc7d89d6924b28fc38b7dce9cf28928ed1a236d712a57bac0b027ff30c9871a",
+      "receipt": {
+        "receipt_hash": "0xc76a6a64538881d21c8d764e3451d3ab3775f3def62048826c831b546d2213b5",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "5144",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x63a949337ee3d2dc6143d0e97c657efda948f68804f5cd9cd8be9c20e42709e0",
+        "timestamp": 1794220183
+      },
+      "costUsd": 0.01,
+      "durationMs": 893,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "ok",
+        "registration_id": "ok",
+        "active": "ok",
+        "jurisdiction": "ok",
+        "registered_address": "ok",
+        "incorporated": "ok"
+      },
+      "result": {
+        "legal_name": "TRAFIGURA PTE LTD",
+        "registration_id": "549300Z2X1L1L3MID765",
+        "active": true,
+        "jurisdiction": "SG",
+        "registered_address": "10 COLLYER QUAY, #29-01/05, OCEAN FINANCIAL CENTRE, SINGAPORE, SG-01, 049315, SG",
+        "incorporated": "2013-05-28"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for corporate registry information, which aligns with the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. The PREFLIGHT Infrastructure Signals miner has an endpoint '/company' that explicitly serves this intent. The provided question includes specific parameters for 'company' and 'jurisdiction', which map directly to the optional parameters of the '/company' endpoint. The 'query' parameter is required and should contain the verbatim question as instructed.",
+      "at": "2026-11-09T10:29:36.127Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev4",
+      "checkId": "vessel:9811000",
+      "role": "primary",
+      "intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+      "routedIntent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+      "minerId": "93008",
+      "minerName": "ADSB.lol Rotterdam",
+      "signalHash": "0x2172e32a1769f4f675f4a18bd05288eb6b2e89e6ca60a4f833d330f52a385fb7",
+      "receipt": {
+        "receipt_hash": "0xe767385ac63750d1bf5bbb25f67a003f20f21597a8a9ee6cd7ad3d28cc3ec0c8",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "4242",
+        "intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xd4ae4fb0ccdb2472c6bb1b98fd9ffe26b6e5d8c873381a1397b2224658128a93",
+        "timestamp": 1794220190
+      },
+      "costUsd": 0.01,
+      "durationMs": 986,
+      "resultShape": "raw",
+      "result": {
+        "truncated": true,
+        "excerpt": "{\"ac\":[{\"alert\":0,\"alt_baro\":30800,\"alt_geom\":30850,\"baro_rate\":-1280,\"category\":\"A3\",\"dir\":268.4,\"dst\":35.36,\"emergency\":\"none\",\"flight\":\"VTAHI   \",\"geom_rate\":-1408,\"gs\":396.3,\"gva\":2,\"hex\":\"800b7e\",\"ias\":299,\"lat\":51.90358,\"lon\":3.523712,\"mach\":0.8,\"mag_heading\":287.23,\"messages\":200423,\"mlat\":[],\"nac_p\":11,\"nac_v\":1,\"nav_altitude_fms\":28000,\"nav_altitude_mcp\":28000,\"nav_heading\":288.98,\"nav_qnh\":1012.8,\"nic\":8,\"nic_baro\":1,\"oat\":-44,\"r\":\"VT-AHI\",\"rc\":186,\"roll\":0,\"rssi\":-12.2,\"sda\":2,\"seen\":0,\"seen_pos\":0.007,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"3114\",\"t\":\"GLEX\",\"tas\":472,\"tat\":-15,\"tisb\":[],\"track\":285.97,\"track_rate\":-0.03,\"true_heading\":289.56,\"type\":\"adsb_icao\",\"version\":2,\"wd\":308,\"ws\":80},{\"alert\":0,\"alt_baro\":9300,\"alt_geom\":9450,\"baro_rate\":-1472,\"category\":\"A3\",\"dir\":315.2,\"dst\":40.016,\"emergency\":\"none\",\"flight\":\"EZY82FZ \",\"geom_rate\":-1440,\"gs\":288.2,\"gva\":2,\"hex\":\"40631b\",\"ias\":249,\"lat\":52.394943,\"lon\":3.709717,\"mach\":0.444,\"mag_heading\":96.33,\"messages\":38275,\"mlat\":[],\"nac_p\":9,\"nac_v\":1,\"nav_altitude_mcp\":7008,\"nav_heading\":0,\"nav_qnh\":1013.6,\"nic\":8,\"nic_baro\":1,\"oat\":-7,\"r\":\"G-EZFW\",\"rc\":186,\"roll\":0,\"rssi\":-21.3,\"sda\":2,\"seen\":0.1,\"seen_pos\":0.187,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"4707\",\"t\":\"A319\",\"tas\":282,\"tat\":3,\"tisb\":[],\"track\":95.18,\"track_rate\":0,\"true_heading\":98.72,\"type\":\"adsb_icao\",\"version\":2,\"wd\":206,\"ws\":18},{\"alert\":0,\"alt_baro\":25250,\"alt_geom\":25225,\"baro_rate\":2944,\"category\":\"A3\",\"dir\":285.7,\"dst\":28.293,\"emergency\":\"none\",\"flight\":\"EJU65QC \",\"geom_rate\":2976,\"gs\":343.2,\"gva\":2,\"hex\":\"44056b\",\"ias\":273,\"lat\":52.049545,\"lon\":3.740688,\"mach\":0.66,\"mag_heading\":257.87,\"messages\":12893,\"mlat\":[],\"nac_p\":9,\"nac_v\":1,\"nav_altitude_mcp\":27008,\"nav_heading\":0,\"nav_qnh\":1013.6,\"nic\":8,\"nic_baro\":1,\"oat\":-31,\"r\":\"OE-LKD\",\"rc\":186,\"roll\":0,\"rssi\":-9,\"sda\":2,\"seen\":0.1,\"seen_pos\":0.07,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"6276\",\"t\":\"A319\",\"tas\":400,\"tat\":-10,\"tisb\":[],\"track\":250.25,\"track_rate\":0,\"true_heading\":260.28,\"type\":\"adsb_icao\",\"version\":2,\"wd\":304,\"ws\":86},{\"alert\":0,\"alt_baro\":38050,\"alt_geom\":38275,\"baro_rate\":0,\"category\":\"A3\",\"dir\":252.5,\"dst\":26.905,\"emergency\":\"none\",\"flight\":\"BAW871  \",\"geom_rate\":0,\"gs\":412.1,\"gva\":2,\"hex\":\"400b82\",\"ias\":249,\"lat\":51.787642,\"lon\":3.787613,\"mach\":0.788,\"mag_heading\":271.58,\"messages\":128095,\"mlat\":[],\"nac_p\":9,\"nac_v\":1,\"nav_altitude_mcp\":38016,\"nav_qnh\":1012.8,\"nic\":8,\"nic_baro\":1,\"oat\":-51,\"r\":\"G-DBCD\",\"rc\":186,\"roll\":0.18,\"rssi\":-12.5,\"sda\":2,\"seen\":0.3,\"seen_pos\":0.339,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"6603\",\"t\":\"A319\",\"tas\":458,\"tat\":-23,\"tisb\":[],\"track\":269.03,\"track_rate\":0,\"true_heading\":274,\"type\":\"adsb_icao\",\"version\":2,\"wd\":311,\"ws\":59},{\"alert\":0,\"alt_baro\":34000,\"alt_geom\":34175,\"baro_rate\":0,\"category\":\"A5\",\"dir\":234.6,\"dst\":28.729,\"emergency\":\"none\",\"flight\":\"DLH462  \",\"geom_rate\":-32,\"gs\":415,\"gva\":2,\"hex\":\"3c4b2c\",\"ias\":297,\"lat\":51.645401,\"lon\":3.85056,\"mach\":0.848,\"mag_heading\":282.48,\"messages\":45316,\"mlat\":[],\"nac_p\":9,\"nac_v\":1,\"nav_altitude_fms\":34000,\"nav_altitude_mcp\":34016,\"nav_heading\":281.95,\"nav_qnh\":1013.6,\"nic\":8,\"nic_baro\":1,\"oat\":-50,\"r\":\"D-ABYL\",\"rc\":186,\"roll\":-0.18,\"rssi\":-11.8,\"sda\":2,\"seen\":0.2,\"seen_pos\":0.233,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\"2521\",\"t\":\"B748\",\"tas\":494,\"tat\":-18,\"tisb\":[],\"track\":281.96,\"track_rate\":0,\"true_heading\":284.92,\"type\":\"adsb_icao\",\"version\":2,\"wd\":300,\"ws\":82},{\"alert\":0,\"alt_baro\":17100,\"alt_geom\":17125,\"baro_rate\":2432,\"category\":\"A5\",\"dir\":298.4,\"dst\":21.872,\"emergency\":\"none\",\"flight\":\"KLM163  \",\"geom_rate\":2464,\"gs\":383.3,\"gva\":2,\"hex\":\"4851f5\",\"ias\":320,\"lat\":52.096842,\"lon\":3.957668,\"mach\":0.656,\"mag_heading\":250.31,\"messages\":11780,\"mlat\":[],\"nac_p\":9,\"nac_v\":1,\"nav_altitude_fms\":3008,\"nav_altitude_mcp\":24000,\"nav_heading\":250.31,\"nav_modes\":[],\"nav_qnh\":1012.8,\"nic\":8,\"nic_baro\":1,\"oat\":-21,\"r\":\"PH-BVR\",\"rc\":186,\"roll\":0,\"rssi\":-5.9,\"sda\":2,\"seen\":0,\"seen_pos\":0.482,\"sil\":3,\"sil_type\":\"perhour\",\"spi\":0,\"squawk\":\""
+      },
+      "reasoning": "Intent: miner ves-adsb-rot given by the caller\nMiner: The user is asking to verify live AIS telemetry for a specific vessel, which falls under the VESSEL_TELEMETRY_VERIFY intent. The ADSB.lol Rotterdam miner has an endpoint that explicitly serves this intent. The question asks for current position, speed, course, destination, last report time, and potential AIS issues, which are all standard telemetry data points. The provided coordinates (51.9244, 4.4800) and distance (50) are reasonable defaults for querying general vessel telemetry in a region, likely near Rotterdam as suggested by the miner's name.",
+      "at": "2026-11-09T10:29:43.985Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev5",
+      "checkId": "port:rotterdam",
+      "role": "primary",
+      "intent": "LIVE_PORT_CONGESTION_GENERAL",
+      "routedIntent": "LIVE_PORT_CONGESTION_GENERAL",
+      "minerId": "86008",
+      "minerName": "Digitraffic Road Weather",
+      "signalHash": "0xc32c453eeb472043cb4e9f1b56f572a4195a0395de909bc96a1ca1c7859dac61",
+      "receipt": {
+        "receipt_hash": "0x85faa9f8a5bd03a19b25a91de3a50f5f7bba59f9ba62272b58d34d54e212b785",
+        "rail": "x402",
+        "payer": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+        "miner": "3708",
+        "intent": "LIVE_PORT_CONGESTION_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2049,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x04078eafb76c67fbbdbf76e8d0f6c2eddbd99c0e8f9b0454e983dc789dd48dec",
+        "timestamp": 1794220195
+      },
+      "costUsd": 0.01,
+      "durationMs": 2205,
+      "resultShape": "raw",
+      "result": {
+        "truncated": true,
+        "excerpt": "{\"dataUpdatedTime\":\"2026-11-09T10:29:24Z\",\"stations\":[{\"dataUpdatedTime\":\"2026-11-09T10:27:54Z\",\"id\":1001,\"sensorValues\":[{\"id\":1,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"ILMA\",\"shortName\":\"Ilma \",\"stationId\":1001,\"unit\":\"°C\",\"value\":4.8},{\"id\":2,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"ILMA_DERIVAATTA\",\"shortName\":\"DIlm\",\"stationId\":1001,\"unit\":\"°C/h\",\"value\":0.2},{\"id\":3,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"TIE_1\",\"shortName\":\"Tie1\",\"stationId\":1001,\"unit\":\"°C\",\"value\":5.9},{\"id\":4,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"TIE_1_DERIVAATTA\",\"shortName\":\"DTie1\",\"stationId\":1001,\"unit\":\"°C/h\",\"value\":0.1},{\"id\":5,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"TIE_2\",\"shortName\":\"Tie2\",\"stationId\":1001,\"unit\":\"°C\",\"value\":5.7},{\"id\":6,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"TIE_2_DERIVAATTA\",\"shortName\":\"DTie2\",\"stationId\":1001,\"unit\":\"°C/h\",\"value\":0.1},{\"id\":7,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"MAA_1\",\"shortName\":\"Maa1\",\"stationId\":1001,\"unit\":\"°C\",\"value\":5.4},{\"id\":8,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"MAA_2\",\"shortName\":\"Maa2\",\"stationId\":1001,\"unit\":\"°C\",\"value\":5.3},{\"id\":9,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"KASTEPISTE\",\"shortName\":\"KastP\",\"stationId\":1001,\"unit\":\"°C\",\"value\":1.8},{\"id\":10,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JÄÄTYMISPISTE_1\",\"shortName\":\"JääPi1\",\"stationId\":1001,\"unit\":\"°C\",\"value\":0},{\"id\":11,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JÄÄTYMISPISTE_2\",\"shortName\":\"JääPi2\",\"stationId\":1001,\"unit\":\"°C\",\"value\":0},{\"id\":16,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"KESKITUULI\",\"shortName\":\"KTuuli\",\"stationId\":1001,\"unit\":\"m/s\",\"value\":2},{\"id\":17,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"MAKSIMITUULI\",\"shortName\":\"MTuuli\",\"stationId\":1001,\"unit\":\"m/s\",\"value\":4.4},{\"id\":18,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"TUULENSUUNTA\",\"shortName\":\"TSuunt\",\"stationId\":1001,\"unit\":\"°\",\"value\":289},{\"id\":21,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"ILMAN_KOSTEUS\",\"shortName\":\"Koste\",\"stationId\":1001,\"unit\":\"%\",\"value\":81},{\"id\":22,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"SADE\",\"sensorValueDescriptionEn\":\"Dry weather\",\"sensorValueDescriptionFi\":\"Pouta\",\"shortName\":\"Sade\",\"stationId\":1001,\"unit\":\"///\",\"value\":0},{\"id\":23,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"SADE_INTENSITEETTI\",\"shortName\":\"S-Int\",\"stationId\":1001,\"unit\":\"mm/h\",\"value\":0},{\"id\":24,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"SADESUMMA\",\"shortName\":\"S-Sum\",\"stationId\":1001,\"unit\":\"mm\",\"value\":0},{\"id\":25,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"SATEEN_OLOMUOTO_PWDXX\",\"sensorValueDescriptionEn\":\"Dry weather\",\"sensorValueDescriptionFi\":\"Pouta\",\"shortName\":\"S-Olom\",\"stationId\":1001,\"unit\":\"///\",\"value\":7},{\"id\":26,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"NÄKYVYYS_KM\",\"shortName\":\"Näk_km\",\"stationId\":1001,\"unit\":\"km\",\"value\":19.45},{\"id\":31,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JOHTAVUUS_1\",\"shortName\":\"Joht1\",\"stationId\":1001,\"unit\":\"V\",\"value\":0.01},{\"id\":32,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JOHTAVUUS_2\",\"shortName\":\"Joht2\",\"stationId\":1001,\"unit\":\"V\",\"value\":0.03},{\"id\":33,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"PINTASIGNAALI_1\",\"shortName\":\"PSig1\",\"stationId\":1001,\"unit\":\"V\",\"value\":0},{\"id\":34,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"PINTASIGNAALI_2\",\"shortName\":\"PSig2\",\"stationId\":1001,\"unit\":\"V\",\"value\":0},{\"id\":35,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JÄÄTAAJUUS_1\",\"shortName\":\"JTaaj1\",\"stationId\":1001,\"unit\":\"Hz\",\"value\":420},{\"id\":36,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"JÄÄTAAJUUS_2\",\"shortName\":\"JTaaj2\",\"stationId\":1001,\"unit\":\"Hz\",\"value\":432},{\"id\":37,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"ASEMAN_STATUS_1\",\"shortName\":\"Stat1\",\"stationId\":1001,\"unit\":\"???\",\"value\":21},{\"id\":38,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"ASEMAN_STATUS_2\",\"shortName\":\"Stat2\",\"stationId\":1001,\"unit\":\"???\",\"value\":21},{\"id\":48,\"measuredTime\":\"2026-11-09T10:26:47Z\",\"name\":\"SADE_TILA\",\"shortName\":\"S-T"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for live port congestion information for Rotterdam. The Digitraffic Road Weather miner has an endpoint that specifically handles the LIVE_PORT_CONGESTION intent. The question includes the exact parameters required by the miner, which are directly mapped to the request body.",
+      "at": "2026-11-09T10:29:51.276Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    }
+  ],
+  "coverage": {
+    "total": 5,
+    "answered": 4,
+    "unknown": 1,
+    "skipped": 0
+  },
+  "cost": {
+    "total_usd": 0.05,
+    "paid_calls": 5,
+    "budget_usd": 0.25,
+    "per_finding_usd": 0.01
+  },
+  "network": {
+    "node": "https://devnode.telegraphprotocol.com",
+    "chain": "eip155:11155111",
+    "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17"
+  },
+  "agent": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+  "digest": "0x2130121d6723ef9cb7e442412eace73ff682537da0ea3bb0f239b72147307a5e",
+  "signature": "0x26c1ac0ff089dacf66fd57263d3bc4141aff16b26724405195a939d88a9a82b42b89aa335cacea9eb52ca5f3eee3b8e58a82551dc3c091c8eb439e19d8e8fb2c1c"
+}

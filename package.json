@@ -1,0 +1,36 @@
+{
+  "name": "countersign",
+  "version": "0.1.0",
+  "description": "Autonomous counterparty due-diligence agent that buys verified checks from Telegraph miners over x402 and issues a signed decision memo.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "cs": "tsx src/cli.ts",
+    "wallet:new": "tsx scripts/new-wallet.ts",
+    "serve": "tsx src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "keywords": [
+    "telegraph",
+    "x402",
+    "due-diligence",
+    "agent",
+    "kyb"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@x402/evm": "^2.30.0",
+    "@x402/fetch": "^2.30.0",
+    "viem": "^2.57.17"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

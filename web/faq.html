@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-ground="sand" data-buttons="tonal" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Countersign FAQ: running checks, reading memos, costs</title>
+<meta name="description" content="How Countersign buys diligence checks from Telegraph miners, how to run a pack, read and verify a signed memo, and what a run costs.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Countersign FAQ: running checks, reading memos, costs">
+<meta property="og:description" content="Setup, packs, the decision rule, memo verification, spend caps and troubleshooting.">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f7f9f8">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<style>:root { --p-bg:#f7f9f8; --p-surface:#ebf0ee; --p-ink:#06525c; --p-muted:#2f737d; --p-accent:#06525c; --p-accent-ink:#f7f9f8; --p-action:#06525c; --p-action-ink:#f7f9f8; --p-inv-bg:#06525c; --p-inv-surface:#205d66; --p-inv-ink:#f7f9f8; --p-inv-muted:#c1d0d2; --p-inv-accent:#f7f9f8; --p-inv-accent-ink:#06525c; --p-inv-action:#f7f9f8; --p-inv-action-ink:#06525c; --font-display:"Instrument Sans",system-ui,sans-serif; --font-text:"Instrument Sans",system-ui,sans-serif; --font-mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; --display-weight:500; --display-tracking:-0.028em; --display-tracking-xl:-0.036em; --display-stretch:96%; --ly-scale:1.04; }</style>
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<!-- page CSS: the question index, code, commands and the small reference tables inside answers -->
+<style>
+  .faq-page { padding-top: var(--s-8, 64px); }
+  .faq-head { max-width: 760px; display: grid; gap: var(--s-4); margin-bottom: var(--s-8, 64px); }
+  .faq-head p { color: var(--ink); font-size: var(--t-lead); line-height: 1.5; max-width: 60ch; margin: 0; }
+
+  /* the index: a sticky list on desktop, a row of chips on phones */
+  .faq-toc { position: sticky; top: 96px; align-self: start; }
+  .faq-toc ol { list-style: none; margin: var(--s-3) 0 0; padding: 0; display: grid; gap: 2px; }
+  .faq-toc a { display: flex; align-items: center; min-height: 40px; padding: 0 var(--s-3); margin-left: calc(var(--s-3) * -1);
+    color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .faq-toc a:hover { color: var(--ink); }
+  .faq-toc a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .faq-toc a[aria-current="true"] { color: var(--ink); border-left-color: var(--ink); font-weight: 500; }
+  .faq-toc .t-label { color: var(--muted); }
+
+  .faq-group { scroll-margin-top: 96px; }
+  .faq-group + .faq-group { margin-top: var(--s-9, 96px); }
+  .faq-group > h2 { margin-bottom: var(--s-6); }
+  .faq-group .faq__item h3 { scroll-margin-top: 96px; }
+  .faq__item p + p, .faq__item p + ul, .faq__item ul + p, .faq__item pre + p, .faq__item p + pre, .faq__item p + .faq-table, .faq__item .faq-table + p { margin-top: var(--s-3); }
+  .faq__item ul { margin: 0; padding-left: 1.2em; max-width: 64ch; display: grid; gap: var(--s-2); }
+  .faq__item li::marker { color: var(--muted); }
+
+  .faq-page code { font: 400 0.88em/1.4 var(--font-mono); padding: 1px 5px; border-radius: 3px; background: var(--p-surface); color: var(--ink); overflow-wrap: anywhere; }
+  .faq-page pre { margin: 0; padding: var(--s-4); border-radius: 4px; background: #0d2f34; color: #d7e7e5; overflow-x: auto;
+    font: 400 13px/1.7 var(--font-mono); max-width: 100%; }
+  .faq-page pre code { padding: 0; background: none; color: inherit; font: inherit; overflow-wrap: normal; }
+
+  .faq-table { width: 100%; max-width: 64ch; border-collapse: collapse; font-size: 15px; line-height: 1.45; }
+  .faq-table th, .faq-table td { text-align: left; vertical-align: top; padding: var(--s-2) var(--s-3) var(--s-2) 0; border-bottom: 1px solid var(--line); }
+  .faq-table th { font-weight: 500; color: var(--muted); }
+  .faq-scroll { max-width: 100%; overflow-x: auto; }
+  .faq-table td:first-child code { overflow-wrap: normal; white-space: nowrap; }
+
+  .verdict { display: inline-block; padding: 1px 7px; border-radius: 3px; font: 500 12px/1.6 var(--font-mono); letter-spacing: .02em; }
+  .verdict--go { background: #e5f1ee; color: #1d6b4f; }
+  .verdict--review { background: #fbf0dc; color: #7a4f0c; }
+  .verdict--stop { background: #f8e3e1; color: #9b2c22; }
+
+  .faq-note { margin-top: var(--s-3); padding: var(--s-3) var(--s-4); border-left: 2px solid #b5651d; background: #fbf3ea; color: #5c3410; max-width: 64ch; }
+
+  @media (max-width: 1023px) {
+    .faq-toc { position: static; margin-bottom: var(--s-7, 48px); }
+    .faq-toc ol { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+    .faq-toc a { margin: 0; min-height: 44px; padding: 0 var(--s-4); border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink); }
+    .faq-toc a[aria-current="true"] { border-color: var(--ink); }
+  }
+  @media (max-width: 639px) {
+    .faq-page { padding-top: var(--s-6); }
+    .faq-group + .faq-group { margin-top: var(--s-8, 64px); }
+    .faq-table { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .faq-toc a { transition: none; } }
+</style>
+</head>
+<body>
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#faq-h">Skip to content</a>
+    <a class="nav__logo" href="./">Countersign</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="./#memo">Memo</a></div>
+      <div class="nav__item"><a class="nav__link" href="./#how">How it works</a></div>
+      <div class="nav__item"><a class="nav__link" href="./#packs">Packs</a></div>
+      <div class="nav__item"><a class="nav__link" href="faq.html" aria-current="page">Questions</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--primary" href="app.html">Open the agent</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top" class="faq-page">
+  <section class="section" data-enter aria-labelledby="faq-h">
+    <div class="wrap">
+      <div class="faq-head">
+        <h1 id="faq-h">Questions about Countersign</h1>
+        <p>What the agent does, how to run a pack, how to read and verify the signed memo, and what a run costs.</p>
+      </div>
+
+      <div class="grid grid--top">
+        <nav class="faq-toc span-3" aria-label="Question groups">
+          <p class="t-label">On this page</p>
+          <ol>
+            <li><a href="#about">About Countersign</a></li>
+            <li><a href="#start">Getting started</a></li>
+            <li><a href="#memo">The memo</a></li>
+            <li><a href="#cost">Cost and safety</a></li>
+            <li><a href="#trouble">Troubleshooting</a></li>
+            <li><a href="#dev">For developers</a></li>
+          </ol>
+        </nav>
+
+        <div class="span-8 start-5">
+
+          <section class="faq-group" id="about" aria-labelledby="about-h">
+            <h2 id="about-h">About Countersign</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>What is Countersign?</h3>
+                <p>An autonomous agent for counterparty due diligence. You give it a token, a cargo seller and vessel, or a legal entity. It plans the checks a desk would order and buys each answer from a Telegraph miner. It then decides with a fixed rule and signs a memo that anyone can re-verify.</p>
+                <p>It is an entry in Telegraph Hackathon Season II, track Apps &amp; Agents.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Who is it for?</h3>
+                <p>Three desks, one pack each, matching three Telegraph commercial missions:</p>
+                <div class="faq-scroll"><table class="faq-table">
+                  <thead><tr><th scope="col">Pack</th><th scope="col">Desk</th><th scope="col">Question it answers</th></tr></thead>
+                  <tbody>
+                    <tr><td>Exchange</td><td>Token listing desk</td><td>Should we list this token?</td></tr>
+                    <tr><td>Commodities</td><td>Physical commodity trader</td><td>Is the seller real, the ship clean, the port open?</td></tr>
+                    <tr><td>Legal</td><td>Law firm, compliance team</td><td>Is this entity in good standing everywhere it operates?</td></tr>
+                  </tbody>
+                </table></div>
+              </div>
+              <div class="faq__item">
+                <h3>What does each pack check?</h3>
+                <ul>
+                  <li><b>Exchange:</b> sanctions on the issuing entity, smart-contract audit, adverse media. Optional: bot detection on the X account, on-chain treasury balance, source code review.</li>
+                  <li><b>Commodities:</b> seller registry and sanctions, vessel sanctions and telemetry, port congestion at discharge. Optional: bill of lading authenticity.</li>
+                  <li><b>Legal:</b> registry standing in up to three jurisdictions, sanctions on the entity and up to three officers, regulatory filings, adverse media, B2B identity.</li>
+                </ul>
+                <p>A finding can trigger more checks. A sanctions hit, a dead registry record or a bot-run audience makes the agent buy a targeted news search.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Why buy checks from Telegraph instead of calling a data API?</h3>
+                <p>Telegraph routes each request to the miner ranked best for that kind of check, so the agent never hardcodes a vendor. Every answer arrives with a signed signal hash and a payment receipt that prove who answered and that the agent paid. Most checks cost $0.01, with no subscriptions and no per-vendor API keys.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Does an AI model decide the outcome?</h3>
+                <p>No. Miners supply the answers; a fixed rule in the code decides. The same answers always give the same decision.</p>
+                <ul>
+                  <li><span class="verdict verdict--stop">STOP</span> a blocking finding that a second miner confirmed.</li>
+                  <li><span class="verdict verdict--review">REVIEW</span> any flag, an unconfirmed or disputed block, a critical check without a usable answer, miners that disagree, or fewer than two thirds of checks answered.</li>
+                  <li><span class="verdict verdict--go">GO</span> everything else: every answered check came back clean.</li>
+                </ul>
+              </div>
+              <div class="faq__item">
+                <h3>Why do the decision labels differ between packs?</h3>
+                <p>Each desk has its own words for the same three outcomes. The memo shows both, for example <code>PROCEED (GO)</code>.</p>
+                <div class="faq-scroll"><table class="faq-table">
+                  <thead><tr><th scope="col">Rule</th><th scope="col">Exchange</th><th scope="col">Commodities</th><th scope="col">Legal</th></tr></thead>
+                  <tbody>
+                    <tr><td>GO</td><td>LIST</td><td>PROCEED</td><td>CLEAR</td></tr>
+                    <tr><td>REVIEW</td><td>REVIEW</td><td>HOLD</td><td>REVIEW</td></tr>
+                    <tr><td>STOP</td><td>REJECT</td><td>BLOCK</td><td>ESCALATE</td></tr>
+                  </tbody>
+                </table></div>
+              </div>
+              <div class="faq__item">
+                <h3>What is a cross-check?</h3>
+                <p>When a critical check comes back with anything but a clean answer, the agent pays a second, independent miner for the same question. The finding is then marked confirmed or disputed. A block the second miner does not confirm leads to REVIEW, never STOP.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Is the memo legal or investment advice?</h3>
+                <p>No. Countersign reports what the miners answered and applies its own rule on top. It supports a human decision and does not replace it.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="faq-group" id="start" aria-labelledby="start-h">
+            <h2 id="start-h">Getting started</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>What do I need to run it?</h3>
+                <p>Node.js 20.12 or newer and a little Sepolia ETH (0.01 to 0.05) from any Sepolia faucet, which pays gas for minting test USDC. No account and no API key.</p>
+              </div>
+              <div class="faq__item">
+                <h3>How do I set it up?</h3>
+                <pre><code>npm install
+npm run wallet:new        # throwaway key in .env, prints the address
+# send Sepolia ETH to that address, then:
+npm run cs -- mint        # 10 test USDC to the agent wallet
+npm run cs -- wallet      # balances and today's spend</code></pre>
+              </div>
+              <div class="faq__item">
+                <h3>Can I try it without paying?</h3>
+                <p>Yes. The node prices every request before payment, so a quote is free. It lists each planned check, its price and the worst case with cross-checks.</p>
+                <pre><code>npm run cs -- plan exchange --example</code></pre>
+              </div>
+              <div class="faq__item">
+                <h3>How do I run a real check?</h3>
+                <pre><code>npm run cs -- run exchange --example
+npm run cs -- run commodities --example
+npm run cs -- run legal --example</code></pre>
+                <p><code>--example</code> uses a built-in subject: Uniswap, Trafigura with the vessel EVER GIVEN, or Revolut Ltd. The terminal streams each purchase, each finding and the decision.</p>
+              </div>
+              <div class="faq__item">
+                <h3>How do I check my own subject?</h3>
+                <p>Pass the fields as flags. <code>npm run cs -- packs</code> lists every field.</p>
+                <pre><code>npm run cs -- run commodities --seller "Trafigura Pte Ltd" \
+  --jurisdiction Singapore --vessel "EVER GIVEN" --imo 9811000 --port Rotterdam</code></pre>
+                <div class="faq-scroll"><table class="faq-table">
+                  <thead><tr><th scope="col">Pack</th><th scope="col">Required</th><th scope="col">Optional</th></tr></thead>
+                  <tbody>
+                    <tr><td>exchange</td><td><code>--project</code> <code>--token</code></td><td><code>--chain</code> <code>--entity</code> <code>--x</code> <code>--treasury</code> <code>--source</code></td></tr>
+                    <tr><td>commodities</td><td><code>--seller</code> <code>--jurisdiction</code> <code>--vessel</code> <code>--port</code></td><td><code>--imo</code> <code>--document</code></td></tr>
+                    <tr><td>legal</td><td><code>--entity</code> <code>--jurisdictions</code></td><td><code>--people</code> <code>--period</code></td></tr>
+                  </tbody>
+                </table></div>
+                <p>Add <code>--no-crosscheck</code> to skip second-miner checks and spend less.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Is there a web interface?</h3>
+                <p>Run <code>npm run serve</code> and open <a href="app.html">the agent</a> at <code>127.0.0.1:4402/app.html</code>. Pick a pack, fill the form or load the example, get a free quote, then run. Purchases stream in live, the memo opens with its evidence ledger, and Verify re-checks every signal on the node.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Which commands does the CLI have?</h3>
+                <div class="faq-scroll"><table class="faq-table">
+                  <tbody>
+                    <tr><td><code>wallet</code></td><td>Address, Sepolia ETH, test USDC, escrow credit, today's spend</td></tr>
+                    <tr><td><code>mint --amount 10</code></td><td>Mint test USDC</td></tr>
+                    <tr><td><code>packs</code></td><td>Packs and their fields</td></tr>
+                    <tr><td><code>plan &lt;pack&gt;</code></td><td>Free quote</td></tr>
+                    <tr><td><code>run &lt;pack&gt;</code></td><td>Paid run, writes a signed memo</td></tr>
+                    <tr><td><code>verify &lt;memo&gt;</code></td><td>Re-check signature, digest, signals</td></tr>
+                    <tr><td><code>show &lt;memo&gt;</code></td><td>Print a memo as Markdown</td></tr>
+                  </tbody>
+                </table></div>
+                <p>Every command starts with <code>npm run cs --</code>.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="faq-group" id="memo" aria-labelledby="memo-h">
+            <h2 id="memo-h">The memo</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>What is in a memo?</h3>
+                <ul>
+                  <li><b>Decision</b> with its desk label, the share of checks answered and the total cost.</li>
+                  <li><b>Why:</b> the reasons behind the decision.</li>
+                  <li><b>Findings:</b> one row per check with its verdict, summary, corroboration and signal hash.</li>
+                  <li><b>Evidence ledger:</b> intent, miner, full signal hash, payment receipt, cost.</li>
+                  <li><b>Integrity:</b> agent wallet, keccak256 digest of the memo, EIP-191 signature.</li>
+                </ul>
+                <p>Each run writes the memo as JSON and Markdown to <code>data/memos/</code>.</p>
+              </div>
+              <div class="faq__item">
+                <h3>What do CLEAR, FLAG, BLOCK and UNKNOWN mean?</h3>
+                <p>CLEAR: the miner's answer shows no risk. FLAG: something a person should read. BLOCK: a hard stop such as a sanctions match. UNKNOWN: the miner returned no usable value or the request failed.</p>
+                <p>An unknown answer is never treated as clean. An unknown critical check turns the memo to REVIEW.</p>
+              </div>
+              <div class="faq__item">
+                <h3>How do I verify a memo, mine or someone else's?</h3>
+                <pre><code>npm run cs -- verify exchange-2026-11-09-58b7f27b
+npm run cs -- verify path/to/memo.json</code></pre>
+                <p>Verify recomputes the memo digest and recovers the signer. It fetches every signal from the Telegraph node, recomputes its keccak256 hash and confirms the agent wallet paid for it. Changing one field in the memo breaks the digest. Any signal can also be opened in a browser at <code>devnode.telegraphprotocol.com/engine/v1/signal/&lt;hash&gt;</code>.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="faq-group" id="cost" aria-labelledby="cost-h">
+            <h2 id="cost-h">Cost and safety</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>What does a run cost?</h3>
+                <p>Most checks cost $0.01 in test USDC. The three example runs cost $0.05, $0.05 and $0.08. Cross-checks and follow-up checks add a few cents, and the free quote shows the worst case before you pay.</p>
+              </div>
+              <div class="faq__item">
+                <h3>What stops the agent from overspending?</h3>
+                <p>Three caps in <code>.env</code>. The agent refuses to sign any payment that would cross one.</p>
+                <div class="faq-scroll"><table class="faq-table">
+                  <thead><tr><th scope="col">Variable</th><th scope="col">Default</th><th scope="col">Limit</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>MAX_USD_PER_RUN</code></td><td>$0.25</td><td>One run</td></tr>
+                    <tr><td><code>MAX_USD_PER_DAY</code></td><td>$2.00</td><td>All runs in a day</td></tr>
+                    <tr><td><code>MAX_ATOMIC_PER_PAYMENT</code></td><td>$0.10</td><td>One payment</td></tr>
+                  </tbody>
+                </table></div>
+                <p>Budget is reserved before signing and charged only on success. Engine errors come back before payment and cost nothing.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Are my queries private?</h3>
+                <p>No. Every Telegraph request is public, and the network feed shows the query with the paying wallet.</p>
+                <p class="faq-note">Use only public company, vessel and token names and a throwaway testnet key. Never put client names or confidential deal terms into a run.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Where is the private key kept?</h3>
+                <p>In <code>.env</code>, which git ignores. <code>npm run wallet:new</code> creates a fresh throwaway key. Never commit <code>.env</code> and never reuse a key that holds real funds.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Is this real money?</h3>
+                <p>No. Countersign runs on Ethereum Sepolia with Telegraph test USDC. Telegraph plans to move to mainnet on the same contracts and payment path.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="faq-group" id="trouble" aria-labelledby="trouble-h">
+            <h2 id="trouble-h">Troubleshooting</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>“AGENT_PRIVATE_KEY is missing or malformed”</h3>
+                <p>There is no key in <code>.env</code>. Run <code>npm run wallet:new</code>.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Minting test USDC fails</h3>
+                <p>The wallet has no Sepolia ETH for gas. Fund the address from a Sepolia faucet and mint again.</p>
+              </div>
+              <div class="faq__item">
+                <h3>A finding says “Not bought: run budget reached”</h3>
+                <p>The run or daily cap was hit. Raise <code>MAX_USD_PER_RUN</code> or <code>MAX_USD_PER_DAY</code> in <code>.env</code>, or run again tomorrow.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Every paid check fails</h3>
+                <p>The wallet is likely out of test USDC. Check with <code>npm run cs -- wallet</code> and mint more.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Errors 429 or 503</h3>
+                <p>429 means more than 60 new questions in a minute; wait a minute. 503 <code>no_compatible_miner</code> means no miner serves that check right now; it shows as UNKNOWN, so retry later. Neither costs anything.</p>
+              </div>
+              <div class="faq__item">
+                <h3>Verify shows BAD for a signal</h3>
+                <p>Either the node was unreachable or the memo was edited. Retry; if it still fails, do not trust the memo.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="faq-group" id="dev" aria-labelledby="dev-h">
+            <h2 id="dev-h">For developers</h2>
+            <div class="faq">
+              <div class="faq__item">
+                <h3>Is there an HTTP API?</h3>
+                <p>The local server binds to 127.0.0.1 and runs one agent at a time.</p>
+                <div class="faq-scroll"><table class="faq-table">
+                  <tbody>
+                    <tr><td><code>GET /api/status</code></td><td>Node, wallet, budget, current run</td></tr>
+                    <tr><td><code>GET /api/packs</code></td><td>Packs and fields</td></tr>
+                    <tr><td><code>POST /api/plan</code></td><td>Free quote: <code>{"pack", "subject"}</code></td></tr>
+                    <tr><td><code>POST /api/runs</code></td><td>Start a run, returns its id</td></tr>
+                    <tr><td><code>GET /api/runs/&lt;id&gt;/events</code></td><td>Live events (Server-Sent Events)</td></tr>
+                    <tr><td><code>GET /api/memos</code></td><td>List memos</td></tr>
+                    <tr><td><code>GET /api/memos/&lt;id&gt;</code></td><td>One memo as JSON</td></tr>
+                    <tr><td><code>GET /api/memos/&lt;id&gt;/verify</code></td><td>Verify a memo</td></tr>
+                  </tbody>
+                </table></div>
+              </div>
+              <div class="faq__item">
+                <h3>How do I add a pack?</h3>
+                <p>Copy a file in <code>src/packs/</code>, define its fields, example subject, labels and the checks it plans from the shared builders in <code>src/packs/checks.ts</code>, then register it in <code>src/packs/index.ts</code>. The agent, budget, decision rule, memo and web UI pick it up unchanged.</p>
+              </div>
+              <div class="faq__item">
+                <h3>How do I run the tests?</h3>
+                <pre><code>npm test
+npm run typecheck</code></pre>
+                <p>They cover the decision rule, the answer evaluators, signal hashing against a real Telegraph signal, memo signing and the spend caps.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing footer--statement" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta">
+      <div class="section-head--split">
+        <div><h2 id="close-h">Run your first diligence memo</h2><p class="t-lead">Free quotes, $0.01 a check, a $0.25 cap per run.</p></div>
+        <a class="btn btn--primary" href="app.html">Open the agent<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+      </div>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="./">Countersign</a>
+          <p class="footer__lede">Counterparty diligence, bought per answer from Telegraph miners and signed.</p>
+        </div>
+        <div class="span-2 start-7 footer__col"><h3>Product</h3><ul><li><a href="./#memo">Memo</a></li><li><a href="./#how">How it works</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Packs</h3><ul><li><a href="./#packs">Exchange</a></li><li><a href="./#packs">Commodities</a></li><li><a href="./#packs">Legal</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Help</h3><ul><li><a href="faq.html">Questions</a></li><li><a href="#contact">Contact</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 Countersign &nbsp; MIT licence</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+<script type="module">
+  // Mark the group in view in the question index.
+  const links = [...document.querySelectorAll('.faq-toc a')];
+  const byId = new Map(links.map((a) => [a.hash.slice(1), a]));
+  const seen = new Map();
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) seen.set(e.target.id, e.isIntersecting);
+    const current = [...byId.keys()].find((id) => seen.get(id));
+    for (const [id, a] of byId) a.setAttribute('aria-current', id === current ? 'true' : 'false');
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  for (const id of byId.keys()) { const el = document.getElementById(id); if (el) io.observe(el); }
+</script>
+</body>
+</html>

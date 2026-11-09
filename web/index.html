@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-ground="sand" data-buttons="tonal" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Countersign: due diligence agent for deal desks</title>
+<meta name="description" content="An agent that buys sanctions, registry, vessel and contract checks from Telegraph miners for $0.01 each and signs a memo anyone can re-verify.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Countersign: due diligence agent for deal desks">
+<meta property="og:description" content="Checks bought per answer from Telegraph miners, cross-checked on a hit and signed into one memo.">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f7f9f8">
+<!-- <link rel="canonical" href="https://[the project's domain]/"> -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<style>:root { --p-bg:#f7f9f8; --p-surface:#ebf0ee; --p-ink:#06525c; --p-muted:#2f737d; --p-accent:#06525c; --p-accent-ink:#f7f9f8; --p-action:#06525c; --p-action-ink:#f7f9f8; --p-inv-bg:#06525c; --p-inv-surface:#205d66; --p-inv-ink:#f7f9f8; --p-inv-muted:#c1d0d2; --p-inv-accent:#f7f9f8; --p-inv-accent-ink:#06525c; --p-inv-action:#f7f9f8; --p-inv-action-ink:#06525c; --font-display:"Instrument Sans",system-ui,sans-serif; --font-text:"Instrument Sans",system-ui,sans-serif; --font-mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; --display-weight:500; --display-tracking:-0.028em; --display-tracking-xl:-0.036em; --display-stretch:96%; --ly-scale:1.04; }</style>
+<link rel="stylesheet" href="assets/ui/base.css">
+<link rel="stylesheet" href="assets/ui/window/fragment.css">
+<link rel="stylesheet" href="assets/ui/doc/fragment.css">
+<link rel="stylesheet" href="assets/ui/checklist/fragment.css">
+<link rel="stylesheet" href="assets/ui/notify/fragment.css">
+<link rel="stylesheet" href="assets/ui/terminal-run/fragment.css">
+<link rel="stylesheet" href="assets/ui/stat/fragment.css">
+<link rel="stylesheet" href="assets/diagrams/diagram.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="assets/backgrounds/backgrounds.js"></script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<link rel="modulepreload" href="assets/moments/moments.js">
+<link rel="modulepreload" href="assets/moments/lib.js">
+<link rel="modulepreload" href="assets/moments/pinned-chapters/moment.js">
+<!-- page CSS: the drawn windows inside the visuals, the app-frame recipe and one --p-h for the card group -->
+<style>
+  /* the hero frame's ground when WebGL is not there: the mesh's own teal and sand */
+  .hero__window { background:
+    radial-gradient(70% 90% at 12% 20%, #9cc9c4 0, transparent 60%),
+    radial-gradient(60% 80% at 88% 30%, #e7dcc4 0, transparent 62%),
+    radial-gradient(80% 90% at 50% 110%, #3f8f93 0, transparent 66%),
+    linear-gradient(#cfe2de, #eef2ec); }
+
+  /* a drawn Countersign window: the memo, the quote, the cross-check and the verify run */
+  .cs-win { background: #fff; color: #0d2f34; border-radius: 6px; overflow: hidden; font: 400 14px/1.4 var(--font-text);
+    box-shadow: 0 0 0 1px rgb(6 82 92 / .1), 0 30px 60px -30px rgb(6 50 56 / .45); text-align: left; }
+  .cs-win__bar { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px; border-bottom: 1px solid #e3ebe9; font-size: 13px; color: #557a7f; }
+  .cs-win__bar b { color: #0d2f34; font-weight: 500; }
+  .cs-win__bar .sp { flex: 1; }
+  .cs-win__dots { display: flex; gap: 6px; } .cs-win__dots i { width: 10px; height: 10px; border-radius: 50%; background: #d7e1df; }
+  .cs-win__head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 12px; }
+  .cs-win__head .cs-win__t { margin: 0; font: 500 17px/1.3 var(--font-text); color: #0d2f34; }
+  .cs-win__head small { display: block; margin-top: 2px; font: 400 12px/1.4 var(--font-mono); color: #557a7f; }
+  .cs-win__head .sp { flex: 1; }
+  .cs-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 3px; font: 500 12px/1 var(--font-text); white-space: nowrap; background: #e5f1ee; color: #1d6b4f; }
+  .cs-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .cs-chip--big { height: 30px; padding: 0 12px; font-size: 13px; background: #1d6b4f; color: #fff; }
+  .cs-chip--big::before { background: #b9e3cf; }
+  .cs-chip--none { background: #eef1f1; color: #5f7074; }
+  .cs-chip--warn { background: #fbf0dc; color: #8a5a10; }
+  .cs-rows { list-style: none; margin: 0; padding: 0 18px; }
+  .cs-rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto 112px; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #edf2f1; font-size: 13.5px; }
+  .cs-rows li > span:first-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cs-rows code, .cs-mono { font: 400 12px/1.4 var(--font-mono); color: #557a7f; }
+  .cs-rows code { text-align: right; }
+  .cs-win__foot { display: flex; align-items: center; gap: 10px; margin-top: 4px; padding: 12px 18px 16px; border-top: 1px solid #edf2f1; font-size: 13px; color: #557a7f; }
+  .cs-win__foot .sp { flex: 1; }
+  .cs-win__foot b { color: #0d2f34; font-weight: 500; }
+  .hero--centred .hero__window > .cs-win { max-width: 880px; }
+  @media (max-width: 639px) {
+    .cs-win__bar .sp ~ span { display: none; }
+    .cs-rows li { grid-template-columns: minmax(0, 1fr) auto; }
+    .cs-rows code { display: none; }
+    .cs-win__head small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
+
+  /* the quote and the cross-check in the pinned chapters */
+  .cs-win--sm { width: min(480px, 100%); }
+  .cs-win--sm .cs-rows li { grid-template-columns: minmax(0, 1fr) auto; }
+  .cs-pair { display: grid; gap: 10px; padding: 4px 18px 6px; }
+  .cs-pair > div { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #edf2f1; font-size: 13.5px; }
+  .cs-pair > div > span:first-child { font: 400 12px/1.3 var(--font-mono); color: #557a7f; }
+  .cs-win--term { background: #0d2f34; }
+  .cs-win--term .cs-win__bar { color: #8fb7b4; border-color: rgb(255 255 255 / .08); } .cs-win--term .cs-win__bar b { color: #fff; } .cs-win--term .cs-win__dots i { background: #2c5a60; }
+  .cs-term { color: #d7e7e5; padding: 16px 18px 18px; font: 400 13px/1.7 var(--font-mono); }
+  .cs-term p { margin: 0; display: flex; gap: 12px; }
+  .cs-term p > span:first-child { min-width: 96px; color: #8fb7b4; }
+  .cs-term .ok { color: #9fe0c0; }
+  .cs-term .cmd { color: #fff; margin-bottom: 8px; }
+
+  /* app-frame (sections-library.md, the whole recipe) */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+  @media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+  @media (max-width: 1023px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane--list::after { display: none; }
+    .app .ui-win__side { display: none; }
+    .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+
+  /* contrast: the lead and body copy in the ink (the muted teal reads 5.1:1) */
+  .hero.hero--centred .hero__lead { color: var(--ink); }
+  .cs-cost.ui-stat { width: 100%; max-width: 420px; }
+  /* phone: lane captions sit under their tiles as small outlined tags */
+  .dg[data-tier="c"] .dg-node--tile > .dg-cap { padding: 1px 6px; border: 1px solid color-mix(in oklab, var(--ink) 16%, var(--p-bg)); border-radius: 4px; background: var(--p-bg); }
+  /* the 11-letter name across the .wrap (the kit sizes 8 letters to fill it) */
+  .close__word { min-width: 0; font-size: clamp(44px, 10.4vw, 158px); line-height: 1; }
+  @media (max-width: 639px) {
+    .close__word { font-size: clamp(36px, 13.4vw, 70px); }
+    .hero__window .cs-rows li:nth-child(n+4), .hero__window .cs-win__foot { display: none; }
+    #packs .ui-term__cwd { display: none; }
+  }
+
+  #packs .panel { --p-h: 300px; }
+  @media (min-width: 640px) and (max-width: 1279px) { #packs .panel { --p-h: 220px; } }
+  @media (max-width: 639px) {
+    /* phone: the stacked chapters fill both screens, the steps spread down them (no empty foot) */
+    main > #how[data-moment]:not(.is-live) { min-height: 200lvh; }
+    main > #how[data-moment]:not(.is-live) > .mo-pc__grid { display: flex; flex-direction: column; }
+    main > #how[data-moment]:not(.is-live) .mo-pc__text { flex: 1 0 auto; display: flex; flex-direction: column; }
+    main > #how[data-moment]:not(.is-live) .mo-pc__steps { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-between; } #packs .panel { --p-h: 150px; } #packs .stage { --fade-h: 40px; }
+    /* phone: the stacked answers fill exactly two screens, the questions spread down them */
+    main > #faq { min-height: 200lvh; display: flex; flex-direction: column; }
+    main > #faq > .wrap { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--s-8, 32px); }
+    main > #faq .faq { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-between; } }
+</style>
+</head>
+<body>
+<!-- type: software
+     deal: hero centred, nav nav-centre, close close-word, footer footer-statement, rhythm space, buttons tonal,
+           mark wordmark, effect gradient-mesh (the hero window), grounds #packs bg-band (bg-halo dropped: it left an empty screen before the pinned chapters)
+     moments: pinned-chapters in #how (the three steps of a run, each with its own drawn window) -->
+
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#memo">Skip to content</a>
+    <a class="nav__logo" href="#top">Countersign</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#memo">Memo</a></div>
+      <div class="nav__item"><a class="nav__link" href="#how">How it works</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="#packs">Packs <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-4">
+              <p class="t-label">Mission packs</p>
+              <a href="#packs">Exchange<span>Token listing screens</span></a>
+              <a href="#packs">Commodities<span>Cargo, vessel and seller</span></a>
+              <a href="#packs">Legal<span>Entity checks by jurisdiction</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="#faq">Questions</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--primary" href="app.html">Open the agent</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--centred" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text">
+      <div class="hero__c">
+        <a class="pill" href="#how"><span>Live on Sepolia testnet</span><span class="muted">See how a run goes</span></a>
+        <h1 id="hero-h">Due diligence agent for deal desks</h1>
+        <p class="hero__lead">Countersign buys sanctions, registry, vessel and contract checks from Telegraph miners at $0.01 each, asks a second miner when a critical answer is not clean, and signs the memo.</p>
+        <div class="btn-row"><a class="btn btn--primary" href="app.html">Open the agent<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a><a class="btn btn--secondary" href="#memo">See a signed memo</a></div>
+      </div>
+      <div class="hero__window" data-fx="gradient-mesh" data-fx-seed="11" role="img" aria-label="A signed Countersign memo: Trafigura Pte Ltd and the vessel EVER GIVEN, five checks for $0.05, decision PROCEED">
+        <div class="ly-piece cs-win" aria-hidden="true">
+          <div class="cs-win__bar"><span class="cs-win__dots"><i></i><i></i><i></i></span><span><b>Memo</b> · commodities-2026-11-09-f62362d5</span><span class="sp"></span><span>Sepolia · Telegraph devnode</span></div>
+          <div class="cs-win__head">
+            <div><p class="cs-win__t">Trafigura Pte Ltd / EVER GIVEN</p><small>5 checks · $0.05 · digest 0x2130…7a5e</small></div>
+            <span class="sp"></span><span class="cs-chip cs-chip--big">PROCEED</span>
+          </div>
+          <ul class="cs-rows" data-ly-steps="700">
+            <li data-step><span>UN sanctions screen, seller</span><span class="cs-chip">Clear</span><code>0xe7b1…1952</code></li>
+            <li data-step><span>UN sanctions screen, vessel EVER GIVEN</span><span class="cs-chip">Clear</span><code>0x39f5…719f</code></li>
+            <li data-step><span>Company registry, Singapore</span><span class="cs-chip">Active</span><code>0xacc7…d89d</code></li>
+            <li data-step><span>Vessel telemetry near Rotterdam</span><span class="cs-chip">Clear</span><code>0x2172…e32a</code></li>
+            <li data-step><span>Port conditions, Rotterdam</span><span class="cs-chip cs-chip--none">No answer</span><code>0xc32c…453e</code></li>
+          </ul>
+          <div class="cs-win__foot"><span>Signed by <b>0x7730…6d5E</b></span><span class="sp"></span><span class="cs-chip">Signature verified</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section" id="memo" aria-labelledby="memo-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <h2 id="memo-h" class="span-5">Every diligence memo, signed and re-checkable</h2>
+        <p class="span-6 start-7">Each finding carries the miner's signal hash and the onchain payment behind it. The three memos below came from real runs on the Telegraph devnode. <a class="link" href="#how">See how a run goes</a></p>
+      </div>
+      <div class="ui app fill" role="img" aria-label="The Countersign memo list beside the open memo for Trafigura Pte Ltd and EVER GIVEN, its sanctions finding marked with the miner's signal hash" data-ui-pause-host>
+        <div class="app__pane app__pane--list">
+          <div class="ui ui-panel ui-win" data-ui="window" data-open="Queued" data-work="Buying" data-done="Signed">
+            <div class="ui-win__bar">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-win__crumb">Countersign <i>/</i> <b>Memos</b></span>
+              <span class="ui-spacer"></span>
+              <span class="ui-win__search" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg><span class="ui-win__ph">Search</span><span class="ui-kbd">/</span></span>
+            </div>
+            <div class="ui-win__body">
+              <nav class="ui-win__side" aria-hidden="true">
+                <span class="ui-win__nav is-on"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg>Memos<em>9</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>Queued<em>6</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg>Signed<em>3</em></span>
+                <span class="ui-win__label">Packs</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Exchange</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Commodities</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Legal</span>
+              </nav>
+              <div class="ui-win__main">
+                <div class="ui-win__cols" aria-hidden="true"><span>Subject</span><span>Pack</span><span>Status</span><span>Cost</span></div>
+                <ul class="ui-win__rows">
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">TR</span><span class="ui-win__who">Trafigura Pte Ltd</span><span class="ui-win__sub">Commodities · PROCEED · 5 checks</span><span class="ui-win__st is-done" data-st>Signed</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">UN</span><span class="ui-win__who">Uniswap</span><span class="ui-win__sub">Exchange · REVIEW · adverse media</span><span class="ui-win__st is-done" data-st>Signed</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">RE</span><span class="ui-win__who">Revolut Ltd</span><span class="ui-win__sub">Legal · CLEAR · 8 checks</span><span class="ui-win__st is-done" data-st>Signed</span><span class="ui-win__age">$0.08</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">GL</span><span class="ui-win__who">Glencore International AG</span><span class="ui-win__sub">Commodities · quote 5 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="5">AA</span><span class="ui-win__who">Aave</span><span class="ui-win__sub">Exchange · quote 5 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">WI</span><span class="ui-win__who">Wise Payments Ltd</span><span class="ui-win__sub">Legal · quote 8 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.08</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">GU</span><span class="ui-win__who">Gunvor SA</span><span class="ui-win__sub">Commodities · quote 5 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">CH</span><span class="ui-win__who">Chainlink</span><span class="ui-win__sub">Exchange · quote 5 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.05</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">MO</span><span class="ui-win__who">Monzo Bank Ltd</span><span class="ui-win__sub">Legal · quote 8 checks</span><span class="ui-win__st" data-st>Queued</span><span class="ui-win__age">$0.08</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app__pane app__pane--open" data-ui-loop>
+          <div class="ui ui-doc" data-ui="doc">
+            <article class="ui-doc__page">
+              <div class="ui-doc__label">Memo commodities-2026-11-09-f62362d5</div>
+              <div class="ui-doc__title">PROCEED: Trafigura Pte Ltd / EVER GIVEN</div>
+              <div class="ui-doc__text">The seller is <mark class="ui-doc__mark is-on">not on the UN consolidated sanctions list</mark>, and neither is the vessel EVER GIVEN on a second screen.</div>
+              <div class="ui-doc__text">The registry shows <mark class="ui-doc__mark" data-kind="Signal" data-msg="PREFLIGHT Infrastructure Signals miner, paid $0.01." data-where="Signal 0xacc7…d89d, verified">TRAFIGURA PTE LTD registered and active</mark> in Singapore.</div>
+              <div class="ui-doc__text">ADS-B telemetry near Rotterdam shows <mark class="ui-doc__mark" data-kind="Signal" data-msg="ADSB.lol miner, paid $0.01." data-where="Signal 0x2172…e32a, verified">no flag on the vessel's track</mark> in the window asked for.</div>
+              <div class="ui-doc__text">Port conditions at Rotterdam returned no usable answer. The check is not critical, so it does not hold the memo.</div>
+              <div class="ui-doc__text">Decision by the fixed rule: every answered check came back clean; 1 non-critical check returned no usable answer.</div>
+              <div class="ui-doc__text">Five checks cost $0.05 in test USDC, each payment settled on Sepolia with its own transaction hash.</div>
+              <div class="ui-doc__text">Signed by the agent key 0x7730…6d5E over digest 0x2130…7a5e.</div>
+            </article>
+            <aside class="ui-doc__note ui-panel is-on" aria-live="polite">
+              <div class="ui-doc__kind"><span class="ui-doc__dot"></span><span data-doc-kind>Signal</span></div>
+              <div class="ui-doc__msg" data-doc-msg>UN Consolidated Sanctions Screen miner, paid $0.01.</div>
+              <div class="ui-doc__where" data-doc-where>Signal 0xe7b1…1952, verified</div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how" style="--h: 2" data-moment="pinned-chapters" aria-labelledby="how-h">
+    <div class="wrap mo-pc__grid">
+      <div class="mo-pc__text">
+        <h2 id="how-h">How it works</h2>
+        <ol class="mo-pc__steps">
+          <li class="mo-pc__step">
+            <h3>Free quotes from the Telegraph node</h3>
+            <p>The node prices each request before payment. A bad input fails at no cost, and a run stops at $0.25.</p>
+            <figure class="mo-pc__visual mo-pc__visual--lit" role="img" aria-label="A free quote for the commodities pack: five checks at $0.01 each, $0.05 in all">
+              <div class="cs-win cs-win--sm" aria-hidden="true">
+                <div class="cs-win__bar"><span class="cs-win__dots"><i></i><i></i><i></i></span><span><b>Quote</b> · Commodities pack</span></div>
+                <ul class="cs-rows">
+                  <li><span>UN sanctions screen, seller</span><span class="cs-mono">$0.01</span></li>
+                  <li><span>UN sanctions screen, vessel</span><span class="cs-mono">$0.01</span></li>
+                  <li><span>Company registry</span><span class="cs-mono">$0.01</span></li>
+                  <li><span>Vessel telemetry</span><span class="cs-mono">$0.01</span></li>
+                  <li><span>Port conditions</span><span class="cs-mono">$0.01</span></li>
+                </ul>
+                <div class="cs-win__foot"><span>Cap $0.25 a run</span><span class="sp"></span><b>Total $0.05</b></div>
+              </div>
+            </figure>
+          </li>
+          <li class="mo-pc__step">
+            <h3>A second Telegraph miner on each hit</h3>
+            <p>A sanctions, registry, vessel or contract answer that is not clean goes to an independent miner. When the two disagree, the memo says REVIEW.</p>
+            <figure class="mo-pc__visual mo-pc__visual--lit" role="img" aria-label="Two miners answer the same registry check differently, so the finding is marked disputed and the decision is REVIEW">
+              <div class="cs-win cs-win--sm" aria-hidden="true">
+                <div class="cs-win__bar"><span class="cs-win__dots"><i></i><i></i><i></i></span><span><b>Cross-check</b> · Company registry</span></div>
+                <div class="cs-win__head"><div><p class="cs-win__t">Second miner asked</p><small>critical check · answer not clean</small></div></div>
+                <div class="cs-pair">
+                  <div><span>Miner 1</span><span>Entity not found</span><span class="cs-chip cs-chip--warn">Hit</span></div>
+                  <div><span>Miner 2</span><span>Registered and active</span><span class="cs-chip">Clear</span></div>
+                </div>
+                <div class="cs-win__foot"><span>Miners disagree</span><span class="sp"></span><span class="cs-chip cs-chip--warn">REVIEW</span></div>
+              </div>
+            </figure>
+          </li>
+          <li class="mo-pc__step">
+            <h3>The agent signs every memo</h3>
+            <p>Verify recomputes each signal's keccak256 hash on the node and checks the EIP-191 signature over the memo.</p>
+            <figure class="mo-pc__visual mo-pc__visual--lit" role="img" aria-label="The verify command checks the memo signature, its digest and all five signal hashes, then prints Memo verified">
+              <div class="cs-win cs-win--sm cs-win--term" aria-hidden="true">
+                <div class="cs-win__bar"><span class="cs-win__dots"><i></i><i></i><i></i></span><span><b>Terminal</b> · countersign</span></div>
+                <div class="cs-term">
+                  <p class="cmd"><span>$</span>npm run cs -- verify f62362d5</p>
+                  <p><span>signature</span><span class="ok">ok</span>&nbsp;0x7730…6d5E</p>
+                  <p><span>digest</span><span class="ok">ok</span>&nbsp;0x2130…7a5e</p>
+                  <p><span>signals</span><span class="ok">5 of 5</span>&nbsp;keccak256 match</p>
+                  <p><span>payments</span><span class="ok">5 of 5</span>&nbsp;on Sepolia</p>
+                  <p><span>result</span><span class="ok">Memo verified</span></p>
+                </div>
+              </div>
+            </figure>
+          </li>
+        </ol>
+      </div>
+      <div class="mo-pc__visuals frame"></div>
+    </div>
+  </section>
+
+  <section class="section g2 bg-band" id="packs" aria-labelledby="packs-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="packs-h">Three diligence packs on one agent core. <span class="muted">Each plans the checks its desk would order.</span></h2>
+          <p><a class="link" href="app.html">Quote a pack for free</a></p>
+        </div>
+        <div class="grid">
+          <article class="card card--row card--open span-6">
+            <h3>Token diligence for an exchange listing</h3>
+            <p>Sanctions, contract audit, adverse media and registry for a listing desk. Uniswap came back REVIEW on adverse media.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:400px;--ax:max(24px, 50% - 200px);--ay:48px;--ay-sm:16px" data-ui-loop>
+                <div class="ui ui-panel ui-checks" data-ui="checklist">
+                  <div class="ui-checks__head">
+                    <div class="ui-title">Uniswap · Exchange pack</div>
+                    <span class="ui-spacer"></span>
+                    <div class="ui-meta" data-checks-count>3 of 5</div>
+                  </div>
+                  <div class="ui-checks__bar"><i data-checks-bar style="--k:0.6"></i></div>
+                  <ul class="ui-checks__list">
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Sanctions screen, clear</span></li>
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Registry, answered</span></li>
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Adverse media, flagged</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Contract audit, no answer</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Market data, no answer</span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row card--open span-6">
+            <h3>Cargo and seller diligence</h3>
+            <p>Seller and vessel sanctions, registry, ADS-B telemetry and port conditions. Five checks for $0.05.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:420px;--ax:max(24px, 50% - 210px);--ay:48px;--ay-sm:16px">
+                <div class="ui ui-notify" data-ui="notify">
+                  <ul class="ui-notify__list" data-notify-list>
+                    <li class="ui-note"><span class="ui-note__ico"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg></span><span class="ui-note__text"><span class="ui-note__title">EVER GIVEN not on the UN list<time>now</time></span><span class="ui-note__body">Second screen, signal 0x39f5…719f</span></span></li>
+                    <li class="ui-note"><span class="ui-note__ico"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg></span><span class="ui-note__text"><span class="ui-note__title">Trafigura Pte Ltd active<time>1m</time></span><span class="ui-note__body">Registered in Singapore</span></span></li>
+                    <li class="ui-note"><span class="ui-agent ui-note__av" aria-hidden="true"></span><span class="ui-note__text"><span class="ui-note__title">Memo signed: PROCEED<time>1m</time></span><span class="ui-note__body">Five checks, $0.05 in test USDC</span></span><span class="ui-btn ui-btn--sm ui-note__btn">Open</span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card card--row card--open span-6">
+          <h3>Entity diligence in each jurisdiction</h3>
+          <p>Sanctions, registry and adverse media wherever the entity operates. Revolut Ltd took eight paid queries and came back CLEAR.</p>
+          <div class="panel"><div class="dg" data-diagram='{"layout":"lanes","alt":"Revolut Ltd goes to Countersign, which returns a clear sanctions screen, an active registry entry and clean adverse media.","input":{"label":"Revolut","icon":"ui:building-2","sub":"Ltd, UK"},"core":{"label":"Countersign","icon":"ui:shield-check"},"lanes":[{"label":"Sanctions","icon":"ui:shield-check","done":true,"sub":"Clear"},{"label":"Registry","icon":"ui:landmark","done":true,"sub":"Active"},{"label":"Media","icon":"ui:newspaper","done":true,"sub":"Clean"}]}'></div></div>
+        </article>
+        <article class="card card--row card--open span-6">
+          <h3>Re-verify any Countersign memo</h3>
+          <p>One command recomputes every signal hash on the node and checks the agent's signature over the memo.</p>
+          <div class="panel">
+            <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:460px;--ax:max(24px, 50% - 230px);--ay:48px;--ay-sm:16px">
+              <div class="ui ui-panel ui-term" data-ui="terminal-run">
+                <div class="ui-term__head">
+                  <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span class="ui-term__title">countersign</span>
+                  <span class="ui-meta">bash</span>
+                  <span class="ui-spacer"></span>
+                </div>
+                <div class="ui-term__screen" data-term-screen>
+                  <div class="ui-term__track" data-term-track>
+                    <div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~/countersign</span><span class="ui-term__sig">$</span><span class="ui-term__typed" data-term-cmd>npm run cs -- verify 3b328f17</span></div>
+                    <div class="ui-term__ln ui-term__meter" data-term-out data-term-meter><span class="ui-term__bar" style="--p:1"><i></i></span><span class="ui-term__count" data-term-count>8 of 8 signals</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">signature</span><span class="ui-term__n">EIP-191</span><span class="ui-term__t">ok</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">digest</span><span class="ui-term__n">canonical JSON</span><span class="ui-term__t">ok</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">signals</span><span class="ui-term__n">keccak256</span><span class="ui-term__t">8 ok</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">payer</span><span class="ui-term__n">0x7730…6d5E</span><span class="ui-term__t">ok</span></div>
+                    <div class="ui-term__ln ui-term__gap" data-term-out aria-hidden="true"></div>
+                    <div class="ui-term__ln ui-term__done" data-term-out data-term-done><span class="ui-term__ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.3 2.4 2.4 4.6-5"/></svg></span><b>Memo verified</b><span class="ui-term__dim">legal, CLEAR</span></div>
+                    <div class="ui-term__ln ui-term__cmd" data-term-next><span class="ui-term__cwd">~/countersign</span><span class="ui-term__sig">$</span><span class="ui-term__typed"></span><i class="ui-term__caret" aria-hidden="true"></i></div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq" aria-labelledby="faq-h">
+    <div class="wrap grid grid--top">
+      <div class="span-5 stack-6">
+        <h2 id="faq-h">Questions about Countersign</h2>
+        <div class="ui ui-panel ui-stat cs-cost" data-ui="stat" data-values="5,5,8" data-prev="5,5,8">
+          <div class="ui-stat__head">
+            <div class="ui-stat__top">
+              <span class="ui-stat__label">Cost of the last diligence run</span>
+              <span class="ui-stat__range">3 runs</span>
+            </div>
+            <div class="ui-stat__line">
+              <span class="ui-stat__num" data-stat-num>$0.08</span>
+              <span class="ui-stat__sub">of the $0.25 cap</span>
+            </div>
+          </div>
+          <div class="ui-stat__chart">
+            <svg class="ui-stat__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+              <path class="ui-stat__grid" d="M0 30.5H400M0 60.5H400M0 90.5H400"/>
+              <path class="ui-stat__cover" fill-rule="evenodd" d=""/>
+              <g class="ui-stat__bars"></g>
+            </svg>
+            <div class="ui-stat__axis" aria-hidden="true"><span>Commodities</span><span>Exchange</span><span>Legal</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="faq span-6 start-7">
+        <div class="faq__item"><h3>What does a diligence run cost?</h3><p>Each check is $0.01 in test USDC on Sepolia. A run stops at $0.25 and the wallet at $2 a day.</p></div>
+        <div class="faq__item"><h3>How does the agent decide GO, REVIEW or STOP?</h3><p>By a fixed rule in the code, never a model. A confirmed block is STOP; an unconfirmed hit or a missing critical answer is REVIEW.</p></div>
+        <div class="faq__item"><h3>Are queries to Telegraph private?</h3><p>No. Requests and the paying wallet show on the public feed, so use public company and vessel names only.</p></div>
+        <div class="faq__item"><h3>How do I re-verify a Countersign memo?</h3><p>Run npm run cs -- verify with the memo id. It fails if one byte of a signal or of the memo changed.</p></div>
+        <div class="faq__item"><h3>What if a Telegraph miner returns nothing useful?</h3><p>The check counts as unknown, never as clear. An unknown critical check turns the memo to REVIEW.</p></div>
+        <div class="btn-row faq__more"><a class="btn btn--secondary" href="faq.html">Read the full FAQ<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing footer--statement" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--word">
+      <div class="section-head--split">
+        <div><h2 id="close-h">Run your first diligence memo</h2><p class="t-lead">Free quotes, $0.01 a check, a $0.25 cap per run.</p></div>
+        <a class="btn btn--primary" href="app.html">Open the agent<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+      </div>
+      <p class="close__word" aria-hidden="true">Countersign</p>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="#top">Countersign</a>
+          <p class="footer__lede">Counterparty diligence, bought per answer from Telegraph miners and signed.</p>
+        </div>
+        <div class="span-2 start-7 footer__col"><h3>Product</h3><ul><li><a href="#memo">Memo</a></li><li><a href="#how">How it works</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Packs</h3><ul><li><a href="#packs">Exchange</a></li><li><a href="#packs">Commodities</a></li><li><a href="#packs">Legal</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Help</h3><ul><li><a href="faq.html">Questions</a></li><li><a href="#contact">Contact</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 Countersign &nbsp; MIT licence</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+<script type="module" src="assets/diagrams/mount.js"></script>
+</body>
+</html>
