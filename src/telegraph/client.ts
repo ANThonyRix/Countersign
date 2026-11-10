@@ -18,6 +18,22 @@ import {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const UA = { "user-agent": "countersign/0.1 (+telegraph hackathon s2)" };
 
+function requestSignal(signal?: AbortSignal): AbortSignal {
+  const timeout = AbortSignal.timeout(config.requestTimeoutMs);
+  return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
+function networkError(err: unknown, url: string, signed = false, amountAtomic = 0n): EngineError {
+  const timedOut = (err as Error)?.name === "TimeoutError";
+  const message = timedOut
+    ? `Telegraph request timed out after ${config.requestTimeoutMs} ms at ${url}. Check TELEGRAPH_NODE and try again.`
+    : `Cannot reach Telegraph node at ${url}. Check TELEGRAPH_NODE and try again. (${(err as Error)?.message ?? String(err)})`;
+  return new EngineError(
+    message + (signed ? " Payment was signed; settlement is unknown. The amount counts against the spend caps; inspect the wallet before retrying." : ""),
+    0, timedOut ? "request_timeout" : "network_error", null, signed, amountAtomic,
+  );
+}
+
 async function readBody(res: Response): Promise<unknown> {
   const text = await res.text();
   try {
@@ -49,13 +65,14 @@ async function getJson<T>(url: string, attempts = 3): Promise<T> {
   let last: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
-      const res = await fetch(url, { headers: UA });
+      const res = await fetch(url, { headers: UA, signal: requestSignal() });
       const body = await readBody(res);
       if (res.ok) return body as T;
       last = new EngineError(`GET ${url} -> ${res.status}`, res.status, errorCode(body, res.status), body, false);
       if (res.status < 500 && res.status !== 429) break;
     } catch (err) {
-      last = err;
+      last = networkError(err, url);
+      break;
     }
     await sleep(500 * 2 ** i);
   }
@@ -191,8 +208,12 @@ export async function quote(input: AskInput, minerId?: string): Promise<QuoteRes
   let res: Response | undefined;
   let body: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
-    res = await fetch(url, { method: "POST", headers: { ...UA, "content-type": "application/json" }, body: JSON.stringify(input) });
-    body = await readBody(res);
+    try {
+      res = await fetch(url, { method: "POST", headers: { ...UA, "content-type": "application/json" }, body: JSON.stringify(input), signal: requestSignal() });
+      body = await readBody(res);
+    } catch (err) {
+      throw networkError(err, url);
+    }
     if (!isGatewayError(res.status) && res.status !== 429) break;
     await sleep(800 * 2 ** attempt);
   }
@@ -250,21 +271,24 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
     );
 
     let res: Response;
+    let payload: unknown;
     try {
       res = await paidFetch(url, {
         method: "POST",
         headers: { ...UA, "content-type": "application/json" },
         body: JSON.stringify(body),
-        signal: opts.signal,
+        signal: requestSignal(opts.signal),
       });
+      payload = await readBody(res);
     } catch (err) {
-      if (reserved !== undefined) opts.budget.settle(reserved, false);
+      // A disconnected response after signing cannot prove that settlement failed.
+      if (reserved !== undefined) opts.budget.settle(reserved, signed !== undefined);
       const message = (err as Error).message ?? String(err);
       const refused = /budget exhausted|refusing to pay|unexpected (payTo|asset)|rejected by spendControls/i.test(message);
-      throw new EngineError(message, 0, refused ? "payment_refused" : "network_error", null, false);
+      if (refused) throw new EngineError(message, 0, "payment_refused", null, false);
+      throw networkError(err, url, signed !== undefined, signed?.amountAtomic);
     }
 
-    const payload = await readBody(res);
     const ok = res.status >= 200 && res.status < 300;
     // Payment settles only when the ask succeeds; engine errors are released from the budget.
     // A gateway timeout after signing is ambiguous, so it is counted as spent (conservative).
@@ -302,11 +326,12 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
       continue;
     }
     throw new EngineError(
-      `${res.status} ${code}${signed ? " (payment was signed; not settled on failure)" : ""}`,
+      `${res.status} ${code}${signed && isGatewayError(res.status) ? " (payment was signed; settlement unknown, counted against spend caps)" : signed ? " (payment was signed; not settled on failure)" : ""}`,
       res.status,
       code,
       payload,
-      false,
+      !!signed && isGatewayError(res.status),
+      signed?.amountAtomic,
     );
   }
   throw new EngineError("retries exhausted", 0, "retries_exhausted", null, false);

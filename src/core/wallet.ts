@@ -9,7 +9,20 @@ const erc20 = parseAbi([
 ]);
 const escrow = parseAbi(["function effectiveBalance(address) view returns (uint256)"]);
 
-export const publicClient = createPublicClient({ chain: sepolia, transport: http(config.rpcUrl) });
+export const publicClient = createPublicClient({ chain: sepolia, transport: http(config.rpcUrl, { timeout: config.requestTimeoutMs, retryCount: 0 }) });
+
+/** Catch an unfunded wallet before buying any checks. x402 spends USDC, not gas. */
+export async function requireFundedWallet(address: `0x${string}`): Promise<void> {
+  let balance: bigint;
+  try {
+    balance = await publicClient.readContract({ address: config.usdc, abi: erc20, functionName: "balanceOf", args: [address] });
+  } catch {
+    throw new Error("Cannot read the test USDC balance from Sepolia. Check SEPOLIA_RPC and try again.");
+  }
+  if (balance === 0n) {
+    throw Object.assign(new Error(`Wallet ${address} has no test USDC. Fund it with Sepolia ETH for mint gas, then run npm run cs -- mint.`), { status: 412 });
+  }
+}
 
 export function agentAccount() {
   return privateKeyToAccount(agentKey());

@@ -14,9 +14,15 @@ function num(name: string, fallback: number): number {
   return value;
 }
 
+const requestTimeoutMs = num("REQUEST_TIMEOUT_MS", 60_000);
+if (!Number.isInteger(requestTimeoutMs) || requestTimeoutMs < 1 || requestTimeoutMs > 2_147_483_647) {
+  throw new Error("REQUEST_TIMEOUT_MS must be a positive integer up to 2147483647");
+}
+
 export const config = {
   node: (process.env.TELEGRAPH_NODE ?? "https://devnode.telegraphprotocol.com").replace(/\/$/, ""),
   rpcUrl: process.env.SEPOLIA_RPC ?? "https://ethereum-sepolia-rpc.publicnode.com",
+  requestTimeoutMs,
   network: "eip155:11155111" as const,
   chainId: 11155111,
   // Telegraph test USDC on Sepolia (6 decimals, public mint, EIP-3009).

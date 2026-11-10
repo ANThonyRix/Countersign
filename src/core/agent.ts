@@ -10,6 +10,7 @@ import { Budget, atomicToUsd } from "./budget.ts";
 import { agrees } from "./evaluators.ts";
 import { signMemo, saveMemo, type Memo } from "./memo.ts";
 import { decide } from "./policy.ts";
+import { requireFundedWallet } from "./wallet.ts";
 import type { AgentEvent, Assessment, CheckSpec, Evidence, Finding } from "./types.ts";
 
 const MAX_CHECKS = 16;
@@ -72,7 +73,7 @@ class Runner {
       minerName: r?.miner_name,
       signalHash: r?.signal_hash,
       receipt: outcome?.receipt,
-      costUsd: outcome?.paidUsd ?? 0,
+      costUsd: outcome?.paidUsd ?? (error instanceof EngineError && error.paid ? atomicToUsd(error.amountAtomic) : 0),
       durationMs: r?.duration_ms,
       resultShape: r?.result_shape,
       fieldStatus: r?.field_status,
@@ -104,7 +105,7 @@ class Runner {
           return { outcome: await ask(input, { account: this.account, budget: this.budget, minerId: m.id, signal: this.opts.signal }), tried };
         } catch (err) {
           lastError = err;
-          if (err instanceof EngineError && err.code === "payment_refused") return { error: err, tried };
+          if (err instanceof EngineError && (err.code === "payment_refused" || err.paid)) return { error: err, tried };
           // 404/422/500/503 on a direct ask: no charge. Move to the next ranked miner.
         }
       }
@@ -134,7 +135,7 @@ class Runner {
 
     if (!this.budget.canAfford(10_000n)) {
       finding.skipped = "budget";
-      finding.summary = `Not bought: run budget of $${config.maxUsdPerRun.toFixed(2)} reached.`;
+      finding.summary = `Not bought: run budget of $${atomicToUsd(this.budget.runCap).toFixed(2)} reached.`;
       this.findings.set(check.id, finding);
       this.emit({ type: "skip", checkId: check.id, reason: "budget" });
       this.emit({ type: "finding", finding });
@@ -267,6 +268,7 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
   const emit = opts.onEvent ?? (() => {});
 
   const checks = await pack.plan(subject, planContext());
+  if (checks.length && budget.canAfford(10_000n)) await requireFundedWallet(account.address);
   emit({
     type: "plan",
     checks: checks.map((c) => ({ id: c.id, title: c.title, intent: c.intent, critical: !!c.critical })),

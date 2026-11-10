@@ -70,7 +70,7 @@ export interface SignalRecord {
   verification?: { algorithm?: string; commitment?: string; verified?: boolean };
 }
 
-/** Error raised for any non-2xx engine answer. `paid` tells whether money left the wallet. */
+/** Engine error. `paid` also includes signed payments whose settlement is unknown. */
 export class EngineError extends Error {
   constructor(
     message: string,
@@ -78,6 +78,7 @@ export class EngineError extends Error {
     readonly code: string,
     readonly body: unknown,
     readonly paid: boolean,
+    readonly amountAtomic: bigint = 0n,
   ) {
     super(message);
     this.name = "EngineError";

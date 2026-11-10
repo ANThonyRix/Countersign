@@ -13,7 +13,8 @@
     "serve": "tsx src/server.ts",
     "start": "tsx src/server.ts",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "test:break": "node --import tsx --test test/break.test.ts"
   },
   "keywords": [
     "telegraph",

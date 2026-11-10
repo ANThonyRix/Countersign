@@ -113,7 +113,8 @@ subject ──► pack.plan() ──► free quote (POST /v1/ask, 402 + PAYMENT-
 - **STOP**: a blocking finding that a second miner confirmed, or one from a non-critical source.
 - **REVIEW**: any flag; any unconfirmed or disputed block; a critical check with no usable answer;
   miners disagreeing; or fewer than two thirds of checks answered.
-- **GO**: everything else, which means every check came back clean.
+- **GO**: every answered check is clean, every critical check has a usable answer, and at least
+  two thirds of checks are answered. Non-critical `unknown` findings remain visible in the memo.
 
 ### Verifying a memo
 
@@ -175,8 +176,9 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
   fields a check needs empty (`field_status`), the finding is `unknown` (unverified), never `clear`.
   A critical check left `unknown`, or fewer than two thirds of checks answered, forces REVIEW. Six
   of the eighteen recorded signals above came back `unknown`.
-- **GO is not legal or compliance advice.** It means every check the pack ordered came back clean
-  from the miners that answered. A human still signs off.
+- **GO is not legal or compliance advice.** It means the answered checks came back clean, every
+  critical check was answered and coverage met the policy threshold. Non-critical checks may still
+  be `unknown`. A human still signs off.
 - **Coverage is limited to live intents.** Packs use only the Telegraph intents that had miners on
   the devnode during the event. A check a real desk would order but no live intent serves is not
   covered, and a memo lists only the checks it actually bought.
@@ -198,7 +200,16 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
 - `.env` holds the private key and is gitignored. Never commit it.
 - Spend caps live in `.env`: `MAX_USD_PER_RUN`, `MAX_USD_PER_DAY` and `MAX_ATOMIC_PER_PAYMENT`. The
   agent refuses to sign any payment that would cross a cap. Engine errors (400, 422, 429, 503) come
-  back before payment and cost nothing.
+  back before settlement and release their budget reservation. A timeout or connection loss after
+  signing, including while reading the paid response body, has unknown settlement: the amount
+  stays charged to the run/day caps and the memo's cost includes it conservatively. The evidence
+  error explains the uncertainty. Inspect the wallet before retrying; the agent does not fall back
+  to another miner after an ambiguous signed payment.
+- Before buying checks, the agent reads its test USDC balance. An empty wallet stops with funding
+  instructions. Sepolia ETH is needed for mint gas, not for an x402 authorization.
+- Telegraph requests have a timeout, including response-body reads (`REQUEST_TIMEOUT_MS`, default
+  60000 ms per attempt). A disconnected node produces an actionable error; unanswered checks stay
+  `unknown` and an offline run produces REVIEW.
 - The server binds to 127.0.0.1 and runs one agent at a time. It answers only to loopback Host
   names (add more with `ALLOWED_HOSTS`), refuses cross-origin POSTs and accepts only
   `application/json` bodies, so another site open in the browser cannot start a paid run.
@@ -210,7 +221,45 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
 ```bash
 npm test            # policy, evaluators, signal hash against a real devnode signal, memo signing, budget caps
 npm run typecheck
+npm run test:break  # reproducible failure scenarios; no testnet payments
 ```
+
+### Break / reproduce
+
+The failure suite in [`test/break.test.ts`](test/break.test.ts) exercises the real planner/runner,
+evaluators, policy, x402 SDK signing, signal-hash verification and memo signing/persistence. It replaces
+`fetch` with a strict in-process mock of Telegraph and Sepolia RPC. It generates an ephemeral wallet,
+uses a temporary data directory and never sends payments or modifies your normal spend ledger.
+The malformed-address case also invokes the real CLI in a child process.
+
+| Break case | Expected and asserted behavior |
+|---|---|
+| Malformed token address (`0xBAD`) | CLI exits 1 with `Token contract must be a 0x address`; subject validation returns status 400 before a run starts. This checks address syntax, not whether an address is an ERC-20 deployment. |
+| Empty agent wallet | Zero test USDC stops the run before any paid request, with instructions to fund mint gas and run `npm run cs -- mint`. |
+| Spend limits | Run, daily and per-payment caps refuse the x402 challenge before a signed request is sent. A run with no remaining budget saves a signed REVIEW memo with skipped/unknown checks and zero cost. |
+| Miners disagree | First miner returns a blocking sanctions answer, an independent miner returns clear: REVIEW, `disputed`, both answers and verified signal hashes retained. Agreement gives STOP; no alternative miner leaves an unconfirmed block at REVIEW. |
+| Node offline | Quote errors identify `TELEGRAPH_NODE`; all three full packs produce signed REVIEW memos with unknown checks, no paid requests and zero cost. |
+| Node stalls | A stalled quote aborts at the configured timeout. A stalled signed request or paid response body yields REVIEW, keeps the reserved amount in the caps and memo, and does not retry with another miner. |
+
+Reproduce all cases with `npm run test:break`, or run one group:
+
+```bash
+node --import tsx --test --test-name-pattern="disagreeing miners" test/break.test.ts
+node --import tsx --test --test-name-pattern="offline" test/break.test.ts
+node --import tsx --test --test-name-pattern="cap|ceiling|exhausted" test/break.test.ts
+```
+
+To check the input error manually (no payment):
+
+```bash
+npm run cs -- run exchange --project Test --token 0xBAD
+```
+
+For the rest of a judge's walkthrough, **Run** a pack using the quickstart, **Check** its memo with
+`npm run cs -- verify <memo-id>`, and **Inspect** `data/memos/<memo-id>.json` or the web evidence ledger.
+**Break** and **Reproduce** use the suite above. The failure cases are simulated, not fresh live
+testnet evidence; the three recorded live runs are listed in Evidence above. The suite does not
+replace a visual browser check or an independent developer's installation from the README.
 
 ## What is borrowed
 
