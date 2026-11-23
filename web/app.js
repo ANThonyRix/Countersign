@@ -129,6 +129,7 @@ function selectPack(id) {
   $("#pack-tagline").textContent = state.pack.tagline;
   $("#estimate").textContent = "";
   $("#fill-case-study").hidden = !state.pack.caseStudy;
+  for (const button of document.querySelectorAll("[data-payment-case]")) button.hidden = !state.pack.paymentCases;
   renderFields();
 }
 
@@ -299,7 +300,7 @@ function renderQuote(result) {
   const failed = result.checks.filter((c) => !c.ok);
   stage.replaceChildren(
     el("div", { class: "view" },
-      viewHead(`Quote: ${state.pack.title}`, "No payment was made. The node quotes miner checks. Public record comparisons are free."),
+      viewHead(`Quote: ${state.pack.title}`, "No payment was made. The node quotes miner checks. Record comparisons are free."),
       el("dl", { class: "stats" },
         stat("Checks planned", String(result.checks.length)),
         stat("Base cost", usd(result.estimate.baseUsd)),
@@ -314,7 +315,7 @@ function renderQuote(result) {
               c.local ? tag("clear", "local") : c.ok ? tag("clear", "priced") : tag("block", String(c.status)),
               el("div", {},
                 el("div", { class: "r-title", text: c.title }),
-                el("div", { class: "r-sub" }, el("span", { class: "mono", text: c.local ? "Public record comparison" : c.intent }), c.critical && !c.local ? " · critical, cross-checked on a hit" : "", c.ok ? "" : ` · ${c.code}`),
+                el("div", { class: "r-sub" }, el("span", { class: "mono", text: c.intent === "ORDER_DOCUMENT" ? "Order document review" : c.local ? "Public record comparison" : c.intent }), c.critical && !c.local ? " · critical, cross-checked on a hit" : "", c.ok ? "" : ` · ${c.code}`),
                 c.problems ? el("div", { class: "r-sub", style: "color:var(--stop)", text: JSON.stringify(c.problems) }) : null,
               ),
               el("span", { class: "r-end", text: c.ok ? usd(c.priceUsd, 4) : "n/a" }),
@@ -558,6 +559,7 @@ async function renderMemo(id) {
         verifyBtn,
       ),
       decisionBlock(memo.decision, memo.decision_label, memo.reasons),
+      paymentConditionsBlock(memo),
       el("dl", { class: "stats" },
         stat("Total cost", usd(memo.cost.total_usd, 4)),
         stat("Paid calls", String(memo.cost.paid_calls)),
@@ -649,12 +651,32 @@ function route(e) {
   renderMemoList();
 }
 
-function loadCaseStudy() {
-  if (!state.pack?.caseStudy) return;
-  state.drafts[state.pack.id] = { ...state.pack.caseStudy };
+function loadCaseStudy(paymentCase) {
+  const payment = paymentCase === "hold" || paymentCase === "proceed" ? state.pack?.paymentCases?.[paymentCase] : undefined;
+  const preset = payment ?? state.pack?.caseStudy;
+  if (!preset) return;
+  state.drafts[state.pack.id] = { ...preset };
   renderFields();
   showFormError();
   $("#estimate").textContent = "";
+}
+
+function paymentConditionsBlock(memo) {
+  if (!memo.payment_conditions) return null;
+  const { basis, document_decision: decision } = memo.payment_conditions;
+  return el("section", { class: "card", "aria-labelledby": "m-payment" },
+    el("h2", { id: "m-payment", text: "Payment conditions" }),
+    el("p", { class: "f-sum", text: `${decision} (${basis} documents)` }),
+    el("p", { class: "small muted", text: "Comparison of entered document values. Telegraph receipts cover the supplier and shipping checks." }),
+    ...memo.findings.filter((f) => f.checkId.startsWith("order:")).map((f) => el("details", { class: "raw" },
+      el("summary", { text: f.title }),
+      el("p", { text: f.summary }),
+      f.facts?.sources ? el("p", { class: "small muted", text: f.facts.sources.filter(Boolean).join(" · ") }) : null,
+      ...((f.facts?.comparisons ?? []).map((row) => el("p", {
+        class: "small", text: `${row.field} · expected ${row.expected || "—"} · observed ${row.observed || "—"}`,
+      }))),
+    )),
+  );
 }
 
 async function init() {
@@ -665,7 +687,10 @@ async function init() {
     renderFields();
     showFormError();
   });
-  $("#fill-case-study").addEventListener("click", loadCaseStudy);
+  $("#fill-case-study").addEventListener("click", () => loadCaseStudy());
+  for (const button of document.querySelectorAll("[data-payment-case]")) {
+    button.addEventListener("click", () => loadCaseStudy(button.dataset.paymentCase));
+  }
   window.addEventListener("hashchange", route);
 
   try {
@@ -677,12 +702,13 @@ async function init() {
     $("#memo-list").replaceChildren(el("li", { class: "muted small", text: "Server offline." }));
     return;
   }
-  const requestedCase = new URLSearchParams(location.search).get("case");
+  const query = new URLSearchParams(location.search);
+  const requestedCase = query.get("case");
   const sharedCase = state.packs.find((pack) => pack.id === requestedCase && pack.caseStudy);
   state.pack = sharedCase ?? state.packs[0];
   renderPacks();
   selectPack(state.pack.id);
-  if (sharedCase) loadCaseStudy();
+  if (sharedCase) loadCaseStudy(query.get("payment"));
   await Promise.all([loadStatus(), loadMemos()]);
   if (state.status?.running && !location.hash && !sharedCase) location.hash = `#/run/${state.status.running.id}`;
   route();

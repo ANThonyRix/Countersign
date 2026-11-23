@@ -3,7 +3,7 @@ import path from "node:path";
 import { keccak256, recoverMessageAddress, toBytes } from "viem";
 import type { LocalAccount } from "viem/accounts";
 import { config, ROOT } from "../config.ts";
-import type { Decision, Evidence, Finding } from "./types.ts";
+import type { Decision, Evidence, Finding, PaymentConditionReview } from "./types.ts";
 
 export interface MemoBody {
   memo_version: 1;
@@ -15,6 +15,7 @@ export interface MemoBody {
   decision: Decision;
   decision_label: string;
   reasons: string[];
+  payment_conditions?: PaymentConditionReview;
   findings: Finding[];
   evidence: Evidence[];
   coverage: { total: number; answered: number; unknown: number; skipped: number };
@@ -130,6 +131,24 @@ export function renderMarkdown(m: Memo): string {
   lines.push(`**${m.mission}** · memo \`${m.id}\` · ${m.created_at}`);
   lines.push("");
   lines.push(`Decision **${m.decision_label}** (${m.decision}). ${m.coverage.answered}/${m.coverage.total} checks answered. Cost **$${m.cost.total_usd.toFixed(4)}** over ${m.cost.paid_calls} paid Telegraph calls.`);
+  if (m.payment_conditions) {
+    const review = m.payment_conditions;
+    const plain = (value: string) => value.replace(/[\r\n]/g, " ").replace(/\|/g, "\\|");
+    lines.push("", "## Payment conditions", "");
+    lines.push(`**${review.document_decision} (${review.basis} documents)** · Overall recommendation **${m.decision_label}**.`);
+    lines.push("This comparison uses the entered values. Telegraph receipts cover the supplier and shipping checks.");
+    for (const f of m.findings.filter((finding) => finding.checkId.startsWith("order:"))) {
+      const comparisons = f.facts?.comparisons as { field: string; expected: string; observed: string }[] | undefined;
+      const sources = f.facts?.sources as string[] | undefined;
+      lines.push("", `### ${f.title}`, "", f.summary);
+      if (!comparisons?.length) continue;
+      if (sources?.length) lines.push("", `Records: ${sources.map((source) => plain(source || "missing")).join(" · ")}`);
+      lines.push("", "| Field | Expected | Observed |", "| --- | --- | --- |");
+      for (const row of comparisons) {
+        lines.push(`| ${plain(row.field)} | ${plain(row.expected || "—")} | ${plain(row.observed || "—")} |`);
+      }
+    }
+  }
   lines.push("");
   lines.push("## Why");
   for (const r of m.reasons) lines.push(`- ${r}`);
@@ -149,6 +168,7 @@ export function renderMarkdown(m: Memo): string {
   const publicSources = new Set([
     ...m.findings.flatMap((f) => f.publicSource ? [f.publicSource] : []),
     ...(m.subject.fields["vessel-source"] ? [m.subject.fields["vessel-source"]] : []),
+    ...(m.payment_conditions && m.subject.fields["arrival-source"] ? [m.subject.fields["arrival-source"]] : []),
   ]);
   if (publicSources.size) {
     lines.push("", "## Public records", "", "The report signs the values supplied for comparison and their citations. Review the original records at the URLs below.");

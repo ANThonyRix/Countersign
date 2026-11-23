@@ -184,6 +184,42 @@ test("sourcing: an arrival record for another ship or port cannot clear a deadli
   assert.throws(() => normaliseSubject(selected, { ...selected.caseStudy, "arrival-source": "javascript:alert(1)" }), /must be an HTTPS URL/);
 });
 
+test("payment cases sign opposite documentary decisions and retain HOLD for unauthenticated originals", async () => {
+  const pack = getPack("commodities");
+  for (const scenario of ["hold", "proceed"] as const) {
+    const subject = normaliseSubject(pack, pack.paymentCases![scenario]);
+    const memo = await runPack(pack, subject, { account, budget: new Budget(0) });
+    assert.deepEqual(memo.payment_conditions, { basis: "illustrative", document_decision: scenario.toUpperCase() });
+    assert.equal(memo.decision_label, "HOLD");
+    const shipment = memo.findings.find((f) => f.checkId === "order:shipment");
+    assert.equal(shipment?.verdict, scenario === "hold" ? "flag" : "clear");
+    if (scenario === "hold") assert.match(shipment.summary, /expected TGHU1234567, found TGHU1234572/);
+    assert.equal((await verifyMemoSignature(memo)).digestMatches, true);
+    const changed = { ...memo, subject: { ...memo.subject, fields: { ...subject, "order-packet": "{}" } } };
+    assert.equal((await verifyMemoSignature(changed)).digestMatches, false);
+  }
+});
+
+test("payment conditions reject unrelated and missing records and apply an inclusive deadline", async () => {
+  const pack = getPack("commodities");
+  const baseline = pack.paymentCases!.proceed;
+  for (const { discharge, field, verdict } of [
+    { discharge: { voyage: "012W" }, field: "shipment", verdict: "flag" },
+    { discharge: { reference: "" }, field: "shipment", verdict: "unknown" },
+    { discharge: { dischargedOn: "2021-08-01" }, field: "deadline", verdict: "flag" },
+    { discharge: { dischargedOn: "2021-07-31" }, field: "deadline", verdict: "clear" },
+    { discharge: { dischargedOn: "2021-07-28" }, field: "deadline", verdict: "unknown" },
+    { discharge: { dischargedOn: "2021-02-30" }, field: "deadline", verdict: "unknown" },
+  ]) {
+    const packet = JSON.parse(baseline["order-packet"]);
+    Object.assign(packet.discharge, discharge);
+    const checks = await pack.plan({ ...baseline, "order-packet": JSON.stringify(packet) }, {});
+    const check = checks.find((item) => item.id === `order:${field}`);
+    assert.ok(check && "recordAssessment" in check);
+    assert.equal(check.recordAssessment.verdict, verdict);
+  }
+});
+
 test("break: malformed token is refused by the CLI before network access", () => {
   const result = spawnSync(process.execPath, ["--import", "tsx", "src/cli.ts", "run", "exchange", "--project", "Test", "--token", "0xBAD"], {
     cwd: ROOT, encoding: "utf8", timeout: 15_000, env: { ...process.env, AGENT_PRIVATE_KEY: generatePrivateKey() },

@@ -27,6 +27,7 @@ Fields are passed as --field value, e.g.
     --vessel "EVER GIVEN" --imo 9811000 --port Rotterdam
 Add --example to use the pack's built-in example subject.
 Use commodities --case-study for the historical cross-border sourcing case.
+Use commodities --payment-case hold or --payment-case proceed for the illustrative order comparison.
 `;
 
 const color = {
@@ -41,17 +42,22 @@ const verdictColor = { clear: color.green, flag: color.yellow, block: color.red,
 function subjectFrom(packId: string, argv: string[]) {
   const pack = getPack(packId);
   const options = Object.fromEntries(pack.fields.map((f) => [f.name, { type: "string" as const }]));
-  const { values } = parseArgs({ args: argv, options: { ...options, example: { type: "boolean" }, "case-study": { type: "boolean" }, "no-crosscheck": { type: "boolean" } }, strict: true });
+  const { values } = parseArgs({ args: argv, options: { ...options, example: { type: "boolean" }, "case-study": { type: "boolean" }, "payment-case": { type: "string" }, "no-crosscheck": { type: "boolean" } }, strict: true });
   if (values["case-study"] && (!pack.caseStudy || values.example)) {
     throw new Error("--case-study is available for commodities and cannot be used with --example");
   }
-  const defaults = values["case-study"] ? pack.caseStudy : values.example ? pack.example : undefined;
+  const paymentCase = values["payment-case"];
+  if (paymentCase !== undefined && (
+    (paymentCase !== "hold" && paymentCase !== "proceed") || !pack.paymentCases || values["case-study"] || values.example
+  )) throw new Error("--payment-case requires commodities and hold or proceed, without another example flag");
+  const paymentSubject = paymentCase === "hold" || paymentCase === "proceed" ? pack.paymentCases?.[paymentCase] : undefined;
+  const defaults = paymentSubject ?? (values["case-study"] ? pack.caseStudy : values.example ? pack.example : undefined);
   const raw = { ...defaults, ...stripFlags(values) };
   return { pack, subject: normaliseSubject(pack, raw), noCrosscheck: !!values["no-crosscheck"] };
 }
 
 function stripFlags(values: Record<string, unknown>) {
-  const { example: _e, "case-study": _c, "no-crosscheck": _n, ...rest } = values;
+  const { example: _e, "case-study": _c, "payment-case": _p, "no-crosscheck": _n, ...rest } = values;
   return rest as Record<string, string>;
 }
 
@@ -158,6 +164,9 @@ async function main() {
       console.log(color.bold(`${pack.title}: ${pack.subjectName(subject)}`));
       console.log(color.dim(`Budget $${config.maxUsdPerRun.toFixed(2)} per run, $${config.maxUsdPerDay.toFixed(2)} per day. Requests are public on the Telegraph feed.`));
       const memo = await runPack(pack, subject, { onEvent: printEvent, noCrosscheck });
+      if (memo.payment_conditions) {
+        console.log(`Payment conditions (${memo.payment_conditions.basis} documents): ${memo.payment_conditions.document_decision}. Overall recommendation: ${memo.decision_label}.`);
+      }
       console.log("");
       console.log(`Cost $${memo.cost.total_usd.toFixed(4)} over ${memo.cost.paid_calls} paid calls.`);
       console.log(`Memo ${memo.id} written to data/memos/. Verify with: npm run cs -- verify ${memo.id}`);

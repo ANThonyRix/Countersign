@@ -1,6 +1,29 @@
 import type { PackDefinition, PlannedCheck, PublicRecordCheck } from "../core/types.ts";
 import { registrationKey } from "../core/evaluators.ts";
 import * as c from "./checks.ts";
+import { illustrativeOrder, paymentChecks, paymentConditionReview } from "./procurement.ts";
+
+const historicalCase = {
+  seller: "Scientex Berhad",
+  jurisdiction: "Malaysia",
+  vessel: "EVER GIVEN",
+  imo: "9811000",
+  port: "Rotterdam",
+  cargo: "Packaging film (illustrative order)",
+  "load-port": "Tanjung Pelepas, Malaysia",
+  "voyage-departure": "2021-03-13",
+  "voyage-number": "011W",
+  carrier: "Evergreen Marine Corporation",
+  "vessel-manager": "Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership",
+  "vessel-source": "https://gcaptain.com/wp-content/uploads/2023/07/Final-Investigation-Report-Ever-Given-23-March-2021.pdf",
+  "seller-id": "196801000264",
+  "record-seller-id": "196801000264",
+  "supplier-source": "https://scientex.com.my/wp-content/uploads/2021/06/SBQ3FY2021.pdf",
+  "record-arrival": "2021-07-29",
+  "record-imo": "9811000",
+  "record-port": "Rotterdam",
+  "arrival-source": "https://www.ect.nl/en/news/news-feed/ever-given-arrived-at-ect-delta-terminal",
+};
 
 function supplierIdentity(s: Record<string, string>): PublicRecordCheck {
   const claimed = registrationKey(s["seller-id"] || "");
@@ -67,6 +90,7 @@ export const commoditiesPack: PackDefinition = {
     { name: "cargo", label: "Goods being sourced", type: "text", tradeDetail: true },
     { name: "load-port", label: "Loading port", type: "text", tradeDetail: true },
     { name: "voyage-departure", label: "Voyage departure date", type: "date", tradeDetail: true },
+    { name: "voyage-number", label: "Voyage number from shipping record", type: "text", tradeDetail: true },
     { name: "carrier", label: "Shipping line", type: "text", tradeDetail: true },
     { name: "vessel-manager", label: "Vessel manager", type: "text", tradeDetail: true },
     { name: "vessel-source", label: "Vessel or voyage record URL", type: "url", tradeDetail: true },
@@ -78,6 +102,10 @@ export const commoditiesPack: PackDefinition = {
     { name: "record-imo", label: "IMO matched to terminal record", type: "text", tradeDetail: true },
     { name: "record-port", label: "Port in terminal record", type: "text", tradeDetail: true },
     { name: "arrival-source", label: "Terminal record URL", type: "url", tradeDetail: true },
+    {
+      name: "order-packet", label: "Order, bill of lading and discharge records (JSON)", type: "textarea", tradeDetail: true,
+      help: "Load a payment example to see the record format. Use public or illustrative values only.",
+    },
   ],
   example: {
     seller: "Trafigura Pte Ltd",
@@ -87,28 +115,13 @@ export const commoditiesPack: PackDefinition = {
     port: "Rotterdam",
     document: "",
   },
-  caseStudy: {
-    seller: "Scientex Berhad",
-    jurisdiction: "Malaysia",
-    vessel: "EVER GIVEN",
-    imo: "9811000",
-    port: "Rotterdam",
-    cargo: "Packaging film (illustrative order)",
-    "load-port": "Tanjung Pelepas, Malaysia",
-    "voyage-departure": "2021-03-13",
-    carrier: "Evergreen Marine Corporation",
-    "vessel-manager": "Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership",
-    "vessel-source": "https://gcaptain.com/wp-content/uploads/2023/07/Final-Investigation-Report-Ever-Given-23-March-2021.pdf",
-    "seller-id": "196801000264",
-    "record-seller-id": "196801000264",
-    "supplier-source": "https://scientex.com.my/wp-content/uploads/2021/06/SBQ3FY2021.pdf",
-    "arrival-deadline": "2021-04-15",
-    "record-arrival": "2021-07-29",
-    "record-imo": "9811000",
-    "record-port": "Rotterdam",
-    "arrival-source": "https://www.ect.nl/en/news/news-feed/ever-given-arrived-at-ect-delta-terminal",
+  caseStudy: { ...historicalCase, "arrival-deadline": "2021-04-15" },
+  paymentCases: {
+    hold: { ...historicalCase, "order-packet": illustrativeOrder("hold") },
+    proceed: { ...historicalCase, "order-packet": illustrativeOrder("proceed") },
   },
   subjectName: (s) => `${s.seller} / ${s.vessel}`,
+  reviewPaymentConditions: paymentConditionReview,
   plan(s) {
     const checks: PlannedCheck[] = [
       c.registryCheck(s.seller, s.jurisdiction, s["seller-id"] || undefined),
@@ -121,8 +134,21 @@ export const commoditiesPack: PackDefinition = {
     if (s["vessel-manager"]) checks.push(c.sanctionsCheck(s["vessel-manager"], "vessel manager"));
     if (s.document?.trim()) checks.push(c.documentCheck(s.document.trim(), "bill of lading"));
     if (s["seller-id"] || s["record-seller-id"] || s["supplier-source"]) checks.push(supplierIdentity(s));
-    if (s["arrival-deadline"] || s["record-arrival"] || s["arrival-source"]) checks.push(arrivalDeadline(s));
-    if (s.cargo) {
+    if (s["arrival-deadline"] || (!s["order-packet"] && (s["record-arrival"] || s["arrival-source"]))) checks.push(arrivalDeadline(s));
+    if (s["order-packet"]) {
+      checks.push(...paymentChecks(s));
+      checks.push({
+        id: "order:document-origin",
+        title: "Authoritative order documents",
+        why: "A document comparison checks consistency. Payment approval requires authenticated originals.",
+        critical: true,
+        evidenceKind: "order-document",
+        recordAssessment: {
+          verdict: "unknown",
+          summary: "Obtain authenticated originals from the buyer, carrier and terminal before releasing payment.",
+        },
+      });
+    } else if (s.cargo) {
       checks.push({
         id: "record:cargo-link",
         title: "Cargo linked to the voyage",

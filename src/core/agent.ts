@@ -33,13 +33,18 @@ export function planContext() {
   };
 }
 
+function checkIntent(check: PlannedCheck): string {
+  if ("input" in check) return check.intent;
+  return check.evidenceKind === "order-document" ? "ORDER_DOCUMENT" : "PUBLIC_RECORD";
+}
+
 /** Free dry run: plans the checks and asks the node for a price on each, without paying. */
 export async function dryRun(pack: PackDefinition, subject: Record<string, string>) {
   const checks = await pack.plan(subject, planContext());
   const quotes = await Promise.all(
     checks.map(async (c) => {
       if ("recordAssessment" in c) {
-        return { id: c.id, title: c.title, intent: "PUBLIC_RECORD", critical: c.critical, ok: true, priceUsd: 0, local: true };
+        return { id: c.id, title: c.title, intent: checkIntent(c), critical: c.critical, ok: true, priceUsd: 0, local: true };
       }
       const q = await quote(c.input).catch((err: Error) => ({ ok: false, status: 0, code: err.message }) as Awaited<ReturnType<typeof quote>>);
       return { id: c.id, title: c.title, intent: c.intent, critical: !!c.critical, ok: q.ok, priceUsd: q.priceUsd, status: q.status, code: q.code, problems: q.problems };
@@ -282,7 +287,7 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
   if (paidChecks.length && budget.canAfford(10_000n)) await requireFundedWallet(account.address);
   emit({
     type: "plan",
-    checks: checks.map((c) => ({ id: c.id, title: c.title, intent: "input" in c ? c.intent : "PUBLIC_RECORD", critical: !!c.critical })),
+    checks: checks.map((c) => ({ id: c.id, title: c.title, intent: checkIntent(c), critical: !!c.critical })),
     estimateUsd: paidChecks.length * 0.01,
   });
 
@@ -294,6 +299,7 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
 
   const order = [...runner.findings.keys()];
   const findings = order.map((id) => runner.findings.get(id)!);
+  const paymentConditions = pack.reviewPaymentConditions?.(subject, findings);
   const policy = decide(findings);
   const label = pack.labels[policy.decision];
   emit({ type: "decision", decision: policy.decision, label, reasons: policy.reasons });
@@ -311,6 +317,7 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
       decision: policy.decision,
       decision_label: label,
       reasons: policy.reasons,
+      ...(paymentConditions ? { payment_conditions: paymentConditions } : {}),
       findings,
       evidence: runner.evidence,
       coverage: policy.coverage,

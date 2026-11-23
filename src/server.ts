@@ -93,6 +93,7 @@ function packView() {
     fields: p.fields,
     example: p.example,
     caseStudy: p.caseStudy,
+    paymentCases: p.paymentCases,
   }));
 }
 

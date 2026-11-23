@@ -1,5 +1,7 @@
 # Cross-border sourcing walkthrough
 
+To see the payment comparison for a specific order, see [Procurement payment review](procurement-payment.md).
+
 A buyer evaluating an overseas packaging supplier needs to know whether the parties and shipping plan match the paperwork before releasing payment. This example models a marketplace sourcing decision that could arise on Alibaba.com or in another international procurement workflow.
 
 The purchase, packaging-film cargo and buyer deadline below are illustrative. The companies, vessel, voyage and terminal arrival are drawn from public records. The sources do not establish that Scientex supplied cargo on this voyage or that Alibaba.com or Cainiao handled the shipment.

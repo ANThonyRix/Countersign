@@ -1,0 +1,796 @@
+{
+  "memo_version": 1,
+  "id": "commodities-2026-11-23-ed5ad604",
+  "created_at": "2026-11-23T14:50:54.657Z",
+  "pack": "commodities",
+  "mission": "Commodities: cargo and counterparty",
+  "subject": {
+    "name": "Scientex Berhad / EVER GIVEN",
+    "fields": {
+      "seller": "Scientex Berhad",
+      "jurisdiction": "Malaysia",
+      "vessel": "EVER GIVEN",
+      "imo": "9811000",
+      "port": "Rotterdam",
+      "document": "",
+      "cargo": "Packaging film (illustrative order)",
+      "load-port": "Tanjung Pelepas, Malaysia",
+      "voyage-departure": "2021-03-13",
+      "voyage-number": "011W",
+      "carrier": "Evergreen Marine Corporation",
+      "vessel-manager": "Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership",
+      "vessel-source": "https://gcaptain.com/wp-content/uploads/2023/07/Final-Investigation-Report-Ever-Given-23-March-2021.pdf",
+      "seller-id": "196801000264",
+      "record-seller-id": "196801000264",
+      "supplier-source": "https://scientex.com.my/wp-content/uploads/2021/06/SBQ3FY2021.pdf",
+      "arrival-deadline": "",
+      "record-arrival": "2021-07-29",
+      "record-imo": "9811000",
+      "record-port": "Rotterdam",
+      "arrival-source": "https://www.ect.nl/en/news/news-feed/ever-given-arrived-at-ect-delta-terminal",
+      "order-packet": "{\n  \"mode\": \"illustrative\",\n  \"purchaseOrder\": {\n    \"reference\": \"Illustrative buyer purchase order and payment terms\",\n    \"id\": \"DEMO-PO-011W\",\n    \"sellerRegistration\": \"196801000264\",\n    \"sku\": \"FILM-01\",\n    \"quantityKg\": 1000,\n    \"dischargePort\": \"Rotterdam\",\n    \"dischargeBy\": \"2021-07-31\"\n  },\n  \"billOfLading\": {\n    \"reference\": \"Illustrative carrier bill of lading\",\n    \"id\": \"DEMO-BL-011W\",\n    \"orderId\": \"DEMO-PO-011W\",\n    \"sellerRegistration\": \"196801000264\",\n    \"sku\": \"FILM-01\",\n    \"quantityKg\": 1000,\n    \"container\": \"TGHU1234567\",\n    \"imo\": \"9811000\",\n    \"voyage\": \"011W\"\n  },\n  \"discharge\": {\n    \"reference\": \"Illustrative terminal discharge record\",\n    \"billOfLadingId\": \"DEMO-BL-011W\",\n    \"container\": \"TGHU1234567\",\n    \"imo\": \"9811000\",\n    \"voyage\": \"011W\",\n    \"port\": \"Rotterdam\",\n    \"dischargedOn\": \"2021-07-30\"\n  }\n}"
+    }
+  },
+  "decision": "REVIEW",
+  "decision_label": "HOLD",
+  "reasons": [
+    "No usable answer: Authoritative order documents",
+    "No usable answer: Registry lookup: Scientex Berhad (Malaysia)"
+  ],
+  "payment_conditions": {
+    "basis": "illustrative",
+    "document_decision": "PROCEED"
+  },
+  "findings": [
+    {
+      "checkId": "vessel:9811000",
+      "title": "Vessel telemetry: EVER GIVEN (IMO 9811000)",
+      "why": "Confirms the named ship exists, is where the seller says, and has no AIS dark periods.",
+      "verdict": "clear",
+      "summary": "Vessel telemetry: no risk indicators in the miner's answer (raw answer, heuristic scan).",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev1"
+      ],
+      "facts": {
+        "routed_intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+        "excerpt": "{\"answer\":\"No ship can be identified from this request: a ship is named by its 9 digit MMSI (for example 230629000) or its 7 digit IMO number. Coverage is the AIS network around Finland and the Baltic, so no details are given rather than guessed.\",\"call_sign\":null,\"canonical\":\"vessel-telemetry:unknown\",\"confidence\":0.6,\"course_deg\":null,\"destination\":null,\"draught_m\":null,\"eta\":null,\"found\":false,\"heading_deg\":null,\"imo\":null,\"latitude\":null,\"longitude\":null,\"mmsi\":null,\"name\":null,\"navigational_status\":null,\"position_time\":null,\"reason\":\"No ship can be identified from this request: a ship is "
+      }
+    },
+    {
+      "checkId": "sanctions:seller:scientex-berhad",
+      "title": "Sanctions screen: Scientex Berhad",
+      "why": "A sanctioned seller ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Scientex Berhad\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev2"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "sanctions:vessel:ever-given",
+      "title": "Sanctions screen: EVER GIVEN",
+      "why": "A sanctioned vessel ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"EVER GIVEN\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev3"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "port:rotterdam",
+      "title": "Port congestion: Rotterdam",
+      "why": "Congestion at the discharge port drives delay and demurrage exposure.",
+      "verdict": "unknown",
+      "summary": "Congestion at Rotterdam: the miner's answer did not contain a usable `congestion_level` (status: missing).",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev4"
+      ]
+    },
+    {
+      "checkId": "record:supplier-id",
+      "title": "Supplier registration number",
+      "why": "Compare the supplier's claimed registration number with a cited public record supplied for this review.",
+      "verdict": "clear",
+      "summary": "Claimed registration 196801000264 matches the cited number 196801000264.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "publicSource": "https://scientex.com.my/wp-content/uploads/2021/06/SBQ3FY2021.pdf"
+    },
+    {
+      "checkId": "order:booking",
+      "title": "Order matches bill of lading",
+      "why": "Reconcile the values in the supplied records for this order.",
+      "verdict": "clear",
+      "summary": "The required values match across the cited records.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "comparisons": [
+          {
+            "field": "Order number",
+            "expected": "DEMO-PO-011W",
+            "observed": "DEMO-PO-011W"
+          },
+          {
+            "field": "Seller registration number",
+            "expected": "196801000264",
+            "observed": "196801000264"
+          },
+          {
+            "field": "Bill of lading seller",
+            "expected": "196801000264",
+            "observed": "196801000264"
+          },
+          {
+            "field": "Product SKU",
+            "expected": "FILM-01",
+            "observed": "FILM-01"
+          },
+          {
+            "field": "Quantity (kg)",
+            "expected": "1000",
+            "observed": "1000"
+          }
+        ],
+        "sources": [
+          "Illustrative buyer purchase order and payment terms",
+          "Illustrative carrier bill of lading"
+        ]
+      }
+    },
+    {
+      "checkId": "order:shipment",
+      "title": "Booked container matches discharge record",
+      "why": "Reconcile the values in the supplied records for this order.",
+      "verdict": "clear",
+      "summary": "The required values match across the cited records.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "comparisons": [
+          {
+            "field": "Bill of lading number",
+            "expected": "DEMO-BL-011W",
+            "observed": "DEMO-BL-011W"
+          },
+          {
+            "field": "Container number",
+            "expected": "TGHU1234567",
+            "observed": "TGHU1234567"
+          },
+          {
+            "field": "Booked vessel IMO",
+            "expected": "9811000",
+            "observed": "9811000"
+          },
+          {
+            "field": "Discharge vessel IMO",
+            "expected": "9811000",
+            "observed": "9811000"
+          },
+          {
+            "field": "Booked voyage number",
+            "expected": "011W",
+            "observed": "011W"
+          },
+          {
+            "field": "Discharge voyage number",
+            "expected": "011W",
+            "observed": "011W"
+          },
+          {
+            "field": "Agreed discharge port",
+            "expected": "ROTTERDAM",
+            "observed": "ROTTERDAM"
+          },
+          {
+            "field": "Recorded discharge port",
+            "expected": "ROTTERDAM",
+            "observed": "ROTTERDAM"
+          }
+        ],
+        "sources": [
+          "Illustrative carrier bill of lading",
+          "Illustrative terminal discharge record",
+          "https://gcaptain.com/wp-content/uploads/2023/07/Final-Investigation-Report-Ever-Given-23-March-2021.pdf"
+        ]
+      }
+    },
+    {
+      "checkId": "order:deadline",
+      "title": "Container discharged by payment deadline",
+      "why": "The buyer requires discharge of the matched container by the agreed calendar date at the destination port.",
+      "verdict": "clear",
+      "summary": "Discharged on 2021-07-30, by the required 2021-07-31.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "comparisons": [
+          {
+            "field": "Discharge by",
+            "expected": "2021-07-31",
+            "observed": "2021-07-30"
+          }
+        ],
+        "sources": [
+          "Illustrative buyer purchase order and payment terms",
+          "Illustrative terminal discharge record"
+        ]
+      }
+    },
+    {
+      "checkId": "order:document-origin",
+      "title": "Authoritative order documents",
+      "why": "A document comparison checks consistency. Payment approval requires authenticated originals.",
+      "verdict": "unknown",
+      "summary": "Obtain authenticated originals from the buyer, carrier and terminal before releasing payment.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": []
+    },
+    {
+      "checkId": "sanctions:shipping-line:evergreen-marine-corporation",
+      "title": "Sanctions screen: Evergreen Marine Corporation",
+      "why": "A sanctioned shipping line ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Evergreen Marine Corporation\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev5"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null
+      }
+    },
+    {
+      "checkId": "sanctions:vessel-manager:bernhard-schulte-shipmanagement-hong-kon",
+      "title": "Sanctions screen: Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership",
+      "why": "A sanctioned vessel manager ends the deal. Screened against consolidated sanctions lists.",
+      "verdict": "clear",
+      "summary": "No sanctions match for \"Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership\".",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev6"
+      ],
+      "facts": {
+        "matched": false,
+        "lists": null,
+        "matches": null,
+        "match_score": 0.75
+      }
+    },
+    {
+      "checkId": "registry:malaysia:scientex-berhad",
+      "title": "Registry lookup: Scientex Berhad (Malaysia)",
+      "why": "Confirms the legal entity exists and is in good standing in Malaysia.",
+      "verdict": "unknown",
+      "summary": "The miner did not identify a registry record for \"Scientex Berhad\" in Malaysia.",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev7",
+        "ev8"
+      ],
+      "facts": {
+        "legal_name": null,
+        "registration_id": null,
+        "jurisdiction": "Malaysia",
+        "registered_address": null,
+        "incorporated": null,
+        "active": false
+      }
+    },
+    {
+      "checkId": "news:registry-malaysia:scientex-berhad",
+      "title": "Adverse media: Scientex Berhad (registry malaysia)",
+      "why": "Registry record missing or inactive in Malaysia: look for dissolution, liquidation or shell-company reporting.",
+      "verdict": "unknown",
+      "summary": "No usable search result identifies \"Scientex Berhad\".",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev9"
+      ],
+      "escalatedFrom": "registry:malaysia:scientex-berhad"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev1",
+      "checkId": "vessel:9811000",
+      "role": "primary",
+      "intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+      "routedIntent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x03e4055636f9ffd6dc7365ab99612dddd4b5821aa0bc503e8eda696195e7977d",
+      "receipt": {
+        "receipt_hash": "0xfb4c9c2900346b8e1385d38631090dbf6a4266075be9aec1a83b78a03032f60d",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445423
+      },
+      "costUsd": 0.01,
+      "durationMs": 785,
+      "resultShape": "raw",
+      "result": {
+        "answer": "No ship can be identified from this request: a ship is named by its 9 digit MMSI (for example 230629000) or its 7 digit IMO number. Coverage is the AIS network around Finland and the Baltic, so no details are given rather than guessed.",
+        "call_sign": null,
+        "canonical": "vessel-telemetry:unknown",
+        "confidence": 0.6,
+        "course_deg": null,
+        "destination": null,
+        "draught_m": null,
+        "eta": null,
+        "found": false,
+        "heading_deg": null,
+        "imo": null,
+        "latitude": null,
+        "longitude": null,
+        "mmsi": null,
+        "name": null,
+        "navigational_status": null,
+        "position_time": null,
+        "reason": "No ship can be identified from this request: a ship is named by its 9 digit MMSI (for example 230629000) or its 7 digit IMO number. Coverage is the AIS network around Finland and the Baltic, so no details are given rather than guessed.",
+        "ship_type": null,
+        "source": "Digitraffic AIS (Fintraffic)",
+        "speed_knots": null,
+        "status": "not_found",
+        "summary": "No ship can be identified from this request: a ship is named by its 9 digit MMSI (for example 230629000) or its 7 digit IMO number. Coverage is the AIS network around Finland and the Baltic, so no details are given rather than guessed."
+      },
+      "reasoning": "Intent: miner txlens given by the caller\nMiner: The user is asking for vessel telemetry information for the vessel 'EVER GIVEN'. The TxLens miner has an endpoint `/vessel-telemetry` that serves the `VESSEL_TELEMETRY_VERIFY_GENERAL` intent and accepts a `query` parameter which should contain the full question. The question is constructed to include the vessel name as requested by the user and the intent.",
+      "at": "2026-11-23T14:50:04.732Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev2",
+      "checkId": "sanctions:seller:scientex-berhad",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x7ed98ef1ff0194de678bbfaedcf1973a6f977ae25970fee94692e98048a8c1c6",
+      "receipt": {
+        "receipt_hash": "0xb2db25af885bbc1799d7263d083e2ccb82cec468d973216dd59087c5998763f4",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445427
+      },
+      "costUsd": 0.01,
+      "durationMs": 1033,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "Scientex Berhad",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking to screen an entity against sanctions lists, which falls under the SANCTIONS_SCREENING_MATCH_GENERAL intent. The TxLens miner has an endpoint /sanctions-screening that serves this intent. The endpoint requires a 'query' parameter, which should be populated with the entity name provided in the user's request.",
+      "at": "2026-11-23T14:50:07.863Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev3",
+      "checkId": "sanctions:vessel:ever-given",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x70e78c454055fde0a79be08c23bb3b47831613b6db4c64dfff5b33c7d496a598",
+      "receipt": {
+        "receipt_hash": "0x96844b908d8ab6337e66221afec4739c50905e9174b1613908caf8c31bc10b09",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445427
+      },
+      "costUsd": 0.01,
+      "durationMs": 1004,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "EVER GIVEN",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking to screen a name against sanctions lists, which falls under the SANCTIONS_SCREENING_MATCH_GENERAL intent. The TxLens miner has an endpoint /sanctions-screening that serves this intent. The 'name' parameter from the user's input is mapped to the 'query' field as required by the miner's configuration for this endpoint.",
+      "at": "2026-11-23T14:50:08.568Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev4",
+      "checkId": "port:rotterdam",
+      "role": "primary",
+      "intent": "LIVE_PORT_CONGESTION_GENERAL",
+      "routedIntent": "LIVE_PORT_CONGESTION_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x2c49298b5bab975e5c63114a498b28985ebd57a687d4a86889f562711c74eca4",
+      "receipt": {
+        "receipt_hash": "0x0edd637c86d0d289ed2355c0c67811b6de94eedd552242190fab29212ed7b7c2",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "LIVE_PORT_CONGESTION_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445429
+      },
+      "costUsd": 0.01,
+      "durationMs": 313,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "port": "ok",
+        "vessels_waiting": "missing",
+        "wait_hours": "missing",
+        "congestion_level": "missing",
+        "as_of": "ok"
+      },
+      "result": {
+        "port": "Rotterdam",
+        "vessels_waiting": null,
+        "wait_hours": null,
+        "congestion_level": null,
+        "as_of": "2026-11-23T14:50:26.456Z"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking about port congestion for Rotterdam, which directly maps to the LIVE_PORT_CONGESTION_GENERAL intent. The TxLens miner's /port-congestion endpoint is designed for this intent and requires a 'query' parameter. The provided parameter 'port: \"Rotterdam\"' is used to construct the verbatim query string for the miner.",
+      "at": "2026-11-23T14:50:10.406Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev5",
+      "checkId": "sanctions:shipping-line:evergreen-marine-corporation",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0xa219ffb074f91da3d6287a591be76956cca4fae19b9948c224545757bb569e0f",
+      "receipt": {
+        "receipt_hash": "0x1abe66083b40d3ff4d8add82d5233eccb4a14e74eb38333d2f9445764e74b34e",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445433
+      },
+      "costUsd": 0.01,
+      "durationMs": 1120,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "missing"
+      },
+      "result": {
+        "name": "Evergreen Marine Corporation",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking to screen a company name against sanctions lists, which falls under the SANCTIONS_SCREENING_MATCH_GENERAL intent. The TxLens miner has an endpoint /sanctions-screening that serves this intent. The endpoint requires a 'query' parameter, which should be populated with the provided company name 'Evergreen Marine Corporation'.",
+      "at": "2026-11-23T14:50:14.423Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev6",
+      "checkId": "sanctions:vessel-manager:bernhard-schulte-shipmanagement-hong-kon",
+      "role": "primary",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "routedIntent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x579ca0c0aa0b5da0412269c2a66816ecb92976ef9908a05fe3c9321c26f2446c",
+      "receipt": {
+        "receipt_hash": "0xba01d75707401295f3ef635bd73c8f6ea41ac318318c0e1b86816eb539413c45",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445434
+      },
+      "costUsd": 0.01,
+      "durationMs": 2149,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "missing",
+        "match_score": "ok"
+      },
+      "result": {
+        "name": "Bernhard Schulte Shipmanagement (Hong Kong) Limited Partnership",
+        "matched": false,
+        "matches": null,
+        "lists": null,
+        "match_score": 0.75
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking to screen a name against sanctions lists, which falls under the SANCTIONS_SCREENING_MATCH_GENERAL intent. The TxLens miner has an endpoint at /sanctions-screening that serves this intent. The endpoint requires a 'query' parameter, which should be populated with the name provided in the <PARAMS> tags.",
+      "at": "2026-11-23T14:50:15.365Z",
+      "verdict": "clear",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev7",
+      "checkId": "registry:malaysia:scientex-berhad",
+      "role": "primary",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0xccdbeecb79fd51f76c1131ccecdbbb44dba19605b93d5e11bdf79e8fb79edd2c",
+      "receipt": {
+        "receipt_hash": "0x6970dc422cc1609de12fd2fbcfcc7b086805272681b88a333d36c01b833220d6",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6121",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445442
+      },
+      "costUsd": 0.01,
+      "durationMs": 3684,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "missing",
+        "registration_id": "missing",
+        "active": "ok",
+        "jurisdiction": "ok",
+        "registered_address": "missing",
+        "incorporated": "missing"
+      },
+      "result": {
+        "legal_name": null,
+        "registration_id": null,
+        "active": false,
+        "jurisdiction": "Malaysia",
+        "registered_address": null,
+        "incorporated": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: The user is asking for information about a company's registration status and address, which falls under the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. The TxLens miner's /corporate-registry endpoint is designed for this purpose and accepts a 'query' parameter which can take the full question. The provided company and jurisdiction are used to construct a natural language query for the miner.",
+      "at": "2026-11-23T14:50:22.867Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev8",
+      "checkId": "registry:malaysia:scientex-berhad",
+      "role": "crosscheck",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "20260828",
+      "minerName": "PREFLIGHT Infrastructure Signals",
+      "signalHash": "0x7053c12b46bca151953185a05ada6917b924b03de80ff3821577ce808f3bb6a1",
+      "receipt": {
+        "receipt_hash": "0x4710d1ce7280e540ef7ce2e6a8ee0e7c4777535259bdf606cd688b694c05cf49",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "5311",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445450
+      },
+      "costUsd": 0.01,
+      "durationMs": 945,
+      "resultShape": "raw",
+      "result": {
+        "active": null,
+        "checked_at": "2026-11-23T14:50:48.146Z",
+        "confidence": 0.75,
+        "entity_status": null,
+        "found": false,
+        "incorporated": null,
+        "jurisdiction": null,
+        "legal_name": null,
+        "lei": null,
+        "reason": "No legal entity named \"Scientex Berhad\" in Malaysia holds an LEI in GLEIF's index.",
+        "registered_address": null,
+        "registration_id": null,
+        "registration_status": null,
+        "registry": null,
+        "source": "GLEIF LEI index",
+        "verdict": "not_found"
+      },
+      "reasoning": "Intent: miner a1-preflight given by the caller\nMiner: The user is asking for corporate registry information for a specific company and jurisdiction. The PREFLIGHT Infrastructure Signals miner has an endpoint '/company' that serves the CORPORATE_REGISTRY_LOOKUP_GENERAL intent and accepts 'company' and 'jurisdiction' as parameters. The 'query' parameter is required and should contain the full question verbatim, which is constructed from the provided company and jurisdiction.",
+      "at": "2026-11-23T14:50:31.118Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev9",
+      "checkId": "news:registry-malaysia:scientex-berhad",
+      "role": "primary",
+      "intent": "NEWS_SEARCH_GENERAL",
+      "routedIntent": "NEWS_SEARCH_GENERAL",
+      "minerId": "302",
+      "minerName": "ChainSight — Universal Intelligence & Data Oracle",
+      "signalHash": "0xe0fa31488c87d55badee078fbd8c3d79c50bb72b414fd86556a9517e860522fd",
+      "receipt": {
+        "receipt_hash": "0x9b143d03043f92bf4af77b8028b6904c86442e873b00ffe35ddaddc2117f7812",
+        "rail": "escrow",
+        "payer": "0x77301a935d97f9c08d1f50829060b0eb31346d5e",
+        "miner": "6119",
+        "intent": "NEWS_SEARCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 44,
+        "settlement": "epoch",
+        "chain": "telegraph",
+        "timestamp": 1795445470
+      },
+      "costUsd": 0.01,
+      "durationMs": 3230,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "answer": "ok",
+        "result_count": "ok",
+        "sources": "ok",
+        "brief": "ok"
+      },
+      "result": {
+        "answer": "Recent coverage of Scientex Berhad Malaysia dissolved OR liquidation OR shell company OR fraud from the last 30 days includes: \"Shell Starts Gas Production from Rosmari-Marjoram Fields Offshore Malaysia\" (egyptoil-gas.com, 17 November 2026); \"BDSX Investors Have Opportunity to Join Biodesix, Inc. Fraud Investigation with SBS Law\" (wgem.marketminute.com, 22 November 2026); \"61,642 Shares in Standex International Corporation $SXI Acquired by Conestoga Capital Advisors LLC\" (themarketsdaily.com, 5 November 2026); \"Standex International (NYSE:SXI) Stock: Insider Charles Cannon, Jr. Sells 908 Shares\" (themarketsdaily.com, 5 November 2026).",
+        "result_count": 4,
+        "sources": [
+          "egyptoil-gas.com",
+          "wgem.marketminute.com",
+          "themarketsdaily.com"
+        ],
+        "brief": "Recent coverage of Scientex Berhad Malaysia dissolved OR liquidation OR shell company OR fraud from the last 30 days includes: \"Shell Starts Gas Production from Rosmari-Marjoram Fields Offshore Malaysia\" (egyptoil-gas.com, 17 November 2026); \"BDSX Investors Have Opportunity to Join Biodesix, Inc. Fraud Investigation with SBS Law\" (wgem.marketminute.com, 22 November 2026); \"61,642 Shares in Standex International Corporation $SXI Acquired by Conestoga Capital Advisors LLC\" (themarketsdaily.com, 5 November 2026); \"Standex International (NYSE:SXI) Stock: Insider Charles Cannon, Jr. Sells 908 Shares\" (themarketsdaily.com, 5 November 2026)."
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: input schema v3 mapped in code to POST /news",
+      "at": "2026-11-23T14:50:51.351Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    }
+  ],
+  "coverage": {
+    "total": 13,
+    "answered": 9,
+    "unknown": 4,
+    "skipped": 0
+  },
+  "cost": {
+    "total_usd": 0.09,
+    "paid_calls": 9,
+    "budget_usd": 0.25,
+    "per_finding_usd": 0.006923
+  },
+  "network": {
+    "node": "https://devnode.telegraphprotocol.com",
+    "chain": "eip155:11155111",
+    "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17"
+  },
+  "agent": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+  "digest": "0x93accd9442cb428838351f388011fd9af97bce1a31eea1b4cd6b7a33e04c2f60",
+  "signature": "0x0c9cc84dbeadf6e6337b312c91d7de05c8562d3d3d0d742b41229a251af4241330fe358f0512249276d7e7841054f4897bc39f8449c848c095a45a1736e338861b"
+}

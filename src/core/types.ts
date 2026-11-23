@@ -8,6 +8,11 @@ export type Corroboration = "single" | "confirmed" | "disputed" | "not_needed";
 
 export type Decision = "GO" | "REVIEW" | "STOP";
 
+export interface PaymentConditionReview {
+  basis: "illustrative" | "supplied";
+  document_decision: "HOLD" | "PROCEED";
+}
+
 export interface Assessment {
   verdict: Verdict;
   summary: string;
@@ -79,6 +84,7 @@ export interface PublicRecordCheck {
   why: string;
   critical: boolean;
   recordAssessment: Assessment;
+  evidenceKind?: "order-document";
   publicSource?: string;
 }
 
@@ -106,6 +112,8 @@ export interface PackDefinition {
   fields: PackField[];
   example: Record<string, string>;
   caseStudy?: Record<string, string>;
+  paymentCases?: Record<"hold" | "proceed", Record<string, string>>;
+  reviewPaymentConditions?(subject: Record<string, string>, findings: Finding[]): PaymentConditionReview | undefined;
   subjectName(subject: Record<string, string>): string;
   plan(subject: Record<string, string>, ctx: PlanContext): Promise<PlannedCheck[]> | PlannedCheck[];
 }
