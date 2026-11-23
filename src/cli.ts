@@ -5,7 +5,7 @@ import { dryRun, runPack } from "./core/agent.ts";
 import { daySpend } from "./core/budget.ts";
 import { loadMemo, renderMarkdown, verifyMemoSignature, type Memo } from "./core/memo.ts";
 import type { AgentEvent } from "./core/types.ts";
-import { mintTestUsdc, walletStatus } from "./core/wallet.ts";
+import { depositTestUsdc, mintTestUsdc, walletStatus } from "./core/wallet.ts";
 import { getPack, normaliseSubject, packs } from "./packs/index.ts";
 import { verifySignal } from "./telegraph/client.ts";
 
@@ -15,6 +15,7 @@ Usage: npm run cs -- <command> [options]
 
   wallet                         Agent address, Sepolia ETH, test USDC, escrow credit
   mint [--amount 10]             Mint Telegraph test USDC to the agent wallet (needs Sepolia ETH)
+  escrow:deposit --amount 0.25   Fund Telegraph escrow with Sepolia test USDC
   packs                          List diligence packs and their fields
   plan <pack> [fields]           Free dry run: plan the checks and get a price quote for each
   run <pack> [fields]            Run the agent for real: pays per check, writes a signed memo
@@ -25,6 +26,7 @@ Fields are passed as --field value, e.g.
   npm run cs -- run commodities --seller "Trafigura Pte Ltd" --jurisdiction Singapore \\
     --vessel "EVER GIVEN" --imo 9811000 --port Rotterdam
 Add --example to use the pack's built-in example subject.
+Use commodities --case-study for the historical cross-border sourcing case.
 `;
 
 const color = {
@@ -39,13 +41,17 @@ const verdictColor = { clear: color.green, flag: color.yellow, block: color.red,
 function subjectFrom(packId: string, argv: string[]) {
   const pack = getPack(packId);
   const options = Object.fromEntries(pack.fields.map((f) => [f.name, { type: "string" as const }]));
-  const { values } = parseArgs({ args: argv, options: { ...options, example: { type: "boolean" }, "no-crosscheck": { type: "boolean" } }, strict: true });
-  const raw = values.example ? { ...pack.example, ...stripFlags(values) } : stripFlags(values);
+  const { values } = parseArgs({ args: argv, options: { ...options, example: { type: "boolean" }, "case-study": { type: "boolean" }, "no-crosscheck": { type: "boolean" } }, strict: true });
+  if (values["case-study"] && (!pack.caseStudy || values.example)) {
+    throw new Error("--case-study is available for commodities and cannot be used with --example");
+  }
+  const defaults = values["case-study"] ? pack.caseStudy : values.example ? pack.example : undefined;
+  const raw = { ...defaults, ...stripFlags(values) };
   return { pack, subject: normaliseSubject(pack, raw), noCrosscheck: !!values["no-crosscheck"] };
 }
 
 function stripFlags(values: Record<string, unknown>) {
-  const { example: _e, "no-crosscheck": _n, ...rest } = values;
+  const { example: _e, "case-study": _c, "no-crosscheck": _n, ...rest } = values;
   return rest as Record<string, string>;
 }
 
@@ -121,6 +127,12 @@ async function main() {
       console.log(`Minted ${values.amount} test USDC: https://sepolia.etherscan.io/tx/${hash}`);
       break;
     }
+    case "escrow:deposit": {
+      const { values } = parseArgs({ args: rest, options: { amount: { type: "string" } } });
+      const hash = await depositTestUsdc(Number(values.amount));
+      console.log(`Deposited ${values.amount} test USDC: https://sepolia.etherscan.io/tx/${hash}`);
+      break;
+    }
     case "packs":
       for (const p of Object.values(packs)) {
         console.log(color.bold(`${p.id}`) + `  ${p.mission}`);
@@ -138,7 +150,7 @@ async function main() {
         if (c.problems) console.log(color.red(`      ${JSON.stringify(c.problems)}`));
       }
       console.log(`Estimated cost $${result.estimate.baseUsd.toFixed(4)}, up to $${result.estimate.worstCaseUsd.toFixed(4)} with cross-checks. Run budget $${result.estimate.budgetUsd.toFixed(2)}.`);
-      console.log(color.dim("Nothing was paid. The node quoted each request before payment."));
+      console.log(color.dim("Nothing was paid. Telegraph quotes were requested for miner checks."));
       break;
     }
     case "run": {

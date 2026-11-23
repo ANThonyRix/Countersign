@@ -40,6 +40,7 @@ export interface PaymentQuote {
   asset?: string;
   amount: string;
   payTo: string;
+  extra?: { message?: string; resource?: string };
 }
 
 export interface MinerInfo {

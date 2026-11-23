@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { recoverMessageAddress } from "viem";
 import type { PackDefinition } from "../src/core/types.ts";
 
 // Every external request is intercepted. The key and ledger exist only for this test process.
@@ -12,10 +13,11 @@ const dir = mkdtempSync(path.join(tmpdir(), "countersign-break-"));
 process.env.COUNTERSIGN_DATA_DIR = dir;
 process.env.TELEGRAPH_NODE = "https://telegraph.invalid";
 process.env.SEPOLIA_RPC = "https://rpc.invalid";
+process.env.TELEGRAPH_PAYMENT_RAIL = "exact";
 const { config, ROOT } = await import("../src/config.ts");
 const { Budget, daySpend } = await import("../src/core/budget.ts");
 const { ask, computeSignalHash, quote } = await import("../src/telegraph/client.ts");
-const { runPack } = await import("../src/core/agent.ts");
+const { dryRun, runPack } = await import("../src/core/agent.ts");
 const { verifyMemoSignature, loadMemo } = await import("../src/core/memo.ts");
 const { getPack, normaliseSubject } = await import("../src/packs/index.ts");
 const { sanctionsCheck } = await import("../src/packs/checks.ts");
@@ -24,7 +26,7 @@ const originalFetch = globalThis.fetch;
 const originalTimeout = config.requestTimeoutMs;
 let sequence = 0;
 
-afterEach(() => { globalThis.fetch = originalFetch; config.requestTimeoutMs = originalTimeout; });
+afterEach(() => { globalThis.fetch = originalFetch; config.requestTimeoutMs = originalTimeout; config.paymentRail = "exact"; });
 after(() => rmSync(dir, { recursive: true, force: true }));
 
 function waitForAbort(signal: AbortSignal): Promise<never> {
@@ -69,7 +71,7 @@ function localNode(options: { balance?: bigint; amount?: bigint; offline?: boole
     if (options.stall === "before" || (paid && options.stall === "after")) return waitForAbort(req.signal);
     if (!paid) {
       const challenge = { x402Version: 2, resource: { url: req.url, description: "Test check", mimeType: "application/json" }, accepts: [{
-        scheme: "exact", network: config.network, asset: config.usdc, payTo: config.diamond,
+        scheme: "exact", network: config.network, asset: config.usdc, payTo: config.exactPayTo,
         amount: String(options.amount ?? 10_000n), maxTimeoutSeconds: 300,
         extra: { name: "USDC", version: "2" },
       }] };
@@ -101,6 +103,86 @@ const pack: PackDefinition = {
   ...getPack("legal"),
   plan: () => [sanctionsCheck("Test Entity", "entity", false)],
 };
+
+test("escrow: Sepolia challenge is bound to the request and budget before signing", async () => {
+  config.paymentRail = "escrow";
+  const receiver = config.diamond.toLowerCase();
+  const message = [
+    "Telegraph Escrow Payment", "", "Wallet: {from}", `Pay To: ${receiver}`,
+    `Network: ${config.network}`, "Amount: 10000 uUSDC", "Resource: /v1/ask",
+    "Nonce: {nonce}", "Valid After: {validAfter}", "Valid Before: {validBefore}",
+  ].join("\n");
+  let recipient = receiver;
+  let paid = 0;
+  const receipt = { rail: "escrow", receipt_hash: "0x" + "f".repeat(64), epoch_id: 3 };
+  globalThis.fetch = async (input, init) => {
+    const request = new Request(input, init);
+    const payment = request.headers.get("x-payment");
+    assert.equal(request.headers.get("payment-signature"), null);
+    if (!payment) {
+      const challenge = { accepts: [
+        { scheme: "escrow", network: config.network, payTo: recipient, extra: { resource: "/v1/ask", message } },
+      ] };
+      return new Response(null, { status: 402, headers: { "payment-required": Buffer.from(JSON.stringify(challenge)).toString("base64") } });
+    }
+    paid++;
+    const { network, payload: { authorization, signature } } = JSON.parse(Buffer.from(payment, "base64").toString("utf8"));
+    assert.equal(network, "eip155:11155111");
+    assert.equal(authorization.to, receiver);
+    assert.equal(authorization.value, "10000");
+    const signedMessage = message.replace(/\{(from|nonce|validAfter|validBefore)\}/g, (_, field) => authorization[field]);
+    assert.equal(await recoverMessageAddress({ message: signedMessage, signature }), account.address);
+    return Response.json({ result: { matched: false } }, {
+      headers: { "x-payment-response": Buffer.from(JSON.stringify(receipt)).toString("base64") },
+    });
+  };
+  assert.equal((await quote(input)).priceUsd, 0.01);
+  await assert.rejects(ask(input, { account, budget: new Budget(0.005, 100) }), /run budget exhausted/);
+  recipient = config.exactPayTo.toLowerCase();
+  await assert.rejects(ask(input, { account, budget: new Budget(1, 100) }), /invalid Sepolia escrow challenge/);
+  assert.equal(paid, 0);
+  recipient = receiver;
+  const payment = await ask(input, { account, budget: new Budget(1, 100) });
+  assert.equal(paid, 1);
+  assert.equal(payment.paidUsd, 0.01);
+  assert.deepEqual(payment.receipt, receipt);
+});
+
+test("sourcing: cited arrival still produces HOLD when no miner calls can be bought", async () => {
+  const requests = localNode();
+  const selected = getPack("commodities");
+  const subject = normaliseSubject(selected, selected.caseStudy!);
+  const quote = await dryRun(selected, subject);
+  assert.equal(requests.length, 7);
+  assert.equal(quote.checks.filter((c) => c.priceUsd === 0).length, 3);
+  assert.equal(quote.estimate.worstCaseUsd.toFixed(2), "0.13");
+  const memo = await runPack(selected, subject, { account, budget: new Budget(0) });
+  assert.equal(requests.length, 7);
+  assert.equal(memo.decision, "REVIEW");
+  assert.equal(memo.cost.paid_calls, 0);
+  assert.equal(memo.findings.find((f) => f.checkId === "record:supplier-id")?.verdict, "clear");
+  const arrival = memo.findings.find((f) => f.checkId === "record:arrival");
+  assert.equal(arrival?.verdict, "flag");
+  assert.equal(arrival.publicSource, subject["arrival-source"]);
+  assert.match(arrival.summary, /105 days after/);
+  assert.equal(memo.findings.find((f) => f.checkId === "record:cargo-link")?.verdict, "unknown");
+  const changed = { ...memo, findings: memo.findings.map((f) => f === arrival ? { ...f, publicSource: "https://example.org/" } : f) };
+  assert.equal((await verifyMemoSignature(memo)).digestMatches, true);
+  assert.equal((await verifyMemoSignature(changed)).digestMatches, false);
+});
+
+test("sourcing: an arrival record for another ship or port cannot clear a deadline", async () => {
+  const selected = getPack("commodities");
+  for (const override of [{ "record-imo": "1234567" }, { "record-port": "Hamburg" }, { "record-arrival": "2021-03-12" }]) {
+    const subject = normaliseSubject(selected, { ...selected.caseStudy, ...override });
+    const checks = await selected.plan(subject, {});
+    const arrival = checks.find((c) => c.id === "record:arrival");
+    assert.ok(arrival && "recordAssessment" in arrival);
+    assert.equal(arrival.recordAssessment.verdict, "unknown");
+  }
+  assert.throws(() => normaliseSubject(selected, { ...selected.caseStudy, "record-arrival": "2021-02-30" }), /valid YYYY-MM-DD date/);
+  assert.throws(() => normaliseSubject(selected, { ...selected.caseStudy, "arrival-source": "javascript:alert(1)" }), /must be an HTTPS URL/);
+});
 
 test("break: malformed token is refused by the CLI before network access", () => {
   const result = spawnSync(process.execPath, ["--import", "tsx", "src/cli.ts", "run", "exchange", "--project", "Test", "--token", "0xBAD"], {

@@ -64,7 +64,7 @@ export function sanctionsCheck(name: string, role: string, follow = true): Check
   };
 }
 
-export function registryCheck(company: string, jurisdiction: string, follow = true): CheckSpec {
+export function registryCheck(company: string, jurisdiction: string, expectedId?: string): CheckSpec {
   return {
     id: `registry:${slug(jurisdiction)}:${slug(company)}`,
     title: `Registry lookup: ${company} (${jurisdiction})`,
@@ -72,9 +72,8 @@ export function registryCheck(company: string, jurisdiction: string, follow = tr
     intent: "CORPORATE_REGISTRY_LOOKUP_GENERAL",
     input: { intent: "CORPORATE_REGISTRY_LOOKUP_GENERAL", params: { company, jurisdiction } },
     critical: true,
-    evaluate: ev.registry(company, jurisdiction),
-    followUps: follow
-      ? (a) =>
+    evaluate: ev.registry(company, jurisdiction, expectedId),
+    followUps: (a) =>
           a.verdict === "block" || a.verdict === "unknown"
             ? [
                 newsCheck(
@@ -84,8 +83,7 @@ export function registryCheck(company: string, jurisdiction: string, follow = tr
                   `registry-${slug(jurisdiction)}`,
                 ),
               ]
-            : []
-      : undefined,
+            : [],
   };
 }
 
@@ -96,7 +94,7 @@ export function newsCheck(query: string, subject: string, why: string, tag = "ad
     why,
     intent: "NEWS_SEARCH_GENERAL",
     input: { intent: "NEWS_SEARCH_GENERAL", params: { query } },
-    evaluate: ev.adverseMedia(subject),
+    evaluate: ev.adverseMedia(subject, query),
   };
 }
 

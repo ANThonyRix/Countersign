@@ -144,7 +144,15 @@ export function renderMarkdown(m: Memo): string {
       .filter(Boolean)
       .map((e) => (e!.signalHash ? `\`${e!.signalHash.slice(0, 10)}…\`` : e!.error ? "error" : "—"))
       .join(", ");
-    lines.push(`| ${f.title} | **${icon[f.verdict]}** ${f.summary.replace(/\|/g, "\\|")} | ${f.corroboration} | ${ev || "—"} |`);
+    lines.push(`| ${f.title} | **${icon[f.verdict]}** ${f.summary.replace(/\|/g, "\\|")} | ${f.corroboration} | ${ev || (f.publicSource ? "Public record" : "—")} |`);
+  }
+  const publicSources = new Set([
+    ...m.findings.flatMap((f) => f.publicSource ? [f.publicSource] : []),
+    ...(m.subject.fields["vessel-source"] ? [m.subject.fields["vessel-source"]] : []),
+  ]);
+  if (publicSources.size) {
+    lines.push("", "## Public records", "", "The report signs the values supplied for comparison and their citations. Review the original records at the URLs below.");
+    for (const url of publicSources) lines.push(`- ${url}`);
   }
   lines.push("");
   lines.push("## Evidence ledger");
@@ -152,9 +160,14 @@ export function renderMarkdown(m: Memo): string {
   lines.push("| # | Intent | Miner | Signal hash | Receipt | Cost | Verified |");
   lines.push("|---|---|---|---|---|---|---|");
   m.evidence.forEach((e, i) => {
-    const v = e.verification ? (e.verification.nodeVerified && e.verification.localHashMatch ? "yes" : "no") : "—";
+    const v = e.verification ? (e.verification.nodeVerified && e.verification.localHashMatch && e.verification.payerMatches ? "yes" : "no") : "—";
+    let receipt = e.receipt?.receipt_hash ? `\`${e.receipt.receipt_hash}\`` : "—";
+    if (e.receipt?.tx_hash) receipt += ` [Settlement](https://sepolia.etherscan.io/tx/${e.receipt.tx_hash})`;
+    if (e.receipt?.rail === "escrow" && e.receipt.epoch_id != null) {
+      receipt += ` [Epoch ${e.receipt.epoch_id}](${m.network.node}/v1/blocks/${e.receipt.epoch_id}/deliveries/${e.receipt.receipt_hash})`;
+    }
     lines.push(
-      `| ${i + 1} | ${e.intent}${e.role === "crosscheck" ? " (cross-check)" : ""} | ${e.minerName ?? e.minerId ?? "—"} | ${e.signalHash ? `\`${e.signalHash}\`` : e.error ?? "—"} | ${e.receipt?.receipt_hash ? `\`${e.receipt.receipt_hash.slice(0, 14)}…\`` : "—"} | $${e.costUsd.toFixed(4)} | ${v} |`,
+      `| ${i + 1} | ${e.intent}${e.role === "crosscheck" ? " (cross-check)" : ""} | ${e.minerName ?? e.minerId ?? "—"} | ${e.signalHash ? `\`${e.signalHash}\`` : e.error ?? "—"} | ${receipt} | $${e.costUsd.toFixed(4)} | ${v} |`,
     );
   });
   lines.push("");

@@ -11,7 +11,7 @@ import { agrees } from "./evaluators.ts";
 import { signMemo, saveMemo, type Memo } from "./memo.ts";
 import { decide } from "./policy.ts";
 import { requireFundedWallet } from "./wallet.ts";
-import type { AgentEvent, Assessment, CheckSpec, Evidence, Finding } from "./types.ts";
+import type { AgentEvent, Assessment, CheckSpec, Evidence, Finding, PlannedCheck } from "./types.ts";
 
 const MAX_CHECKS = 16;
 const MAX_FALLBACK_MINERS = 3;
@@ -38,13 +38,16 @@ export async function dryRun(pack: PackDefinition, subject: Record<string, strin
   const checks = await pack.plan(subject, planContext());
   const quotes = await Promise.all(
     checks.map(async (c) => {
+      if ("recordAssessment" in c) {
+        return { id: c.id, title: c.title, intent: "PUBLIC_RECORD", critical: c.critical, ok: true, priceUsd: 0, local: true };
+      }
       const q = await quote(c.input).catch((err: Error) => ({ ok: false, status: 0, code: err.message }) as Awaited<ReturnType<typeof quote>>);
       return { id: c.id, title: c.title, intent: c.intent, critical: !!c.critical, ok: q.ok, priceUsd: q.priceUsd, status: q.status, code: q.code, problems: q.problems };
     }),
   );
   const unit = quotes.find((q) => q.priceUsd)?.priceUsd ?? 0.01;
   const base = quotes.reduce((s, q) => s + (q.priceUsd ?? unit), 0);
-  const crossMax = checks.filter((c) => c.critical).length * unit;
+  const crossMax = checks.filter((c) => c.critical && !("recordAssessment" in c)).length * unit;
   return { checks: quotes, estimate: { baseUsd: base, worstCaseUsd: base + crossMax, budgetUsd: config.maxUsdPerRun } };
 }
 
@@ -119,7 +122,7 @@ class Runner {
     }
   }
 
-  async runCheck(check: CheckSpec): Promise<CheckSpec[]> {
+  async runCheck(check: PlannedCheck): Promise<CheckSpec[]> {
     if (this.opts.signal?.aborted) return [];
     const finding: Finding = {
       checkId: check.id,
@@ -130,8 +133,15 @@ class Runner {
       critical: !!check.critical,
       corroboration: "single",
       evidence: [],
-      escalatedFrom: check.escalatedFrom,
+      escalatedFrom: "input" in check ? check.escalatedFrom : undefined,
     };
+
+    if ("recordAssessment" in check) {
+      Object.assign(finding, check.recordAssessment, { corroboration: "not_needed", publicSource: check.publicSource });
+      this.findings.set(check.id, finding);
+      this.emit({ type: "finding", finding });
+      return [];
+    }
 
     if (!this.budget.canAfford(10_000n)) {
       finding.skipped = "budget";
@@ -200,12 +210,12 @@ class Runner {
     return next;
   }
 
-  async runAll(initial: CheckSpec[]): Promise<void> {
+  async runAll(initial: PlannedCheck[]): Promise<void> {
     const queue = [...initial];
     for (const c of queue) this.seen.add(c.id);
     const active = new Set<Promise<void>>();
 
-    const launch = (c: CheckSpec) => {
+    const launch = (c: PlannedCheck) => {
       const p = this.runCheck(c)
         .then((more) => {
           for (const m of more) {
@@ -227,7 +237,7 @@ class Runner {
               critical: !!c.critical,
               corroboration: "single",
               evidence: this.evidence.filter((e) => e.checkId === c.id).map((e) => e.id),
-              escalatedFrom: c.escalatedFrom,
+              escalatedFrom: "input" in c ? c.escalatedFrom : undefined,
             };
             this.findings.set(c.id, finding);
             this.emit({ type: "finding", finding });
@@ -256,7 +266,7 @@ class Runner {
             localHashMatch: v.localHashMatch,
             payerMatches: !!v.payer && v.payer.toLowerCase() === this.account.address.toLowerCase(),
           };
-          this.emit({ type: "verify", evidenceId: e.id, ok: v.nodeVerified && v.localHashMatch });
+          this.emit({ type: "verify", evidenceId: e.id, ok: v.nodeVerified && v.localHashMatch && !v.error });
         }),
     );
   }
@@ -268,11 +278,12 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
   const emit = opts.onEvent ?? (() => {});
 
   const checks = await pack.plan(subject, planContext());
-  if (checks.length && budget.canAfford(10_000n)) await requireFundedWallet(account.address);
+  const paidChecks = checks.filter((c) => "input" in c);
+  if (paidChecks.length && budget.canAfford(10_000n)) await requireFundedWallet(account.address);
   emit({
     type: "plan",
-    checks: checks.map((c) => ({ id: c.id, title: c.title, intent: c.intent, critical: !!c.critical })),
-    estimateUsd: checks.length * 0.01,
+    checks: checks.map((c) => ({ id: c.id, title: c.title, intent: "input" in c ? c.intent : "PUBLIC_RECORD", critical: !!c.critical })),
+    estimateUsd: paidChecks.length * 0.01,
   });
 
   const runner = new Runner(pack, account, budget, emit, opts);

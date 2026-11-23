@@ -75,7 +75,7 @@ function renderWallet() {
   box.replaceChildren(
     el("dl", {},
       el("div", { class: "w-addr" }, el("dt", { text: "Agent" }), el("dd", {}, el("a", { href: w.explorer, target: "_blank", rel: "noopener", text: short(w.address) }))),
-      el("div", {}, el("dt", { text: "Test USDC" }), el("dd", { text: Number(w.usdc).toFixed(2) })),
+      el("div", {}, el("dt", { text: s.paymentRail === "escrow" ? "Test USDC in escrow" : "Test USDC" }), el("dd", { text: Number(s.paymentRail === "escrow" ? w.escrowCredit : w.usdc).toFixed(2) })),
       el("div", { class: "w-day" }, el("dt", { text: "Spent today" }), el("dd", { text: `${usd(s.budget.spentUsd)} / ${usd(s.budget.capUsd)}` })),
     ),
   );
@@ -87,7 +87,8 @@ function runBlocker() {
   if (s.running) return "A run is already in progress.";
   if (!s.wallet) return "No agent wallet yet. Run `npm run wallet:new` on the server.";
   if (s.wallet.error) return "Cannot read the wallet balance from Sepolia.";
-  if (Number(s.wallet.usdc) < 0.1) return "The agent wallet needs test USDC. Run `npm run cs -- mint` on the server.";
+  if (s.paymentRail === "escrow" && Number(s.wallet.escrowCredit) <= 0) return "Telegraph escrow needs test USDC. Run `npm run cs -- escrow:deposit --amount 0.25` on the server.";
+  if (s.paymentRail !== "escrow" && Number(s.wallet.usdc) < 0.1) return "The agent wallet needs test USDC. Run `npm run cs -- mint` on the server.";
   if (s.budget.spentUsd >= s.budget.capUsd) return "Today's spend cap is used up.";
   return null;
 }
@@ -127,14 +128,16 @@ function selectPack(id) {
   state.pack = packById(id);
   $("#pack-tagline").textContent = state.pack.tagline;
   $("#estimate").textContent = "";
+  $("#fill-case-study").hidden = !state.pack.caseStudy;
   renderFields();
 }
 
 function renderFields() {
   const draft = state.drafts[state.pack.id] ?? {};
   const box = $("#fields");
-  box.replaceChildren(
-    ...state.pack.fields.map((f) => {
+  const basic = [];
+  const trade = [];
+  for (const f of state.pack.fields) {
       const id = `f-${f.name}`;
       const helpId = `${id}-help`;
       const errId = `${id}-err`;
@@ -148,17 +151,28 @@ function renderFields() {
         autocomplete: "off",
         spellcheck: f.type === "address" || f.type === "textarea" ? "false" : null,
       };
-      const control = f.type === "textarea" ? el("textarea", { ...common, rows: 4 }) : el("input", { ...common, type: "text" });
+      const type = f.type === "date" || f.type === "url" ? f.type : "text";
+      const control = f.type === "textarea" ? el("textarea", { ...common, rows: 4 }) : el("input", { ...common, type });
       control.value = draft[f.name] ?? "";
       control.addEventListener("input", () => control.closest(".field").classList.remove("invalid"));
       const help = f.help ?? (f.type === "list" ? "Separate entries with commas." : null);
-      return el("div", { class: "field" },
+      const field = el("div", { class: "field" },
         el("label", { for: id }, f.label, f.required ? el("span", { class: "req", "aria-hidden": "true", text: "*" }) : null),
         control,
         help ? el("span", { class: "help", id: helpId, text: help }) : null,
         el("span", { class: "err", id: errId }),
       );
-    }),
+      (f.tradeDetail ? trade : basic).push(field);
+  }
+  box.replaceChildren(
+    ...basic,
+    trade.length ? el("details", {
+      class: "trade-details",
+      open: state.pack.fields.some((f) => f.tradeDetail && draft[f.name]),
+    },
+    el("summary", { text: "Trade details and public records" }),
+    el("p", { class: "small muted", text: "Use public data only. Enter values from the cited records for comparison." }),
+    ...trade) : null,
   );
 }
 
@@ -285,7 +299,7 @@ function renderQuote(result) {
   const failed = result.checks.filter((c) => !c.ok);
   stage.replaceChildren(
     el("div", { class: "view" },
-      viewHead(`Quote: ${state.pack.title}`, "Nothing was paid. The node priced each request before payment."),
+      viewHead(`Quote: ${state.pack.title}`, "No payment was made. The node quotes miner checks. Public record comparisons are free."),
       el("dl", { class: "stats" },
         stat("Checks planned", String(result.checks.length)),
         stat("Base cost", usd(result.estimate.baseUsd)),
@@ -293,14 +307,14 @@ function renderQuote(result) {
         stat("Run budget", usd(result.estimate.budgetUsd)),
       ),
       el("section", { class: "card", "aria-labelledby": "q-checks" },
-        el("h2", { id: "q-checks", text: "Checks the agent will buy" }),
+        el("h2", { id: "q-checks", text: "Planned checks" }),
         el("ul", { class: "rows" },
           ...result.checks.map((c) =>
             el("li", {},
-              c.ok ? tag("clear", "priced") : tag("block", String(c.status)),
+              c.local ? tag("clear", "local") : c.ok ? tag("clear", "priced") : tag("block", String(c.status)),
               el("div", {},
                 el("div", { class: "r-title", text: c.title }),
-                el("div", { class: "r-sub" }, el("span", { class: "mono", text: c.intent }), c.critical ? " · critical, cross-checked on a hit" : "", c.ok ? "" : ` · ${c.code}`),
+                el("div", { class: "r-sub" }, el("span", { class: "mono", text: c.local ? "Public record comparison" : c.intent }), c.critical && !c.local ? " · critical, cross-checked on a hit" : "", c.ok ? "" : ` · ${c.code}`),
                 c.problems ? el("div", { class: "r-sub", style: "color:var(--stop)", text: JSON.stringify(c.problems) }) : null,
               ),
               el("span", { class: "r-end", text: c.ok ? usd(c.priceUsd, 4) : "n/a" }),
@@ -482,6 +496,10 @@ async function renderMemo(id) {
   const ledgerRows = memo.evidence.map((e) => {
     const vCell = el("td", { class: "mono", text: e.signalHash ? "not checked" : "n/a" });
     if (e.signalHash) verifyCells.set(e.id, vCell);
+    const receipt = e.receipt;
+    const epoch = receipt?.rail === "escrow" && /^\d+$/.test(String(receipt.epoch_id)) && /^0x[\da-f]{64}$/i.test(receipt.receipt_hash);
+    const settlement = receipt?.tx_hash ? `https://sepolia.etherscan.io/tx/${receipt.tx_hash}`
+      : epoch ? `${state.status?.node ?? "https://devnode.telegraphprotocol.com"}/v1/blocks/${receipt.epoch_id}/deliveries/${receipt.receipt_hash}` : null;
     return el("tr", {},
       el("td", {}, el("div", { text: memo.findings.find((f) => f.checkId === e.checkId)?.title ?? e.checkId }), el("div", { class: "small muted mono", text: e.routedIntent ?? e.intent })),
       el("td", { class: "nowrap", text: e.role === "crosscheck" ? "2nd miner" : "primary" }),
@@ -489,7 +507,9 @@ async function renderMemo(id) {
       el("td", {}, e.error ? tag("block", "error") : tag(e.verdict ?? "unknown")),
       el("td", { class: "num", text: usd(e.costUsd, 4) }),
       el("td", { class: "mono" }, e.signalHash ? el("a", { href: signalUrl(e.signalHash), target: "_blank", rel: "noopener", text: short(e.signalHash, 10, 6) }) : el("span", { class: "muted", text: e.error ? short(e.error, 40, 0) : "none" })),
-      el("td", { class: "mono" }, e.receipt?.tx_hash ? el("a", { href: `https://sepolia.etherscan.io/tx/${e.receipt.tx_hash}`, target: "_blank", rel: "noopener", text: short(e.receipt.tx_hash) }) : el("span", { class: "muted", text: "batched" })),
+      el("td", { class: "mono" }, settlement
+        ? el("a", { href: settlement, target: "_blank", rel: "noopener noreferrer", title: receipt.receipt_hash, text: epoch ? `Epoch ${receipt.epoch_id} · ${short(receipt.receipt_hash)}` : short(receipt.tx_hash) })
+        : el("span", { class: "muted", text: receipt?.receipt_hash ? short(receipt.receipt_hash) : "—" })),
       vCell,
     );
   });
@@ -558,7 +578,8 @@ async function renderMemo(id) {
                     el("span", { text: f.why }),
                     f.corroboration !== "not_needed" ? el("span", { text: corroborationText(f.corroboration) }) : null,
                     f.escalatedFrom ? el("span", { text: `follow-up of ${f.escalatedFrom}` }) : null,
-                    el("span", { text: `${f.evidence.filter((id) => evidenceById.has(id)).length} evidence` }),
+                    publicRecordLink(f.publicSource),
+                    f.evidence.length ? el("span", { text: `${f.evidence.filter((id) => evidenceById.has(id)).length} evidence` }) : null,
                   ),
                 ),
               ),
@@ -568,7 +589,13 @@ async function renderMemo(id) {
         el("section", { class: "card", "aria-labelledby": "m-subject" },
           el("h2", { id: "m-subject", text: "Subject and signature" }),
           el("dl", { class: "sig" },
-            ...subjectFields.flatMap(([k, v]) => [el("dt", { text: pack?.fields.find((f) => f.name === k)?.label ?? k }), el("dd", { text: v.length > 120 ? `${v.slice(0, 120)}…` : v })]),
+            ...subjectFields.flatMap(([k, v]) => {
+              const field = pack?.fields.find((f) => f.name === k);
+              return [
+                el("dt", { text: field?.label ?? k }),
+                el("dd", {}, (field?.type === "url" ? publicRecordLink(v) : null) ?? (v.length > 120 ? `${v.slice(0, 120)}…` : v)),
+              ];
+            }),
             el("dt", { text: "Agent" }), el("dd", {}, el("a", { href: `https://sepolia.etherscan.io/address/${memo.agent}`, target: "_blank", rel: "noopener", text: memo.agent })),
             el("dt", { text: "Digest" }), el("dd", { text: memo.digest }),
             el("dt", { text: "Signature" }), el("dd", { text: short(memo.signature, 26, 12) }),
@@ -581,7 +608,7 @@ async function renderMemo(id) {
         el("h2", { id: "m-ledger", text: "Evidence ledger" }),
         el("div", { class: "ledger-wrap" },
           el("table", { class: "ledger" },
-            el("thead", {}, el("tr", {}, ...["Check", "Role", "Miner", "Verdict", "Cost", "Signal", "Settlement", "Verified"].map((h) => el("th", { scope: "col", text: h })))),
+            el("thead", {}, el("tr", {}, ...["Check", "Role", "Miner", "Verdict", "Cost", "Signal", "Receipt", "Verified"].map((h) => el("th", { scope: "col", text: h })))),
             el("tbody", {}, ...ledgerRows),
           ),
         ),
@@ -592,6 +619,13 @@ async function renderMemo(id) {
       ),
     ),
   );
+}
+
+function publicRecordLink(value) {
+  if (!value || !URL.canParse(value)) return null;
+  const url = new URL(value);
+  if (url.protocol !== "https:" || url.username || url.password) return null;
+  return el("a", { href: url.href, target: "_blank", rel: "noopener noreferrer", text: "Open public record" });
 }
 
 function corroborationText(c) {
@@ -615,6 +649,14 @@ function route(e) {
   renderMemoList();
 }
 
+function loadCaseStudy() {
+  if (!state.pack?.caseStudy) return;
+  state.drafts[state.pack.id] = { ...state.pack.caseStudy };
+  renderFields();
+  showFormError();
+  $("#estimate").textContent = "";
+}
+
 async function init() {
   $("#subject-form").addEventListener("submit", onRun);
   $("#quote-btn").addEventListener("click", onQuote);
@@ -623,6 +665,7 @@ async function init() {
     renderFields();
     showFormError();
   });
+  $("#fill-case-study").addEventListener("click", loadCaseStudy);
   window.addEventListener("hashchange", route);
 
   try {
@@ -634,11 +677,14 @@ async function init() {
     $("#memo-list").replaceChildren(el("li", { class: "muted small", text: "Server offline." }));
     return;
   }
-  state.pack = state.packs[0];
+  const requestedCase = new URLSearchParams(location.search).get("case");
+  const sharedCase = state.packs.find((pack) => pack.id === requestedCase && pack.caseStudy);
+  state.pack = sharedCase ?? state.packs[0];
   renderPacks();
   selectPack(state.pack.id);
+  if (sharedCase) loadCaseStudy();
   await Promise.all([loadStatus(), loadMemos()]);
-  if (state.status?.running && !location.hash.startsWith("#/run/")) location.hash = `#/run/${state.status.running.id}`;
+  if (state.status?.running && !location.hash && !sharedCase) location.hash = `#/run/${state.status.running.id}`;
   route();
 }
 

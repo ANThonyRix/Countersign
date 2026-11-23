@@ -1,0 +1,11 @@
+countersign.ink {
+    encode zstd gzip
+    request_body {
+        max_size 64KB
+    }
+    reverse_proxy 127.0.0.1:4402
+}
+
+www.countersign.ink {
+    redir https://countersign.ink{uri} permanent
+}

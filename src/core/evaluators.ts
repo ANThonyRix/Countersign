@@ -40,7 +40,9 @@ export function sanctions(subject: string) {
   };
 }
 
-export function registry(company: string, jurisdiction: string) {
+export const registrationKey = (value: string) => value.normalize("NFKC").toUpperCase().replace(/[\s-]/g, "");
+
+export function registry(company: string, jurisdiction: string, expectedId?: string) {
   return (r: AskResponse): Assessment => {
     const res = shaped(r);
     if (!res) return unknown(r, "active", `Registry lookup for "${company}" in ${jurisdiction}`);
@@ -52,10 +54,18 @@ export function registry(company: string, jurisdiction: string) {
       incorporated: res.incorporated,
       active: res.active,
     };
-    if (!ok(r, "active")) {
-      if (!ok(r, "legal_name") && !ok(r, "registration_id")) {
-        return { verdict: "unknown", summary: `No registry record found for "${company}" in ${jurisdiction}.`, facts };
-      }
+    const name = ok(r, "legal_name") && typeof res.legal_name === "string" && res.legal_name.trim();
+    const registration = ok(r, "registration_id") && typeof res.registration_id === "string" && registrationKey(res.registration_id);
+    if (!name && !registration) {
+      return { verdict: "unknown", summary: `The miner did not identify a registry record for "${company}" in ${jurisdiction}.`, facts };
+    }
+    if (expectedId && !registration) {
+      return { verdict: "unknown", summary: `The miner did not return a registration number to match "${company}" in ${jurisdiction}.`, facts };
+    }
+    if (expectedId && registration !== registrationKey(expectedId)) {
+      return { verdict: "flag", summary: `The miner returned a different registration number for "${company}". Confirm the legal entity before paying.`, facts };
+    }
+    if (!ok(r, "active") || typeof res.active !== "boolean") {
       return { verdict: "unknown", summary: `Registry record for "${company}" in ${jurisdiction} found but its status could not be read.`, facts };
     }
     if (res.active === false) {
@@ -70,11 +80,15 @@ const ADVERSE = /\b(fraud\w*|scam\w*|lawsuit\w*|sued|indict\w*|charged|convict\w
 const NEGATED = /\b(no|not|none|without|nothing|zero)\b[^.]{0,60}$/i;
 
 /** Heuristic adverse-media screen over the search answer. It reports the terms it saw. */
-export function adverseMedia(subject: string) {
+export function adverseMedia(subject: string, query?: string) {
   return (r: AskResponse): Assessment => {
     const res = shaped(r);
-    const text = res ? [res.answer, res.brief].filter(Boolean).join(" ") : typeof r.result === "string" ? r.result : JSON.stringify(r.result ?? "");
+    const answer = res ? [res.answer, res.brief].filter(Boolean).join(" ") : typeof r.result === "string" ? r.result : JSON.stringify(r.result ?? "");
+    const text = query && query !== subject ? answer.replaceAll(query, "") : answer;
     if (!text || text.length < 20) return unknown(r, "answer", `Adverse-media search for "${subject}"`);
+    if (!text.toLowerCase().includes(subject.toLowerCase())) {
+      return { verdict: "unknown", summary: `No usable search result identifies "${subject}".` };
+    }
     const hits = new Set<string>();
     for (const m of text.matchAll(ADVERSE)) {
       const before = text.slice(Math.max(0, (m.index ?? 0) - 80), m.index);

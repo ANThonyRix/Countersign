@@ -36,6 +36,13 @@ test("registry: record without status is unknown", () => {
   assert.equal(registry("Acme", "GB")(shaped({ legal_name: "ACME LTD", active: null }, ["legal_name"])).verdict, "unknown");
 });
 
+test("registry: a false status without an entity or a different registration number cannot block", () => {
+  const review = registry("Acme", "GB", "123");
+  assert.equal(review(shaped({ active: false, legal_name: null, registration_id: null })).verdict, "unknown");
+  assert.equal(review(shaped({ active: false, legal_name: "ACME LTD", registration_id: "456" })).verdict, "flag");
+  assert.equal(review(shaped({ active: false, legal_name: "ACME LTD", registration_id: "123" })).verdict, "block");
+});
+
 test("adverseMedia: negated terms do not flag", () => {
   const clean = adverseMedia("Acme")(shaped({ answer: "There is no record of fraud or lawsuits involving Acme in public sources." }));
   assert.equal(clean.verdict, "clear");
@@ -49,6 +56,11 @@ test("adverseMedia: plain adverse terms flag", () => {
 
 test("adverseMedia: empty answer is unknown", () => {
   assert.equal(adverseMedia("Acme")(shaped({ answer: "" }, [])).verdict, "unknown");
+});
+
+test("adverseMedia: a query echoed above unrelated results cannot flag the supplier", () => {
+  const query = "Acme dissolved OR fraud";
+  assert.equal(adverseMedia("Acme", query)(shaped({ answer: `Results for ${query} include a fraud investigation of Other Ltd.` })).verdict, "unknown");
 });
 
 test("portCongestion: high level or long wait flags", () => {

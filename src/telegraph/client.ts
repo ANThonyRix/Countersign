@@ -3,7 +3,7 @@ import { keccak256, toBytes } from "viem";
 import type { LocalAccount } from "viem/accounts";
 import { config, engineUrl } from "../config.ts";
 import { Budget, atomicToUsd } from "../core/budget.ts";
-import { createPaidFetch, type PaymentIntent } from "./payment.ts";
+import { createPaidFetch, escrowAmount, escrowHeader, type PaymentIntent } from "./payment.ts";
 import {
   EngineError,
   type AskInput,
@@ -178,8 +178,8 @@ export async function verifySignal(hash: string, expectedPayer?: string): Promis
       miner: record.signal?.miner_slug,
       intent: record.signal?.intent_id,
     };
-    if (expectedPayer && payer && payer.toLowerCase() !== expectedPayer.toLowerCase()) {
-      check.error = `signal was paid by ${payer}, expected ${expectedPayer}`;
+    if (expectedPayer && payer?.toLowerCase() !== expectedPayer.toLowerCase()) {
+      check.error = payer ? `signal was paid by ${payer}, expected ${expectedPayer}` : "signal does not identify its payer";
     }
     return check;
   } catch (err) {
@@ -220,10 +220,10 @@ export async function quote(input: AskInput, minerId?: string): Promise<QuoteRes
   if (!res) return { ok: false, status: 0, code: "network_error" };
   if (res.status === 402) {
     const challenge = decodeBase64Json<{ accepts?: PaymentQuote[] }>(res.headers.get("payment-required"));
-    const exact = challenge?.accepts?.find((a) => a.scheme === "exact" && a.network === config.network);
-    if (!exact) return { ok: false, status: 402, code: "no_exact_scheme" };
-    const amountAtomic = BigInt(exact.amount);
-    return { ok: true, status: 402, amountAtomic, priceUsd: atomicToUsd(amountAtomic), quote: exact };
+    const payment = challenge?.accepts?.find((a) => a.scheme === config.paymentRail && a.network === config.network);
+    const amountAtomic = payment && (config.paymentRail === "escrow" ? escrowAmount(payment, url) : BigInt(payment.amount));
+    if (!payment || amountAtomic === undefined) return { ok: false, status: 402, code: `no_valid_${config.paymentRail}_scheme` };
+    return { ok: true, status: 402, amountAtomic, priceUsd: atomicToUsd(amountAtomic), quote: payment };
   }
   const problems = body && typeof body === "object" && "problems" in body ? (body as { problems: unknown }).problems : undefined;
   return { ok: false, status: res.status, code: errorCode(body, res.status), problems };
@@ -273,12 +273,32 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
     let res: Response;
     let payload: unknown;
     try {
-      res = await paidFetch(url, {
+      const request: RequestInit = {
         method: "POST",
         headers: { ...UA, "content-type": "application/json" },
         body: JSON.stringify(body),
         signal: requestSignal(opts.signal),
-      });
+      };
+      if (config.paymentRail === "escrow") {
+        request.redirect = "error";
+        res = await fetch(url, request);
+        if (res.status === 402) {
+          const challenge = decodeBase64Json<{ accepts?: PaymentQuote[] }>(res.headers.get("payment-required"));
+          const selected = challenge?.accepts?.find((a) => a.scheme === "escrow" && a.network === config.network);
+          const amount = selected && escrowAmount(selected, url);
+          if (!selected || amount === undefined) throw new Error("refusing to pay: invalid Sepolia escrow challenge");
+          if (amount > BigInt(config.maxAtomicPerPayment)) throw new Error("refusing to pay: payment exceeds the configured ceiling");
+          const refusal = opts.budget.reserve(amount);
+          if (refusal) throw new Error(refusal);
+          reserved = amount;
+          const header = await escrowHeader(opts.account, selected, amount);
+          await res.body?.cancel();
+          signed = { amountAtomic: amount, payTo: selected.payTo, asset: config.usdc, network: config.network };
+          res = await fetch(url, { ...request, headers: { ...request.headers, "x-payment": header } });
+        }
+      } else {
+        res = await paidFetch(url, request);
+      }
       payload = await readBody(res);
     } catch (err) {
       // A disconnected response after signing cannot prove that settlement failed.
@@ -306,7 +326,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
       const response = payload as AskResponse;
       return {
         response,
-        receipt: decodeBase64Json<TelegraphReceipt>(res.headers.get("x-telegraph-receipt")),
+        receipt: decodeBase64Json<TelegraphReceipt>(res.headers.get("x-telegraph-receipt") ?? res.headers.get("x-payment-response")),
         settlement,
         paidAtomic,
         paidUsd: atomicToUsd(paidAtomic),

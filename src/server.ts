@@ -10,6 +10,7 @@ import type { AgentEvent } from "./core/types.ts";
 import { walletStatus } from "./core/wallet.ts";
 import { getPack, normaliseSubject, packs } from "./packs/index.ts";
 import { verifySignal } from "./telegraph/client.ts";
+import { createRequestGuard } from "./http/guard.ts";
 
 const WEB = path.join(ROOT, "web");
 // The run endpoint spends from the agent wallet, so listen on loopback unless told otherwise.
@@ -23,6 +24,11 @@ const ALLOWED_HOSTS = new Set(
 );
 const MAX_FINISHED_RUNS = 20;
 const SECURITY_HEADERS = { "x-content-type-options": "nosniff", "referrer-policy": "no-referrer", "x-frame-options": "DENY" };
+const guardRequest = createRequestGuard({
+  allowedHosts: ALLOWED_HOSTS,
+  publicOrigin: process.env.PUBLIC_ORIGIN,
+  trustLoopbackProxy: process.env.TRUST_LOOPBACK_PROXY === "true",
+});
 
 interface Run {
   id: string;
@@ -44,6 +50,8 @@ const MIME: Record<string, string> = {
   ".svg": "image/svg+xml",
   ".json": "application/json",
   ".woff2": "font/woff2",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
 };
 
 function send(res: ServerResponse, status: number, body: unknown) {
@@ -52,32 +60,6 @@ function send(res: ServerResponse, status: number, body: unknown) {
 }
 
 const httpError = (status: number, message: string) => Object.assign(new Error(message), { status });
-
-function hostnameOf(host: string | undefined): string | undefined {
-  if (!host) return undefined;
-  try {
-    return new URL(`http://${host}`).hostname.toLowerCase();
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Cross-site request guard. POST endpoints spend from the agent wallet, so:
- *  - the Host header must name this server (DNS rebinding);
- *  - a browser Origin, when sent, must be this same server (CSRF);
- *  - POST bodies must be application/json, which a cross-site form or no-cors fetch cannot send
- *    without a CORS preflight, and this server never answers preflights.
- */
-function guardRequest(req: IncomingMessage): void {
-  const hostname = hostnameOf(req.headers.host);
-  if (!hostname || !ALLOWED_HOSTS.has(hostname)) throw httpError(403, "host not allowed");
-  if (req.method === "GET" || req.method === "HEAD") return;
-  const origin = req.headers.origin;
-  if (origin !== undefined && origin !== `http://${req.headers.host}`) throw httpError(403, "cross-origin request refused");
-  const type = (req.headers["content-type"] ?? "").split(";")[0].trim().toLowerCase();
-  if (type !== "application/json") throw httpError(415, "content-type must be application/json");
-}
 
 async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
   let size = 0;
@@ -110,6 +92,7 @@ function packView() {
     labels: p.labels,
     fields: p.fields,
     example: p.example,
+    caseStudy: p.caseStudy,
   }));
 }
 
@@ -200,11 +183,13 @@ const server = createServer(async (req, res) => {
   const p = url.pathname;
   try {
     guardRequest(req);
+    if (req.method === "GET" && p === "/healthz") return send(res, 200, { ok: true });
     if (req.method === "GET" && p === "/api/status") {
       const wallet = hasAgentKey() ? await walletStatus().catch((e: Error) => ({ error: e.message })) : null;
       return send(res, 200, {
         node: config.node,
         network: config.network,
+        paymentRail: config.paymentRail,
         wallet,
         budget: { perRunUsd: config.maxUsdPerRun, ...daySpend() },
         running: activeRun ? { id: activeRun.id, pack: activeRun.pack, subject: activeRun.subject } : null,
@@ -232,6 +217,7 @@ const server = createServer(async (req, res) => {
     send(res, 405, { error: "method not allowed" });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
+    if (status === 429) res.setHeader("retry-after", String((err as { retryAfter?: number }).retryAfter ?? 60));
     send(res, status, { error: (err as Error).message });
   }
 });

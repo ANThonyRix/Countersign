@@ -123,6 +123,7 @@ button, input, textarea { font: inherit; color: inherit; }
   text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; font-size: 13px;
 }
 .link-btn:hover { text-decoration-thickness: 2px; }
+.trade-details > summary { cursor: pointer; color: var(--accent); font-size: 13px; min-height: 44px; padding-block: 12px; }
 .form-error { color: var(--stop); font-size: 13px; margin-bottom: var(--s3); }
 .actions { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); }
 /* Keeps the main action in view while the side column scrolls on desktop. */
@@ -291,6 +292,7 @@ details.raw pre { margin: 0; padding: var(--s4); background: var(--bg); border: 
   .rows .r-end { text-align: left; }
   .rows li.child { padding-left: var(--s3); }
   .view-head .btn { width: 100%; }
+  .sig { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

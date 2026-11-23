@@ -4,7 +4,7 @@ Counterparty due diligence bought per answer from Telegraph miners and signed.
 
 Countersign is an autonomous agent for the Telegraph Hackathon Season II (Apps & Agents). It plans the
 checks a listing desk, a commodities trader or a legal team would order. It buys each check from a
-Telegraph miner over x402 for $0.01 in test USDC on Sepolia, and asks a second, independent miner
+Telegraph miner using an x402 challenge and test USDC in Ethereum Sepolia escrow, and asks a second, independent miner
 whenever a critical answer is not clean. It then decides GO / REVIEW / STOP with a deterministic rule
 and signs a memo. Anyone can re-verify the memo against the node.
 
@@ -13,7 +13,7 @@ One core, three mission packs:
 | Pack | Mission | What it checks |
 |---|---|---|
 | `exchange` | Exchange: token listing desk | issuer sanctions, smart-contract audit, adverse media; optional: X account bot detection, on-chain treasury balance, source code review |
-| `commodities` | Commodities: cargo and counterparty | seller registry and sanctions, vessel sanctions and telemetry, discharge port congestion; optional: bill of lading authenticity |
+| `commodities` | Commodities: cargo and counterparty | seller registry and sanctions, vessel sanctions and telemetry, discharge port congestion; optional: bill of lading authenticity, screening of shipping parties, and public record comparisons |
 | `legal` | Legal: multi-jurisdiction diligence | registry standing in each jurisdiction, sanctions on the entity and each officer, regulatory filings, adverse media, B2B identity |
 
 Questions about usage, costs, safety or the memo format: see [FAQ.md](FAQ.md).
@@ -30,11 +30,12 @@ npm install
 npm run wallet:new          # writes a fresh throwaway key to .env and prints the address
 ```
 
-1. Send 0.01–0.05 Sepolia ETH to the printed address (any Sepolia faucet). The ETH pays gas for the mint.
-2. Mint Telegraph test USDC and check the wallet:
+1. Send a little Sepolia ETH to the printed address (any Sepolia faucet). The ETH pays gas for minting and funding escrow.
+2. Mint Telegraph test USDC, deposit a test balance into the [current Telegraph escrow](https://anjoman.ai/docs/using/escrow-inference), and check the wallet:
 
    ```bash
    npm run cs -- mint
+   npm run cs -- escrow:deposit --amount 0.25
    npm run cs -- wallet
    ```
 
@@ -44,7 +45,7 @@ npm run wallet:new          # writes a fresh throwaway key to .env and prints th
    npm run cs -- plan commodities --example
    ```
 
-4. Run a pack for real. Each check costs $0.01. A run stops at `MAX_USD_PER_RUN` ($0.25 by default):
+4. Run a pack for real. Typical testnet checks cost $0.01. A run stops at `MAX_USD_PER_RUN` ($0.25 by default):
 
    ```bash
    npm run cs -- run commodities --example
@@ -75,16 +76,25 @@ npm run cs -- run commodities --seller "Trafigura Pte Ltd" --jurisdiction Singap
   --vessel "EVER GIVEN" --imo 9811000 --port Rotterdam
 ```
 
+For the cross-border sourcing case, select **Commodities → Load cross-border case** in the web app.
+The [walkthrough](examples/cross-border-sourcing.md) explains the public records, buyer deadline and signed result.
+From the CLI:
+
+```bash
+npm run cs -- plan commodities --case-study
+npm run cs -- run commodities --case-study
+```
+
 ## How it works
 
 ```
 subject ──► pack.plan() ──► free quote (POST /v1/ask, 402 + PAYMENT-REQUIRED)
                                │
                                ▼
-               budget.reserve() ──► x402 exact payment (EIP-3009, test USDC)
+               budget.reserve() ──► Sepolia escrow authorization (EIP-191, test USDC)
                                │
                                ▼
-               miner answer + signal_hash + X-TELEGRAPH-RECEIPT
+               miner answer + signal_hash + Telegraph receipt
                                │
                  evaluator ──► clear / flag / block / unknown
                                │   critical and not clean?
@@ -125,7 +135,9 @@ receipt. `verify` does three things:
 2. Fetches each signal from `GET /engine/v1/signal/{hash}`.
 3. Recomputes keccak256 over the key-sorted payload and confirms the agent wallet paid for it.
 
-Editing any field breaks the digest.
+Editing any field breaks the digest. Public record comparisons sign the entered values and citations.
+The operator can inspect the cited documents directly. Telegraph receipts cover miner requests; escrow
+receipts link to the delivery record once its epoch is published.
 
 ## Evidence: recorded runs
 
@@ -190,8 +202,9 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
   and it does not pin which wallet counts as "the" Countersign agent. Check the agent address
   against the one you expect.
 - **Requests are public.** See Safety.
-- **One agent at a time.** The local server runs one run at a time and keeps memos on disk in
-  `data/`. It has no accounts and is not meant to be exposed beyond 127.0.0.1.
+- **One shared demo agent.** The server runs one run at a time and keeps memos on disk. The public
+  demo has no accounts: all requests and memos are public, and visitors share the testnet wallet
+  and daily budget. Each visitor can start at most three runs per hour.
 
 ## Safety
 
@@ -205,14 +218,20 @@ Countersign is a hackathon MVP on testnet. Read its memos with these limits in m
   stays charged to the run/day caps and the memo's cost includes it conservatively. The evidence
   error explains the uncertainty. Inspect the wallet before retrying; the agent does not fall back
   to another miner after an ambiguous signed payment.
-- Before buying checks, the agent reads its test USDC balance. An empty wallet stops with funding
-  instructions. Sepolia ETH is needed for mint gas, not for an x402 authorization.
+- Before buying checks, the agent reads its available test USDC in Ethereum Sepolia escrow. Empty
+  escrow stops with funding instructions. Sepolia ETH pays gas for minting and funding escrow.
+  `TELEGRAPH_PAYMENT_RAIL=exact` retains compatibility with older Sepolia nodes.
 - Telegraph requests have a timeout, including response-body reads (`REQUEST_TIMEOUT_MS`, default
   60000 ms per attempt). A disconnected node produces an actionable error; unanswered checks stay
   `unknown` and an offline run produces REVIEW.
 - The server binds to 127.0.0.1 and runs one agent at a time. It answers only to loopback Host
   names (add more with `ALLOWED_HOSTS`), refuses cross-origin POSTs and accepts only
   `application/json` bodies, so another site open in the browser cannot start a paid run.
+- A public deployment sets `PUBLIC_ORIGIN` to its exact HTTPS origin and puts Caddy in front of
+  the loopback listener. `TRUST_LOOPBACK_PROXY=true` accepts client addresses only from that local
+  proxy. Caddy overwrites untrusted forwarded headers. API quotas allow three run requests per
+  hour, twelve quote requests per minute and sixty read requests per minute per visitor address.
+  Quotas reset on process restart; the shared spend ledger persists on disk.
 - An evaluator never fails open: a verdict outside the intent's enum, or an evaluator error, is
   `unknown`, and a crashed check still reaches the policy as `unknown`.
 

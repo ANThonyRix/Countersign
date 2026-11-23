@@ -90,6 +90,7 @@ npm run wallet:new        # creates a throwaway key in .env and prints the addre
 Send Sepolia ETH to the printed address, then:
 ```bash
 npm run cs -- mint        # mints 10 test USDC to the agent wallet
+npm run cs -- escrow:deposit --amount 0.25
 npm run cs -- wallet      # shows address, ETH, test USDC, escrow credit and today's spend
 ```
 
@@ -152,6 +153,7 @@ npm run serve
 |---|---|
 | `npm run cs -- wallet` | Agent address, Sepolia ETH, test USDC, escrow credit, today's spend |
 | `npm run cs -- mint [--amount 10]` | Mint test USDC (needs Sepolia ETH for gas) |
+| `npm run cs -- escrow:deposit --amount 0.25` | Fund Telegraph escrow on Ethereum Sepolia |
 | `npm run cs -- packs` | List packs and their fields |
 | `npm run cs -- plan <pack> [fields]` | Free quote: planned checks and prices |
 | `npm run cs -- run <pack> [fields]` | Real run: pays per check and writes a signed memo |
@@ -233,7 +235,7 @@ contracts and settlement path.
 | `AGENT_PRIVATE_KEY is missing or malformed` | No key in `.env` | `npm run wallet:new` |
 | Mint fails | No Sepolia ETH for gas | Fund the address from a Sepolia faucet |
 | Finding says `Not bought: run budget of $0.25 reached` | `MAX_USD_PER_RUN` or `MAX_USD_PER_DAY` reached | Raise the cap in `.env` or run again tomorrow |
-| Paid checks fail across the board | Not enough test USDC in the wallet | `npm run cs -- wallet`, then `npm run cs -- mint` |
+| Paid checks fail across the board | Not enough test USDC in escrow | Check `npm run cs -- wallet`, then fund escrow with `npm run cs -- escrow:deposit --amount 0.25` |
 | `429` | More than 60 new questions per minute | Wait a minute. The agent already limits itself to 4 parallel requests |
 | `503 no_compatible_miner` | No miner serves that intent right now | Check shows as UNKNOWN; retry later |
 | Many UNKNOWN findings | Miners answered without the needed fields | The memo still records what was paid; the decision falls back to REVIEW |

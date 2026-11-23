@@ -65,6 +65,7 @@ export interface Finding {
   verdict: Verdict;
   summary: string;
   facts?: Record<string, unknown>;
+  publicSource?: string;
   critical: boolean;
   corroboration: Corroboration;
   evidence: string[];
@@ -72,7 +73,18 @@ export interface Finding {
   skipped?: string;
 }
 
-export type FieldType = "text" | "textarea" | "address" | "list";
+export interface PublicRecordCheck {
+  id: string;
+  title: string;
+  why: string;
+  critical: boolean;
+  recordAssessment: Assessment;
+  publicSource?: string;
+}
+
+export type PlannedCheck = CheckSpec | PublicRecordCheck;
+
+export type FieldType = "text" | "textarea" | "address" | "list" | "date" | "url";
 
 export interface PackField {
   name: string;
@@ -81,6 +93,7 @@ export interface PackField {
   required?: boolean;
   placeholder?: string;
   help?: string;
+  tradeDetail?: boolean;
 }
 
 export interface PackDefinition {
@@ -92,8 +105,9 @@ export interface PackDefinition {
   labels: Record<Decision, string>;
   fields: PackField[];
   example: Record<string, string>;
+  caseStudy?: Record<string, string>;
   subjectName(subject: Record<string, string>): string;
-  plan(subject: Record<string, string>, ctx: PlanContext): Promise<CheckSpec[]> | CheckSpec[];
+  plan(subject: Record<string, string>, ctx: PlanContext): Promise<PlannedCheck[]> | PlannedCheck[];
 }
 
 export interface PlanContext {

@@ -8,7 +8,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Countersign FAQ: running checks, reading memos, costs">
 <meta property="og:description" content="Setup, packs, the decision rule, memo verification, spend caps and troubleshooting.">
-<meta property="og:image" content="share.jpg">
+<meta property="og:image" content="https://countersign.ink/share.jpg">
+<link rel="canonical" href="https://countersign.ink/faq.html">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#f7f9f8">
@@ -201,6 +202,7 @@
 npm run wallet:new        # throwaway key in .env, prints the address
 # send Sepolia ETH to that address, then:
 npm run cs -- mint        # 10 test USDC to the agent wallet
+npm run cs -- escrow:deposit --amount 0.25
 npm run cs -- wallet      # balances and today's spend</code></pre>
               </div>
               <div class="faq__item">
@@ -240,6 +242,7 @@ npm run cs -- run legal --example</code></pre>
                   <tbody>
                     <tr><td><code>wallet</code></td><td>Address, Sepolia ETH, test USDC, escrow credit, today's spend</td></tr>
                     <tr><td><code>mint --amount 10</code></td><td>Mint test USDC</td></tr>
+                    <tr><td><code>escrow:deposit --amount 0.25</code></td><td>Fund Telegraph escrow on Ethereum Sepolia</td></tr>
                     <tr><td><code>packs</code></td><td>Packs and their fields</td></tr>
                     <tr><td><code>plan &lt;pack&gt;</code></td><td>Free quote</td></tr>
                     <tr><td><code>run &lt;pack&gt;</code></td><td>Paid run, writes a signed memo</td></tr>
@@ -333,7 +336,7 @@ npm run cs -- verify path/to/memo.json</code></pre>
               </div>
               <div class="faq__item">
                 <h3>Every paid check fails</h3>
-                <p>The wallet is likely out of test USDC. Check with <code>npm run cs -- wallet</code> and mint more.</p>
+                <p>Check available credit with <code>npm run cs -- wallet</code>. If escrow is empty, fund it with <code>npm run cs -- escrow:deposit --amount 0.25</code>.</p>
               </div>
               <div class="faq__item">
                 <h3>Errors 429 or 503</h3>
