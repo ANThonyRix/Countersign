@@ -240,6 +240,9 @@ button, input, textarea { font: inherit; color: inherit; }
 .shipment-label.hold { color: var(--review); }
 .order-decision-copy { font-size: 14px; color: #c3cad6; overflow-wrap: anywhere; }
 .order-decision details > ul { padding-bottom: var(--s2); }
+.settlement-address { overflow-wrap: anywhere; }
+.settlement-links { display: flex; flex-wrap: wrap; gap: 0 var(--s4); }
+.settlement-links a { display: inline-flex; align-items: center; min-height: 44px; }
 
 .findings { list-style: none; margin: 0; padding: 0; }
 .findings > li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: var(--s3); padding: var(--s4) 0; border-top: 1px solid var(--line); }

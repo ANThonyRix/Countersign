@@ -1,0 +1,18 @@
+{
+  "payload": {
+    "purpose": "Countersign Devnet demonstration document",
+    "role": "demo terminal",
+    "issuedAt": "2026-11-24T13:18:10.324Z",
+    "document": {
+      "reference": "Illustrative terminal discharge record",
+      "billOfLadingId": "DEMO-BL-011W",
+      "container": "TGHU1234567",
+      "imo": "9811000",
+      "voyage": "011W",
+      "port": "Rotterdam",
+      "dischargedOn": "2021-07-30"
+    }
+  },
+  "signer": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAdCbx/YJaiER+NPERTnRsREkBykkPzLOiS3NlsLg4Foo=\n-----END PUBLIC KEY-----\n",
+  "signature": "k0BjJwhCPLTNAm8IIsqVLuva97Kvsl+gMKahyTj7yZ+LFrZ9xl108jV1IvFderxxVH7Yk0vxmbuMQF31/b3TDA=="
+}

@@ -11,6 +11,7 @@ import { walletStatus } from "./core/wallet.ts";
 import { getPack, normaliseSubject, packs } from "./packs/index.ts";
 import { verifySignal } from "./telegraph/client.ts";
 import { createRequestGuard } from "./http/guard.ts";
+import { settlementStatus } from "./settlement/status.ts";
 
 const WEB = path.join(ROOT, "web");
 // The run endpoint spends from the agent wallet, so listen on loopback unless told otherwise.
@@ -237,10 +238,11 @@ const server = createServer(async (req, res) => {
     const runMatch = p.match(/^\/api\/runs\/([0-9a-f-]{36})\/events$/);
     if (req.method === "GET" && runMatch) return streamRun(req, res, runMatch[1]);
     if (req.method === "GET" && p === "/api/memos") return send(res, 200, listMemos());
-    const memoMatch = p.match(/^\/api\/memos\/([A-Za-z0-9-]+)(\/verify)?$/);
+    const memoMatch = p.match(/^\/api\/memos\/([A-Za-z0-9-]+)(\/(verify|settlement))?$/);
     if (req.method === "GET" && memoMatch) {
-      if (memoMatch[2]) return send(res, 200, await verifyMemo(memoMatch[1]));
+      if (memoMatch[3] === "verify") return send(res, 200, await verifyMemo(memoMatch[1]));
       const memo = loadMemo(memoMatch[1]);
+      if (memo && memoMatch[3] === "settlement") return send(res, 200, await settlementStatus(memo));
       return memo ? send(res, 200, memo) : send(res, 404, { error: "memo not found" });
     }
     if (p.startsWith("/api/")) return send(res, 404, { error: "not found" });

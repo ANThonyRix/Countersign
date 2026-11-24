@@ -558,8 +558,11 @@ async function renderMemo(id) {
         ),
         verifyBtn,
       ),
+      memo.subject.fields["settlement-demo"]
+        ? el("p", { class: "small muted", text: memo.subject.fields["settlement-demo"] }) : null,
       memo.payment_conditions ? orderDecisionSummary(memo) : decisionBlock(memo.decision, memo.decision_label, memo.reasons),
       paymentConditionsBlock(memo),
+      memo.payment_conditions ? settlementBlock(memo.id) : null,
       el("dl", { class: "stats" },
         stat("Total cost", usd(memo.cost.total_usd, 4)),
         stat("Paid calls", String(memo.cost.paid_calls)),
@@ -694,6 +697,43 @@ function orderDecisionSummary(memo) {
         el("ul", {}, ...memo.reasons.map((reason) => el("li", { text: reason }))),
       ),
     ),
+  );
+}
+
+function settlementBlock(id) {
+  const details = el("div", { "aria-live": "polite" }, el("p", { class: "muted", text: "Checking escrow status…" }));
+  const explorer = (signature, label) => el("a", {
+    href: "https://explorer.solana.com/tx/" + encodeURIComponent(signature) + "?cluster=devnet",
+    target: "_blank", rel: "noopener noreferrer", text: label,
+  });
+  api("/api/memos/" + encodeURIComponent(id) + "/settlement").then((value) => {
+    if (value.status === "UNFUNDED") {
+      details.replaceChildren(el("p", { class: "muted", text: "No Devnet escrow linked to this report." }));
+      return;
+    }
+    const units = BigInt(value.amountAtomic);
+    const fraction = String(units % 1000000n).padStart(6, "0").replace(/0+$/, "");
+    const amount = String(units / 1000000n) + (fraction ? "." + fraction : "");
+    const label = {
+      HOLD: "HOLD",
+      READY: "Awaiting buyer approval",
+      RELEASED: "Released · Finalized",
+      SETTLED: "Settled under another report",
+    }[value.status];
+    details.replaceChildren(...[
+      el("p", { class: "f-sum", text: `${label} · ${amount} test USDC` }),
+      value.status === "READY" ? el("p", { class: "small muted", text: "Telegraph signals are rechecked at approval." }) : null,
+      value.reasons?.length ? el("ul", {}, ...value.reasons.map((reason) => el("li", { text: reason }))) : null,
+      value.supplier ? el("p", { class: "small mono settlement-address", text: "Recipient " + value.supplier }) : null,
+      el("div", { class: "settlement-links" },
+        value.signature ? explorer(value.signature, "View finalized release") : null,
+        explorer(value.funding, "View escrow deposit"),
+      ),
+    ].filter(Boolean));
+  }).catch(() => details.replaceChildren(el("p", { class: "muted", text: "Devnet escrow status is unavailable." })));
+  return el("section", { class: "card", "aria-labelledby": "m-settlement" },
+    el("h2", { id: "m-settlement", text: "Supplier settlement · Solana Devnet" }),
+    details,
   );
 }
 

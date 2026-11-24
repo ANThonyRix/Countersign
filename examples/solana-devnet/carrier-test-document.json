@@ -1,0 +1,20 @@
+{
+  "payload": {
+    "purpose": "Countersign Devnet demonstration document",
+    "role": "demo carrier",
+    "issuedAt": "2026-11-24T13:18:10.324Z",
+    "document": {
+      "reference": "Illustrative carrier bill of lading",
+      "id": "DEMO-BL-011W",
+      "orderId": "DEMO-PO-011W",
+      "sellerRegistration": "196801000264",
+      "sku": "FILM-01",
+      "quantityKg": 1000,
+      "container": "TGHU1234567",
+      "imo": "9811000",
+      "voyage": "011W"
+    }
+  },
+  "signer": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA406rixViPRIrNxsn2XG2PCdc5FuBGOC6xB3iQGnwokU=\n-----END PUBLIC KEY-----\n",
+  "signature": "BEQBSnVCONUnvB2DEg3C8FmqqLQ19P12D3wbUN3nmxQWhAvGUvx2pk8Idcd4q47s62tfFGHuGk8YZRe5IWqFAg=="
+}

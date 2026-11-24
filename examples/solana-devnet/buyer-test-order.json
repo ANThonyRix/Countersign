@@ -1,0 +1,18 @@
+{
+  "payload": {
+    "purpose": "Countersign Devnet demonstration document",
+    "role": "demo buyer",
+    "issuedAt": "2026-11-24T13:18:10.324Z",
+    "document": {
+      "reference": "Illustrative buyer purchase order and payment terms",
+      "id": "DEMO-PO-011W",
+      "sellerRegistration": "196801000264",
+      "sku": "FILM-01",
+      "quantityKg": 1000,
+      "dischargePort": "Rotterdam",
+      "dischargeBy": "2021-07-31"
+    }
+  },
+  "signer": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAQRv8J02BpuXpRIYuwu4Q/oP6CXn50W4AVRiq2L+nXbo=\n-----END PUBLIC KEY-----\n",
+  "signature": "8ys7iL/JBcXKISgkFhoESJKx6R8onm56vVeVukIMhEw+jgdKK+mAi6XMuUhS9NcoiritWmP4b9BpDsa6cyO3CQ=="
+}

@@ -1,0 +1,18 @@
+{
+  "purpose": "Corporate identity corroboration for the test scenario",
+  "reviewedAt": "2026-11-24T13:18:10.324Z",
+  "sources": [
+    {
+      "url": "https://scientex.com.my/wp-content/uploads/2026/06/Scientex-Corporate-Information.pdf",
+      "company": "Scientex Berhad",
+      "registration": "196801000264",
+      "exchangeCode": "4731"
+    },
+    {
+      "url": "https://www.bursamalaysia.com/sites/5d809dcf39fba22790cad230/assets/66a225f6cd34aa1abc247885/List_of_Companies.pdf",
+      "company": "Scientex Berhad",
+      "exchangeCode": "4731"
+    }
+  ],
+  "scope": "Issuer registration disclosure matched to the stock exchange listing. The Devnet payee is a test wallet controlled by the demo operator."
+}

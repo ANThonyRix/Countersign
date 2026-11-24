@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "network": "solana-devnet",
+  "mint": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+  "sourceTelegraphMemo": "commodities-2026-11-23-ed5ad604",
+  "sourceTelegraphDigest": "0x93accd9442cb428838351f388011fd9af97bce1a31eea1b4cd6b7a33e04c2f60",
+  "releaseMemo": "commodities-2026-11-24-devnet-release",
+  "escrow": {
+    "version": 1,
+    "terms": {
+      "orderId": "DEMO-PO-011W",
+      "orderDigest": "f7369d829c115485a7d8d74bda9b576c78b312137c3c53d840fb80d864311358",
+      "registration": "196801000264",
+      "buyer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+      "supplier": "7E9cWerdNd13hQnjTP9xjmMoXLYBi72UN3PJy2zgWQqW",
+      "settlementSigner": "9J43PqUkXTXcbD78qvnCn5j1nW69gWN6wpn579gP7pVD",
+      "reviewer": "0xeCE2a8f429f44D95F7F427F781A77f2590aA63e3",
+      "memoSigner": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+      "amountAtomic": "1000000"
+    },
+    "vault": "BZFvu3k5ABNqqpfteqU8EpNK1Kno2RrTvKdD1ZLmGcXk",
+    "authority": "BmqLz6FkeubGa7Ti7AvCmRNBfjT2RtDaRoeFgBq98GpZ",
+    "funding": "5T5qVYeNUCzG2ok3NgxM7bNh287Jpihj54hecPARpRHp7oCLA87UNCMo5FjN9NQR5y4wShxivmMAgCTfF2DxRWv8"
+  },
+  "holdBeforeRelease": {
+    "observedAt": "2026-11-24T13:18:10.324Z",
+    "cases": [
+      "commodities-2026-11-23-3435f1fa",
+      "commodities-2026-11-24-8712c156"
+    ],
+    "results": [
+      {
+        "status": "HOLD",
+        "reasons": [
+          "Container number: expected TGHU1234567, found TGHU1234572. Request a terminal discharge record for the container, bill of lading and voyage on this order."
+        ],
+        "vault": "BZFvu3k5ABNqqpfteqU8EpNK1Kno2RrTvKdD1ZLmGcXk",
+        "funding": "5T5qVYeNUCzG2ok3NgxM7bNh287Jpihj54hecPARpRHp7oCLA87UNCMo5FjN9NQR5y4wShxivmMAgCTfF2DxRWv8",
+        "amountAtomic": "1000000"
+      },
+      {
+        "status": "HOLD",
+        "reasons": [
+          "The shipment records are illustrative.",
+          "Authenticated originals and supplier registry confirmation are required."
+        ],
+        "vault": "BZFvu3k5ABNqqpfteqU8EpNK1Kno2RrTvKdD1ZLmGcXk",
+        "funding": "5T5qVYeNUCzG2ok3NgxM7bNh287Jpihj54hecPARpRHp7oCLA87UNCMo5FjN9NQR5y4wShxivmMAgCTfF2DxRWv8",
+        "amountAtomic": "1000000"
+      }
+    ]
+  },
+  "signedReview": {
+    "review": {
+      "version": 1,
+      "escrow": "BZFvu3k5ABNqqpfteqU8EpNK1Kno2RrTvKdD1ZLmGcXk",
+      "termsDigest": "e2e84e0b95df201a97cb7c21fbd78811311b2bb48f99053420d6f1d3f1bbdf52",
+      "memoDigest": "0xd964b5fe548aa15be5a90e069b7f4adde1caabb8e7928ab158de353ddf882363",
+      "registration": "196801000264",
+      "evidence": {
+        "purchaseOrder": "f35b6782d7a804f4b2057d7d1bcc896fc737d3bad948a1062d7747f0aa6c608c",
+        "billOfLading": "eb0db7b254b3f73fd794358efdd462c76df1249494389fd7bbdd36cd92f97779",
+        "discharge": "ebb7f3c9ea195413e8c9c401601327cca628712c4f54b9aa1b9af2dca51a6386",
+        "registry": "972c91a17d4763bc090cf3b007b914bd79ee597f0b8a76800f53e56a928addb6"
+      },
+      "issuedAt": "2026-11-24T13:18:45.137Z",
+      "expiresAt": "2026-11-25T13:18:45.137Z"
+    },
+    "signature": "0xd6c2a02ddd252977882dd517ab54c04b2afdd82f9a7cdff20a6da7861ab15d7c0ca94b0d9984c94458d829bd4de45015bbc57ec6d518e2c0605c4b0a6ab148f51b"
+  },
+  "release": {
+    "signature": "22u5PeXVBWJm13mNoS9ksXYDnR72PT7KDFfx2aubVQLWDt5wuWgdbUAGvHcfyvg53nE3B4Z8NvUJo5XMf2bzHfzy",
+    "slot": 525802847,
+    "memoDigest": "0xd964b5fe548aa15be5a90e069b7f4adde1caabb8e7928ab158de353ddf882363",
+    "reviewDigest": "fd825679f1516ae1e455908b28dce09d1b0ac6db9c2d1dbd97a17ba2d0dd4113",
+    "finalized": true,
+    "supplierTokenAccount": "6NRwp4Auxr6dWkStzwx1XzmwxK9Yqrj1oFCmr2oDqcpk",
+    "amountAtomic": "1000000",
+    "vaultClosed": true
+  },
+  "successfulVaultTransactions": 2,
+  "repeatedSubmission": "The CLI returned the same finalized signature. The vault transaction history still contains the deposit and one release."
+}
