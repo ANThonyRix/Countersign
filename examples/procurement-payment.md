@@ -13,7 +13,7 @@ The buyer orders 1,000 kg of packaging film, SKU `FILM-01`, under `DEMO-PO-011W`
 | HOLD | `TGHU1234572` at Rotterdam on 30 July | The entry identifies another container. Request the record for `TGHU1234567`. |
 | PROCEED | `TGHU1234567` at Rotterdam on 30 July | The order, bill of lading and discharge entry agree. The entered date meets the illustrative deadline. |
 
-The memorandum includes a separate overall recommendation. It remains HOLD until authenticated originals establish the order and the shipment. Missing critical checks or conflicting evidence also prevent clearance. The memo's signature covers the entered values, comparisons, findings and receipts. Verify checks the memo signature and Telegraph signal hashes. The paid signals cover supplier and shipping checks.
+The two status cards show **Shipment checks** and **Overall payment decision** together. Shipment PROCEED means the order, container and discharge deadline match on illustrative records. Both recorded runs retain overall HOLD pending authenticated originals and a resolved supplier registry check. The memo's signature covers the entered values, comparisons, findings and receipts. Verify checks the memo signature and Telegraph signal hashes. Authenticating original shipment documents requires separate evidence.
 
 ## Reproduce both comparisons
 

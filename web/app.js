@@ -558,7 +558,7 @@ async function renderMemo(id) {
         ),
         verifyBtn,
       ),
-      decisionBlock(memo.decision, memo.decision_label, memo.reasons),
+      memo.payment_conditions ? orderDecisionSummary(memo) : decisionBlock(memo.decision, memo.decision_label, memo.reasons),
       paymentConditionsBlock(memo),
       el("dl", { class: "stats" },
         stat("Total cost", usd(memo.cost.total_usd, 4)),
@@ -639,8 +639,10 @@ function corroborationText(c) {
 function route(e) {
   const h = location.hash;
   if (h.startsWith("#/memo/")) {
-    // On a phone the stage sits below the form, so bring the memo into view after a click.
-    return renderMemo(decodeURIComponent(h.slice(7))).then(() => e && focusStage());
+    // On a phone the stage sits below the form, even when opening a shared report.
+    return renderMemo(decodeURIComponent(h.slice(7))).then(() => {
+      if (e || isMobile()) focusStage();
+    });
   }
   if (h.startsWith("#/run/")) return attachRun(h.slice(6));
   if (h === "#/quote" && stage.querySelector(".view")) return;
@@ -661,13 +663,47 @@ function loadCaseStudy(paymentCase) {
   $("#estimate").textContent = "";
 }
 
+function orderDecisionSummary(memo) {
+  const { basis, document_decision: shipment } = memo.payment_conditions;
+  const comparison = memo.findings.find((f) =>
+    ["order:booking", "order:shipment", "order:deadline"].includes(f.checkId) && f.verdict !== "clear"
+  );
+  const explanation = shipment === "PROCEED"
+    ? `The order, container and discharge deadline match on ${basis} records.`
+    : comparison?.summary ?? "The records do not establish that all shipment conditions were met.";
+  const pending = [];
+  const originals = memo.findings.find((f) => f.checkId === "order:document-origin");
+  if (originals && originals.verdict !== "clear") pending.push("Authenticate originals from the buyer, carrier and terminal.");
+  if (memo.findings.some((f) => f.checkId.startsWith("registry:") &&
+      (f.verdict !== "clear" || f.corroboration === "disputed"))) {
+    pending.push("Resolve the supplier registry check.");
+  }
+  return el("div", { class: "order-decisions" },
+    el("section", { class: "card order-decision", "aria-labelledby": "shipment-decision-title" },
+      el("h2", { id: "shipment-decision-title", text: "Shipment checks" }),
+      el("div", { class: `shipment-label ${shipment === "PROCEED" ? "pass" : "hold"}`, text: shipment }),
+      el("p", { class: "small muted", text: basis === "illustrative" ? "Illustrative records" : "Supplied records" }),
+      el("p", { class: "order-decision-copy", text: explanation }),
+    ),
+    el("section", { class: `card decision ${memo.decision} order-decision`, "aria-labelledby": "payment-decision-title" },
+      el("h2", { id: "payment-decision-title", text: "Overall payment decision" }),
+      el("div", { class: "decision-label", text: memo.decision_label }),
+      pending.length ? el("ul", {}, ...pending.map((reason) => el("li", { text: reason }))) : null,
+      el("details", { class: "raw", open: pending.length === 0 },
+        el("summary", { text: "Decision reasons" }),
+        el("ul", {}, ...memo.reasons.map((reason) => el("li", { text: reason }))),
+      ),
+    ),
+  );
+}
+
 function paymentConditionsBlock(memo) {
   if (!memo.payment_conditions) return null;
   const { basis, document_decision: decision } = memo.payment_conditions;
   return el("section", { class: "card", "aria-labelledby": "m-payment" },
     el("h2", { id: "m-payment", text: "Payment conditions" }),
     el("p", { class: "f-sum", text: `${decision} (${basis} documents)` }),
-    el("p", { class: "small muted", text: "Comparison of entered document values. Telegraph receipts cover the supplier and shipping checks." }),
+    el("p", { class: "small muted", text: "Comparisons use the entered records. Verify checks the report signature and Telegraph signals. Original documents need separate authentication." }),
     ...memo.findings.filter((f) => f.checkId.startsWith("order:")).map((f) => el("details", { class: "raw" },
       el("summary", { text: f.title }),
       el("p", { text: f.summary }),

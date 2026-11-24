@@ -1,0 +1,37 @@
+:root {
+  --p-bg: #f7f9f8;
+  --p-surface: #ebf0ee;
+  --p-ink: #06525c;
+  --p-muted: #2f737d;
+  --p-accent: #06525c;
+  --p-action: #06525c;
+  --p-action-ink: #f7f9f8;
+  --font-display: "Instrument Sans", system-ui, sans-serif;
+  --font-text: "Instrument Sans", system-ui, sans-serif;
+}
+
+.showcase-bar { border-bottom: 1px solid var(--line); }
+.showcase-bar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 70px; }
+.showcase-bar .nav__logo { font-weight: 700; }
+#content > section { height: auto; min-height: 0; padding: 0; }
+#content > .showcase-intro { padding-block: clamp(34px, 5vw, 64px) clamp(24px, 3vw, 42px); }
+.showcase-intro h1 { max-width: 16ch; font-size: clamp(38px, 5.7vw, 80px); line-height: 1.02; letter-spacing: -.042em; }
+.showcase-intro p { max-width: 64ch; font-size: clamp(16px, 2vw, 21px); margin-top: 18px; }
+.showcase-live { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); align-items: start; gap: clamp(18px, 4vw, 52px); }
+.showcase-live h2, .showcase-section h2 { font-size: clamp(26px, 3.2vw, 46px); }
+.showcase-live p { margin-block: 12px; }
+.video-length { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 8px; }
+.showcase-live video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #101519; }
+#content > .showcase-section { margin-top: clamp(42px, 7vw, 78px); border-top: 1px solid var(--line); padding-top: clamp(24px, 4vw, 48px); }
+.showcase-section > p { margin-block: 12px 20px; max-width: 72ch; }
+.showcase-links { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.showcase-link { display: inline-flex; align-items: center; min-height: 44px; width: fit-content; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.showcase-link:hover, .showcase-link:focus-visible { color: var(--muted); }
+.showcase-walkthrough { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-block: 14px 70px; }
+.showcase-walkthrough p { max-width: 68ch; margin-bottom: 14px; }
+.showcase-walkthrough code { font-family: ui-monospace, monospace; font-size: .92em; overflow-wrap: anywhere; }
+.showcase-actions { display: flex; flex-direction: column; }
+
+@media (max-width: 740px) {
+  .showcase-live, .showcase-walkthrough { grid-template-columns: minmax(0, 1fr); }
+}

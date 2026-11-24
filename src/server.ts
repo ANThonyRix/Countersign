@@ -52,6 +52,7 @@ const MIME: Record<string, string> = {
   ".woff2": "font/woff2",
   ".jpg": "image/jpeg",
   ".png": "image/png",
+  ".mp4": "video/mp4",
 };
 
 function send(res: ServerResponse, status: number, body: unknown) {
@@ -160,7 +161,15 @@ async function verifyMemo(id: string) {
   return { ok, signature, signals, checkedAt: new Date().toISOString() };
 }
 
-function serveStatic(res: ServerResponse, urlPath: string) {
+function videoRange(header: string, size: number) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header);
+  if (!match || (!match[1] && !match[2]) || !size) return null;
+  const start = match[1] ? Number(match[1]) : Math.max(0, size - Number(match[2]));
+  const end = match[1] && match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+  return start <= end ? { start, end } : null;
+}
+
+function serveStatic(req: IncomingMessage, res: ServerResponse, urlPath: string) {
   let rel: string;
   try {
     rel = urlPath === "/" ? "index.html" : decodeURIComponent(urlPath).replace(/^\/+/, "");
@@ -171,12 +180,33 @@ function serveStatic(res: ServerResponse, urlPath: string) {
   const file = path.resolve(WEB, rel);
   // Dot segments (.taste-skill, .git, .env and the like) are tooling, never site content.
   const hidden = path.relative(WEB, file).split(path.sep).some((s) => s.startsWith("."));
-  if (hidden || !file.startsWith(WEB + path.sep) || !existsSync(file) || !statSync(file).isFile()) {
+  const stats = !hidden && file.startsWith(WEB + path.sep) && existsSync(file)
+    ? statSync(file, { throwIfNoEntry: false }) : undefined;
+  if (!stats?.isFile()) {
     res.writeHead(404, { ...SECURITY_HEADERS, "content-type": "text/plain" });
     return res.end("not found");
   }
-  res.writeHead(200, { ...SECURITY_HEADERS, "content-type": MIME[path.extname(file)] ?? "application/octet-stream", "cache-control": "no-cache" });
-  createReadStream(file).pipe(res);
+  const type = MIME[path.extname(file)] ?? "application/octet-stream";
+  const headers = {
+    ...SECURITY_HEADERS, "content-type": type, "cache-control": "no-cache",
+    ...(type === "video/mp4" ? { "accept-ranges": "bytes" } : {}),
+  };
+  const requestedRange = type === "video/mp4" && req.method === "GET" && !req.headers["if-range"] ? req.headers.range : undefined;
+  const range = requestedRange ? videoRange(requestedRange, stats.size) : undefined;
+  if (range === null) {
+    res.writeHead(416, { ...headers, "content-range": `bytes */${stats.size}`, "content-length": 0 });
+    return res.end();
+  }
+  res.writeHead(range ? 206 : 200, {
+    ...headers,
+    "content-length": range ? range.end - range.start + 1 : stats.size,
+    ...(range ? { "content-range": `bytes ${range.start}-${range.end}/${stats.size}` } : {}),
+  });
+  if (req.method === "HEAD") return res.end();
+  const stream = createReadStream(file, range);
+  stream.on("error", () => res.destroy());
+  res.on("close", () => stream.destroy());
+  stream.pipe(res);
 }
 
 const server = createServer(async (req, res) => {
@@ -214,7 +244,7 @@ const server = createServer(async (req, res) => {
       return memo ? send(res, 200, memo) : send(res, 404, { error: "memo not found" });
     }
     if (p.startsWith("/api/")) return send(res, 404, { error: "not found" });
-    if (req.method === "GET") return serveStatic(res, p);
+    if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res, p);
     send(res, 405, { error: "method not allowed" });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;

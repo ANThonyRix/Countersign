@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="tonal" data-motion>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cross-border procurement demo | Countersign</title>
+  <meta name="description" content="Watch Countersign audit a shipment before supplier payment. See the live Ethereum Sepolia run and verify its signed Telegraph receipts.">
+  <meta name="site-kind" content="software">
+  <meta name="page-type" content="software">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Countersign | Cross-border procurement demo">
+  <meta property="og:description" content="The shipment checks pass. Supplier payment stays on hold. Watch the live run and see the evidence.">
+  <meta property="og:url" content="https://countersign.ink/procurement.html">
+  <meta property="og:image" content="https://countersign.ink/media/procurement-live.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://countersign.ink/procurement.html">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/motion/motion.css">
+  <link rel="stylesheet" href="procurement.css">
+  </head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="showcase-bar">
+    <div class="wrap">
+      <a class="nav__logo" href="./">Countersign</a>
+      <nav aria-label="Demo links">
+        <a class="btn btn--primary" href="app.html?case=commodities&amp;payment=proceed">Open the agent</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" class="wrap">
+    <section class="showcase-intro" aria-labelledby="procurement-title" data-enter>
+      <h1 id="procurement-title">Audit a shipment before paying the supplier</h1>
+      <p>Trace a purchase order to the booked container and Rotterdam discharge. See the Telegraph checks and signed evidence behind the payment hold.</p>
+    </section>
+
+    <section class="showcase-live" id="live" aria-labelledby="live-title">
+      <div>
+        <h2 id="live-title">Live run <span class="video-length">1:52</span></h2>
+        <p>Watch the buyer enter the order, request a quote, start the run and verify the report. Nine checks cost 0.09 test USDC on Ethereum Sepolia.</p>
+        <a class="showcase-link" href="media/procurement-live.mp4" download>Download MP4</a>
+      </div>
+      <video controls playsinline preload="none" poster="media/procurement-live.jpg" aria-labelledby="live-title">
+        <source src="media/procurement-live.mp4" type="video/mp4">
+        <a href="media/procurement-live.mp4">Open the live run MP4</a>
+      </video>
+    </section>
+
+    <section class="showcase-section" id="report" aria-labelledby="report-title">
+      <h2 id="report-title">Shipment PROCEED. Payment HOLD.</h2>
+      <p>The evidence ledger shows the providers, costs, signal hashes and Telegraph receipts. <strong>Verify memo</strong> rechecks the signature and all nine signals.</p>
+      <div class="showcase-links">
+        <a class="showcase-link" href="app.html#/memo/commodities-2026-11-24-8712c156">Open the signed report</a>
+        <a class="showcase-link" href="api/memos/commodities-2026-11-24-8712c156">Signed JSON</a>
+      </div>
+    </section>
+
+    <section class="showcase-section" id="walkthrough" aria-labelledby="walkthrough-title">
+      <h2 id="walkthrough-title">Walkthrough</h2>
+      <div class="showcase-walkthrough">
+        <div>
+          <p>The buyer’s illustrative order <code>DEMO-PO-011W</code> names container <code>TGHU1234567</code> on Ever Given voyage <code>011W</code>. Payment requires discharge of that container in Rotterdam by 31 July 2021.</p>
+          <p>The terminal entry names <code>TGHU1234567</code> and shows discharge on 30 July. The shipment comparison passes. The buyer still needs authenticated originals and a resolved supplier registry check to release payment.</p>
+          <p>The voyage is based on public records. The purchase order, bill of lading, container records and terms are illustrative. The signed Telegraph checks and Sepolia receipts come from live testnet runs.</p>
+        </div>
+        <div class="showcase-actions">
+          <a class="showcase-link" href="https://github.com/ANThonyRix/Countersign/blob/main/examples/procurement-live.md">Reproduction steps on GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

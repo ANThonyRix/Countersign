@@ -232,6 +232,14 @@ button, input, textarea { font: inherit; color: inherit; }
 .decision-label { font: 600 clamp(32px, 4vw, 48px)/1 var(--font-text); letter-spacing: -0.02em; color: var(--d); }
 .decision ul { margin: 0; padding-left: 18px; color: #c3cad6; font-size: 14px; }
 .decision li + li { margin-top: var(--s1); }
+.order-decisions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
+.order-decision, .order-decision.decision { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; gap: var(--s2); margin: 0; }
+.order-decision h2, .order-decision p { margin: 0; }
+.order-decision .decision-label, .shipment-label { font: 600 clamp(25px, 3.3vw, 38px)/1 var(--font-text); letter-spacing: -0.02em; }
+.shipment-label.pass { color: var(--go); }
+.shipment-label.hold { color: var(--review); }
+.order-decision-copy { font-size: 14px; color: #c3cad6; overflow-wrap: anywhere; }
+.order-decision details > ul { padding-bottom: var(--s2); }
 
 .findings { list-style: none; margin: 0; padding: 0; }
 .findings > li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: var(--s3); padding: var(--s4) 0; border-top: 1px solid var(--line); }
@@ -250,8 +258,8 @@ table.ledger { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ledger td.ok { color: var(--go); }
 .ledger td.bad { color: var(--stop); }
 
-.sig { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s2) var(--s4); margin: 0; font-size: 13px; }
-.sig dt { color: var(--muted); }
+.sig { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--s2) var(--s4); margin: 0; font-size: 13px; }
+.sig dt { color: var(--muted); overflow-wrap: anywhere; }
 .sig dd { margin: 0; font-family: var(--font-mono); font-size: 12px; overflow-wrap: anywhere; }
 .verify-out { margin-top: var(--s4); }
 .verify-out .result { font-weight: 600; }
@@ -281,6 +289,7 @@ details.raw pre { margin: 0; padding: var(--s4); background: var(--bg); border: 
   .wallet dl .w-day { display: none; }
 }
 @media (max-width: 600px) {
+  .order-decisions { grid-template-columns: minmax(0, 1fr); }
   .bar { padding: var(--s2) var(--s4); }
   .chip span:last-child { display: none; }
   .chip { padding: var(--s2); }
@@ -292,7 +301,6 @@ details.raw pre { margin: 0; padding: var(--s4); background: var(--bg); border: 
   .rows .r-end { text-align: left; }
   .rows li.child { padding-left: var(--s3); }
   .view-head .btn { width: 100%; }
-  .sig { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
