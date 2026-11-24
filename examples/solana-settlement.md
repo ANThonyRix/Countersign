@@ -6,6 +6,8 @@ The buyer authorizes a fixed amount and supplier wallet when funding the order. 
 
 ## Recorded Devnet run · November 24, 2026
 
+[Watch the Solana Devnet walkthrough](https://countersign.ink/procurement.html#solana) or [download the MP4](../web/media/solana-devnet-live.mp4). The video reviews the signed reports, rechecks the Telegraph signals and verifies the earlier release in Solana Explorer.
+
 [Open the report in Countersign](https://countersign.ink/app.html#/memo/commodities-2026-11-24-devnet-release) · [Escrow deposit](https://explorer.solana.com/tx/5T5qVYeNUCzG2ok3NgxM7bNh287Jpihj54hecPARpRHp7oCLA87UNCMo5FjN9NQR5y4wShxivmMAgCTfF2DxRWv8?cluster=devnet) · [Finalized release](https://explorer.solana.com/tx/22u5PeXVBWJm13mNoS9ksXYDnR72PT7KDFfx2aubVQLWDt5wuWgdbUAGvHcfyvg53nE3B4Z8NvUJo5XMf2bzHfzy?cluster=devnet) · [Signed release report](commodities-2026-11-24-devnet-release.json) · [Settlement proof](solana-devnet/settlement-proof.json)
 
 1. **Fund.** The test buyer deposited 1 test USDC for `DEMO-PO-011W`.

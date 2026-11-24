@@ -81,7 +81,7 @@ The [walkthrough](examples/cross-border-sourcing.md) explains the public records
 
 The [procurement demo](https://countersign.ink/procurement.html) includes a live Ethereum Sepolia recording and signed reports for both shipment outcomes. The [walkthrough](examples/procurement-live.md) explains the payment decisions and how to reproduce the scenarios.
 
-The [Solana Devnet demo](https://countersign.ink/procurement.html#solana) shows the finalized release of 1 test USDC from a separate supplier escrow. The [settlement guide](examples/solana-settlement.md) covers reviewing the recorded proof and reproducing a run with your own test wallets. Telegraph intelligence purchases continue to use the existing Sepolia escrow.
+The [Solana Devnet video](https://countersign.ink/procurement.html#solana) walks through both payment holds and verifies the finalized release of 1 test USDC from a separate supplier escrow. The [settlement guide](examples/solana-settlement.md) covers reviewing the recorded proof and reproducing a run with your own test wallets. Telegraph intelligence purchases continue to use the existing Sepolia escrow. [Download the MP4 from this repository](web/media/solana-devnet-live.mp4).
 
 From the CLI:
 

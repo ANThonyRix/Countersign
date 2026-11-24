@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cross-border procurement demo | Countersign</title>
-  <meta name="description" content="Compare two signed shipment reviews and watch a live Ethereum Sepolia run with verifiable Telegraph receipts.">
+  <meta name="description" content="Compare signed shipment reviews, inspect Telegraph receipts on Sepolia and verify a supplier payment on Solana Devnet.">
   <meta name="site-kind" content="software">
   <meta name="page-type" content="software">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Countersign | Cross-border procurement demo">
-  <meta property="og:description" content="One purchase order, two shipment outcomes. Watch the live run and compare the signed reports.">
+  <meta property="og:description" content="Watch how Countersign checks a shipment, explains a payment hold and verifies a finalized Solana Devnet settlement.">
   <meta property="og:url" content="https://countersign.ink/procurement.html">
   <meta property="og:image" content="https://countersign.ink/media/procurement-live.jpg">
   <meta name="twitter:card" content="summary_large_image">
@@ -77,8 +77,17 @@
     </section>
 
     <section class="showcase-section" id="solana" aria-labelledby="solana-title">
-      <h2 id="solana-title">Supplier settlement on Solana Devnet</h2>
-      <p>Both earlier reports kept payment on HOLD. In the controlled release, the buyer and settlement signer released 1 test USDC after a review of signed test documents and archived Telegraph checks. The signed report links to the finalized transaction.</p>
+      <div class="showcase-live">
+        <div>
+          <h2 id="solana-title">Supplier settlement on Solana Devnet</h2>
+          <p id="solana-video-summary">See why both earlier reports kept payment on HOLD, then watch Countersign recheck nine Telegraph signals and verify the finalized release of 1 test USDC from a separate controlled test.</p>
+          <a class="showcase-link" href="media/solana-devnet-live.mp4" download>Download Solana video (2:07)</a>
+        </div>
+        <video controls playsinline preload="none" poster="media/solana-devnet-live.jpg" aria-labelledby="solana-title" aria-describedby="solana-video-summary">
+          <source src="media/solana-devnet-live.mp4" type="video/mp4">
+          <a href="media/solana-devnet-live.mp4">Open the Solana Devnet video</a>
+        </video>
+      </div>
       <div class="showcase-links">
         <a class="showcase-link" href="app.html#/memo/commodities-2026-11-24-devnet-release">Open the Devnet release report</a>
         <a class="showcase-link" href="https://github.com/ANThonyRix/Countersign/blob/main/examples/solana-settlement.md">Reproduce the settlement on Devnet</a>
