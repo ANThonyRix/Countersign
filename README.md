@@ -79,7 +79,7 @@ npm run cs -- run commodities --seller "Trafigura Pte Ltd" --jurisdiction Singap
 For the cross-border sourcing case, select **Commodities → Load cross-border case** in the web app.
 The [walkthrough](examples/cross-border-sourcing.md) explains the public records, buyer deadline and signed result.
 
-The [procurement demo](https://countersign.ink/procurement.html) includes a live Ethereum Sepolia recording and its signed report. The [walkthrough](examples/procurement-live.md) explains the payment decision and how to reproduce the run.
+The [procurement demo](https://countersign.ink/procurement.html) includes a live Ethereum Sepolia recording and signed reports for both shipment outcomes. The [walkthrough](examples/procurement-live.md) explains the payment decisions and how to reproduce the scenarios.
 
 From the CLI:
 

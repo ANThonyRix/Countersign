@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cross-border procurement demo | Countersign</title>
-  <meta name="description" content="Watch Countersign audit a shipment before supplier payment. See the live Ethereum Sepolia run and verify its signed Telegraph receipts.">
+  <meta name="description" content="Compare two signed shipment reviews and watch a live Ethereum Sepolia run with verifiable Telegraph receipts.">
   <meta name="site-kind" content="software">
   <meta name="page-type" content="software">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Countersign | Cross-border procurement demo">
-  <meta property="og:description" content="The shipment checks pass. Supplier payment stays on hold. Watch the live run and see the evidence.">
+  <meta property="og:description" content="One purchase order, two shipment outcomes. Watch the live run and compare the signed reports.">
   <meta property="og:url" content="https://countersign.ink/procurement.html">
   <meta property="og:image" content="https://countersign.ink/media/procurement-live.jpg">
   <meta name="twitter:card" content="summary_large_image">
@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/system.css">
   <link rel="stylesheet" href="assets/motion/motion.css">
   <link rel="stylesheet" href="procurement.css">
-  </head>
+</head>
 <body>
   <a class="skip-link" href="#content">Skip to content</a>
   <header class="showcase-bar">
@@ -41,7 +41,7 @@
 
     <section class="showcase-live" id="live" aria-labelledby="live-title">
       <div>
-        <h2 id="live-title">Live run <span class="video-length">1:52</span></h2>
+        <h2 id="live-title">Live PROCEED run <span class="video-length">1:52</span></h2>
         <p>Watch the buyer enter the order, request a quote, start the run and verify the report. Nine checks cost 0.09 test USDC on Ethereum Sepolia.</p>
         <a class="showcase-link" href="media/procurement-live.mp4" download>Download MP4</a>
       </div>
@@ -52,11 +52,27 @@
     </section>
 
     <section class="showcase-section" id="report" aria-labelledby="report-title">
-      <h2 id="report-title">Shipment PROCEED. Payment HOLD.</h2>
-      <p>The evidence ledger shows the providers, costs, signal hashes and Telegraph receipts. <strong>Verify memo</strong> rechecks the signature and all nine signals.</p>
-      <div class="showcase-links">
-        <a class="showcase-link" href="app.html#/memo/commodities-2026-11-24-8712c156">Open the signed report</a>
-        <a class="showcase-link" href="api/memos/commodities-2026-11-24-8712c156">Signed JSON</a>
+      <h2 id="report-title">Two shipment outcomes</h2>
+      <p>The same purchase order and deadline produce different shipment results. Each report includes an evidence ledger with Telegraph receipts. <strong>Verify memo</strong> rechecks the signature and signals.</p>
+      <div class="showcase-cases">
+        <article id="hold-case" aria-labelledby="hold-title">
+          <h3 id="hold-title">Shipment HOLD <span>Payment HOLD</span></h3>
+          <p>The order names <code>TGHU1234567</code>. The terminal record names <code>TGHU1234572</code>, so it does not prove discharge of the booked container.</p>
+          <p class="case-cost">8 paid checks · 0.08 test USDC</p>
+          <div class="showcase-links">
+            <a class="showcase-link" href="app.html#/memo/commodities-2026-11-23-3435f1fa">Open the HOLD report</a>
+            <a class="showcase-link" href="api/memos/commodities-2026-11-23-3435f1fa">HOLD signed JSON</a>
+          </div>
+        </article>
+        <article id="proceed-case" aria-labelledby="proceed-title">
+          <h3 id="proceed-title">Shipment PROCEED <span>Payment HOLD</span></h3>
+          <p>The container and deadline match on illustrative records. Payment stays on hold until the buyer authenticates the originals and resolves the supplier registry check.</p>
+          <p class="case-cost">9 paid checks · 0.09 test USDC</p>
+          <div class="showcase-links">
+            <a class="showcase-link" href="app.html#/memo/commodities-2026-11-24-8712c156">Open the PROCEED report</a>
+            <a class="showcase-link" href="api/memos/commodities-2026-11-24-8712c156">PROCEED signed JSON</a>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -65,10 +81,12 @@
       <div class="showcase-walkthrough">
         <div>
           <p>The buyer’s illustrative order <code>DEMO-PO-011W</code> names container <code>TGHU1234567</code> on Ever Given voyage <code>011W</code>. Payment requires discharge of that container in Rotterdam by 31 July 2021.</p>
-          <p>The terminal entry names <code>TGHU1234567</code> and shows discharge on 30 July. The shipment comparison passes. The buyer still needs authenticated originals and a resolved supplier registry check to release payment.</p>
+          <p>Both terminal entries give 30 July as the discharge date. Only the entry for <code>TGHU1234567</code> meets the container and date conditions together.</p>
           <p>The voyage is based on public records. The purchase order, bill of lading, container records and terms are illustrative. The signed Telegraph checks and Sepolia receipts come from live testnet runs.</p>
         </div>
         <div class="showcase-actions">
+          <a class="showcase-link" href="app.html?case=commodities&amp;payment=hold">Try the HOLD preset</a>
+          <a class="showcase-link" href="app.html?case=commodities&amp;payment=proceed">Try the PROCEED preset</a>
           <a class="showcase-link" href="https://github.com/ANThonyRix/Countersign/blob/main/examples/procurement-live.md">Reproduction steps on GitHub</a>
         </div>
       </div>
