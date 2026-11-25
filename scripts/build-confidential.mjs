@@ -14,6 +14,13 @@ await build({
   plugins: [{
     name: "arcium-browser",
     setup(builder) {
+      builder.onResolve({ filter: /^\.\/sdk\.ts$/ }, args => {
+        if (args.importer.endsWith("compute.ts")) return { path: "sdk", namespace: "arcium-browser" };
+      });
+      builder.onLoad({ filter: /^sdk$/, namespace: "arcium-browser" }, () => ({
+        resolveDir: process.cwd(),
+        contents: "import * as anchor from '@anchor-lang/core'; import * as arcium from '@arcium-hq/client'; export { anchor, arcium };",
+      }));
       builder.onResolve({ filter: /^(crypto|fs)$/ }, args => {
         if (args.importer.includes("@arcium-hq")) return { path: args.path, namespace: "arcium-browser" };
       });

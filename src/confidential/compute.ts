@@ -1,14 +1,17 @@
-import { BN, AnchorProvider } from "@anchor-lang/core";
-import {
-  awaitComputationFinalization, deserializeLE, getArciumProgramId, getArciumSignerAccAddress,
-  getClockAccAddress, getClusterAccAddress, getCompDefAccAddress, getCompDefAccOffset,
-  getComputationAccAddress, getExecutingPoolAccAddress, getFeePoolAccAddress,
-  getMempoolAccAddress, getMXEAccAddress, getMXEPublicKey, RescueCipher, sha256, x25519,
-} from "@arcium-hq/client";
+import type { BN as Offset, AnchorProvider } from "@anchor-lang/core";
 import {
   Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, type VersionedTransactionResponse,
 } from "@solana/web3.js";
 import { Buffer } from "buffer";
+import { anchor, arcium } from "./sdk.ts";
+
+const { BN } = anchor;
+const {
+  awaitComputationFinalization, deserializeLE, getArciumProgramId, getArciumSignerAccAddress,
+  getClockAccAddress, getClusterAccAddress, getCompDefAccAddress, getCompDefAccOffset,
+  getComputationAccAddress, getExecutingPoolAccAddress, getFeePoolAccAddress,
+  getMempoolAccAddress, getMXEAccAddress, getMXEPublicKey, RescueCipher, sha256, x25519,
+} = arcium;
 
 export const programId = new PublicKey("EbFG12L4EqbuCqKkhf3hbThgXz43wXAAXr3psBQGPoAz");
 export const clusterOffset = 456;
@@ -41,7 +44,7 @@ export function parseAmounts(values: string[]): Amounts {
   return [amounts[0], amounts[1], amounts[2]];
 }
 
-function queueInstruction(payer: PublicKey, computation: PublicKey, offset: BN, encrypted: number[][],
+function queueInstruction(payer: PublicKey, computation: PublicKey, offset: Offset, encrypted: number[][],
   key: Uint8Array, nonce: Uint8Array, market: MarketReference) {
   const body = Buffer.alloc(200);
   queueTag.copy(body, 0);

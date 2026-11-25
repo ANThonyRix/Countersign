@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
-import { BN } from "@anchor-lang/core";
-import { getClusterAccAddress, getComputationAccAddress } from "@arcium-hq/client";
 import { Keypair, TransactionInstruction, TransactionMessage, type VersionedTransactionResponse } from "@solana/web3.js";
 import { clusterOffset, parseAmounts, programId, queueContext, verifiedCiphertext } from "../src/confidential/compute.ts";
 import { consensusPrice } from "../src/confidential/market.ts";
+import { anchor, arcium } from "../src/confidential/sdk.ts";
+
+const { BN } = anchor;
+const { getClusterAccAddress, getComputationAccAddress } = arcium;
 
 const discriminator = (label: string) => createHash("sha256").update(label).digest().subarray(0, 8);
 const computation = getComputationAccAddress(clusterOffset, new BN(123));

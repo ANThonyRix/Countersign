@@ -1,12 +1,14 @@
 import { readFileSync } from "node:fs";
-import { AnchorProvider, Wallet } from "@anchor-lang/core";
-import { getArciumProgram, getArciumProgramId, getLookupTableAddress, getMXEAccAddress } from "@arcium-hq/client";
 import { AddressLookupTableProgram, Connection, Keypair, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { createHash } from "node:crypto";
 import { loadMemo, saveMemo, verifyMemoSignature } from "../src/core/memo.ts";
 import { calculate, definition, parseAmounts, programId, rpcUrl } from "../src/confidential/compute.ts";
 import { buyMarket, verifyMarket } from "../src/confidential/market.ts";
 import { createExecutionReport, updateMarket, verifyExecutionReport } from "../src/confidential/report.ts";
+import { anchor, arcium } from "../src/confidential/sdk.ts";
+
+const { AnchorProvider, Wallet } = anchor;
+const { getArciumProgram, getArciumProgramId, getLookupTableAddress, getMXEAccAddress } = arcium;
 
 function provider() {
   const file = process.env.CONFIDENTIAL_SOLANA_KEYPAIR_FILE;
