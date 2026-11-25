@@ -12,6 +12,8 @@
     "wallet:new": "tsx scripts/new-wallet.ts",
     "serve": "tsx src/server.ts",
     "settlement": "tsx scripts/settlement.ts",
+    "confidential": "tsx scripts/confidential.ts",
+    "build:confidential": "node scripts/build-confidential.mjs",
     "start": "tsx src/server.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --import tsx --test test/*.test.ts",
@@ -26,6 +28,9 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@anchor-lang/core": "1.0.2",
+    "@arcium-hq/client": "0.13.2",
+    "@noble/hashes": "1.8.0",
     "@solana/kit": "8.0.0",
     "@solana/spl-token": "0.4.15",
     "@solana/web3.js": "1.98.4",
@@ -33,10 +38,12 @@
     "@x402/fetch": "^2.30.0",
     "@x402/svm": "2.30.0",
     "bs58": "6.0.0",
+    "buffer": "6.0.3",
     "viem": "^2.57.17"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "esbuild": "0.28.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }

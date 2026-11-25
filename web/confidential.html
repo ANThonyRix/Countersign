@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; media-src 'self'; connect-src 'self' https://api.devnet.solana.com wss://api.devnet.solana.com; form-action 'none'; base-uri 'none'">
+  <title>Confidential Institutional Intelligence | Countersign</title>
+  <meta name="description" content="Verify SOL/USD market evidence and check redemption liquidity with confidential computation on Solana Devnet.">
+  <meta name="site-kind" content="software">
+  <meta name="page-type" content="software">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="confidential.css">
+</head>
+<body>
+  <a class="skip" href="#liquidity-form">Skip to liquidity check</a>
+  <header class="bar">
+    <a class="brand" href="./">Countersign</a>
+    <div class="bar-meta">
+      <a class="bar-link" href="app.html">Diligence workspace</a>
+      <span class="chip">Solana Devnet</span>
+    </div>
+  </header>
+  <main class="liquidity" id="liquidity">
+    <header class="liquidity-intro">
+      <h1>Confidential liquidity check</h1>
+      <p class="lede">See whether a fund can cover a redemption after a 20% drop in SOL. Arcium computes on encrypted amounts and your browser decrypts the verdict.</p>
+    </header>
+    <div class="liquidity-workspace">
+      <form id="liquidity-form" class="liquidity-form" autocomplete="off" aria-labelledby="positions-heading">
+        <h2 id="positions-heading">Portfolio inputs</h2>
+        <p class="muted">Use synthetic positions and a funded Devnet wallet.</p>
+        <div class="sample-actions" aria-label="Example positions">
+          <button type="button" class="link-btn" data-example="covered">Load covered example</button>
+          <button type="button" class="link-btn" data-example="review">Load review example</button>
+        </div>
+        <label for="position">SOL position</label>
+        <input id="position" type="text" inputmode="decimal" maxlength="12" required>
+        <label for="reserve">USDC reserve</label>
+        <input id="reserve" type="text" inputmode="decimal" maxlength="12" required>
+        <label for="redemption">Redemption amount in USDC</label>
+        <input id="redemption" type="text" inputmode="decimal" maxlength="12" required>
+        <button type="submit" class="btn btn-primary" id="calculate" disabled>Run private check</button>
+      </form>
+      <section class="liquidity-evidence" aria-labelledby="market-heading">
+        <h2 id="market-heading">Market evidence</h2>
+        <p id="market-status" role="status">Checking the latest paid SOL/USD snapshot…</p>
+        <a id="market-report" class="liquidity-link" hidden>Open signed market evidence</a>
+        <button type="button" class="link-btn" id="refresh-market">Check for a fresh snapshot</button>
+        <div class="liquidity-result" aria-labelledby="result-heading">
+          <h2 id="result-heading">Private decision</h2>
+          <p id="run-status" role="status">The verdict appears here after the cluster signs its result.</p>
+          <output id="verdict" hidden></output>
+          <a id="queue-transaction" class="liquidity-link" hidden>View encrypted request on Solana</a>
+          <a id="callback-transaction" class="liquidity-link" hidden>View signed callback on Solana</a>
+          <a id="execution-report" class="liquidity-link" hidden>Open signed public report</a>
+          <button type="button" class="link-btn" id="verify-execution" hidden>Verify report</button>
+          <p id="verify-status" role="status" hidden></p>
+        </div>
+      </section>
+    </div>
+    <section class="liquidity-demo" id="demo" aria-labelledby="demo-heading">
+      <h2 id="demo-heading">Recorded Solana Devnet runs</h2>
+      <p>Both synthetic cases use the same $67.26 SOL price. The Kraken and Coinbase checks cost 0.02 test USDC in total. The video shortens network waits.</p>
+      <video controls playsinline preload="none" poster="media/confidential-devnet.jpg" aria-labelledby="demo-heading">
+        <source src="media/confidential-devnet.mp4" type="video/mp4">
+        <a href="media/confidential-devnet.mp4">Open the Devnet walkthrough</a>
+      </video>
+      <ul class="liquidity-reports">
+        <li><a class="liquidity-link" href="app.html#/memo/confidential-0d3082ff70bb98b8d897d765b3323f4b">COVERED report</a></li>
+        <li><a class="liquidity-link" href="app.html#/memo/confidential-d94527345a929bc987e6a96bf419bb80">REVIEW report</a></li>
+        <li><a class="liquidity-link" href="app.html#/memo/confidential-market-2026-11-25-69dc7da8">Shared market evidence</a></li>
+        <li><a class="liquidity-link" href="https://github.com/ANThonyRix/Countersign/blob/main/examples/confidential-liquidity.md">Reproduce the checks</a></li>
+      </ul>
+    </section>
+  </main>
+  <script type="module" src="confidential-client.js"></script>
+</body>
+</html>

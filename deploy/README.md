@@ -15,7 +15,9 @@ multiple replicas against the same wallet or data directory.
 - Health endpoint: `/healthz` (process health, independent of Telegraph and Sepolia RPC availability).
 
 The application uses `tsx` at runtime, so deployment installs development dependencies too.
-No frontend bundling is required. The browser receives the files under `web/` directly.
+The browser receives files under `web/` directly. Run `npm run build:confidential` during staging
+to generate the confidential page's local Arcium bundle. Make `web/confidential-client.js` readable
+by the service user before switching releases.
 
 ## Required environment
 

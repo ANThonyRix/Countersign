@@ -1,0 +1,16 @@
+[toolchain]
+package_manager = "npm"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+countersign_confidential = "EbFG12L4EqbuCqKkhf3hbThgXz43wXAAXr3psBQGPoAz"
+
+[programs.devnet]
+countersign_confidential = "EbFG12L4EqbuCqKkhf3hbThgXz43wXAAXr3psBQGPoAz"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"

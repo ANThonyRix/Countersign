@@ -23,6 +23,15 @@ export interface MemoBody {
   network: { node: string; chain: string; asset: string };
   agent: string;
   payment_payer?: string;
+  confidential_execution?: {
+    marketId: string;
+    marketDigest: string;
+    priceCents: number;
+    policy: string;
+    queue: string;
+    callback: string;
+    feesLamports: number;
+  };
 }
 
 export interface Memo extends MemoBody {

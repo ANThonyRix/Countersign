@@ -164,10 +164,17 @@ async function verifyMemo(id: string) {
   const anchor = memo.pack === "startup"
     ? await (await import("./settlement/startup-anchor.ts")).startupAnchorStatus(memo)
     : undefined;
+  const execution = memo.pack === "confidential"
+    ? await (await import("./confidential/report.ts")).verifyExecutionReport(memo)
+    : undefined;
+  const market = memo.pack === "confidential-market"
+    ? await (await import("./confidential/market.ts")).verifyMarket(memo, Date.parse(memo.created_at))
+    : undefined;
   const anchorMatches = !anchor || anchor.status === "unanchored" || anchor.status === "finalized";
   const ok = signature.digestMatches && signature.signerMatches && anchorMatches &&
+    (!execution || execution.status === "finalized") && (!market || market.ok) &&
     signals.every((s) => s.found && s.nodeVerified && s.localHashMatch && !s.error);
-  return { ok, signature, signals, ...(anchor ? { anchor } : {}), checkedAt: new Date().toISOString() };
+  return { ok, signature, signals, anchor, execution, market, checkedAt: new Date().toISOString() };
 }
 
 function videoRange(header: string, size: number) {
@@ -224,6 +231,19 @@ const server = createServer(async (req, res) => {
   try {
     guardRequest(req);
     if (req.method === "GET" && p === "/healthz") return send(res, 200, { ok: true });
+    if (req.method === "GET" && p === "/api/confidential/market") {
+      return send(res, 200, await (await import("./confidential/report.ts")).publicMarket());
+    }
+    if (req.method === "POST" && p === "/api/confidential/reports") {
+      const body = await readJson(req);
+      const { marketId, queue, callback } = body;
+      if (Object.keys(body).length !== 3 || typeof marketId !== "string" || typeof queue !== "string" || typeof callback !== "string") {
+        throw httpError(400, "Only public market and transaction references are accepted.");
+      }
+      const { createExecutionReport } = await import("./confidential/report.ts");
+      const memo = await createExecutionReport(marketId, { queue, callback }).catch(error => { throw httpError(422, error.message); });
+      return send(res, 201, { id: memo.id });
+    }
     if (req.method === "GET" && p === "/api/status") {
       const [wallet, startupWallet] = await Promise.all([
         hasAgentKey() ? walletStatus().catch((e: Error) => ({ error: e.message })) : null,

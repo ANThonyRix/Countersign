@@ -1,0 +1,125 @@
+{
+  "memo_version": 1,
+  "id": "confidential-d94527345a929bc987e6a96bf419bb80",
+  "created_at": "2026-11-25T13:52:26.000Z",
+  "pack": "confidential",
+  "mission": "Confidential Institutional Intelligence",
+  "subject": {
+    "name": "Private liquidity check",
+    "fields": {
+      "policy": "sol-liquidity-20pct-v1",
+      "market": "confidential-market-2026-11-25-69dc7da8"
+    }
+  },
+  "decision": "REVIEW",
+  "decision_label": "PRIVATE DECISION",
+  "reasons": [
+    "The Arcium callback validated the cluster signature. The analyst can decrypt the verdict locally."
+  ],
+  "confidential_execution": {
+    "marketId": "confidential-market-2026-11-25-69dc7da8",
+    "marketDigest": "0xe2521a80978857deeb350fddaa3154e466f96e9040e0ee22fe92a99b3317ff62",
+    "priceCents": 6726,
+    "policy": "sol-liquidity-20pct-v1",
+    "queue": "5fybRH9H3CJubcVtrVUsrDmMYaFV3RXiBK4inp6djhPo97qDqTCJwVrh3StLsAWQU4YHnTnLKJTPjuGn27jWCWEu",
+    "callback": "4LP2bSbLh1ik1Q2DozkqnU4dF8ueZYLbCjPqizYYb68ejsoXsBNSFxo4cPGtm8V5BqKoXuzW8xzPbJiJLdu8KMEE",
+    "feesLamports": 10000
+  },
+  "findings": [
+    {
+      "checkId": "sol-usd",
+      "title": "Independent SOL/USD quotes",
+      "why": "Use the lower price when both venues agree within 1%.",
+      "verdict": "clear",
+      "summary": "Conservative price $67.26.",
+      "facts": {
+        "priceCents": 6726
+      },
+      "critical": true,
+      "corroboration": "confirmed",
+      "evidence": [
+        "sol-usd-crypto-kraken",
+        "sol-usd-crypto-coinbase"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "sol-usd-crypto-kraken",
+      "checkId": "sol-usd",
+      "role": "primary",
+      "intent": "CRYPTO_PRICE_USD",
+      "minerId": "crypto-kraken",
+      "at": "2026-11-25T13:40:53.754Z",
+      "receipt": {
+        "receipt_hash": "0xfcaf6c8bbad7cdce05a5c91e1ba2dba2d960d93feb520ca048044cff4022c156",
+        "rail": "x402",
+        "payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+        "miner": "2865",
+        "intent": "CRYPTO_PRICE_USD",
+        "amount_uusdc": "10000",
+        "epoch_id": 0,
+        "settlement": "onchain",
+        "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "tx_hash": "5UCTvhm4VMG1w5FvYFyUWpocFM8zqk2yi9zTvtcx2GixMH7LPDgn3Nra2mLAL1UHSQpuGpZLNJ6J31hkaAcY8uzc",
+        "timestamp": 1795614081
+      },
+      "costUsd": 0.01,
+      "minerName": "Kraken Spot Price",
+      "signalHash": "0x462870d6983ad87153e32c1888e5e3479b7633739894838bc2e90715c892f453",
+      "durationMs": 322,
+      "result": {
+        "price_usd": 67.26
+      }
+    },
+    {
+      "id": "sol-usd-crypto-coinbase",
+      "checkId": "sol-usd",
+      "role": "crosscheck",
+      "intent": "CRYPTO_PRICE_USD",
+      "minerId": "crypto-coinbase",
+      "at": "2026-11-25T13:40:58.307Z",
+      "receipt": {
+        "receipt_hash": "0x08dd513ca824fbf7bcdf3f7832093bdba0d88c2f70daf912ab0e8b623304c02f",
+        "rail": "x402",
+        "payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+        "miner": "2864",
+        "intent": "CRYPTO_PRICE_USD",
+        "amount_uusdc": "10000",
+        "epoch_id": 0,
+        "settlement": "onchain",
+        "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "tx_hash": "4gbx5hRY6ka2B3B8R2uWVQ2qgdJPS58h52XdRrpSnzgxBVbwwTaMnpex61L3msvtZGyMLHonkK4MTfS21cG93RD2",
+        "timestamp": 1795614084
+      },
+      "costUsd": 0.01,
+      "minerName": "Coinbase Spot Price",
+      "signalHash": "0x2b77138543b9ff7d325c69173d5b6c89d8162b177cb88afa277728bce6004c61",
+      "durationMs": 253,
+      "result": {
+        "price_usd": 67.28
+      }
+    }
+  ],
+  "coverage": {
+    "total": 1,
+    "answered": 1,
+    "unknown": 0,
+    "skipped": 0
+  },
+  "cost": {
+    "total_usd": 0.02,
+    "paid_calls": 2,
+    "budget_usd": 0.02,
+    "per_finding_usd": 0.02
+  },
+  "network": {
+    "node": "https://devnode.telegraphprotocol.com",
+    "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+    "asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+  },
+  "agent": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+  "payment_payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+  "digest": "0xd75c6f9b37f1b454d2f22a28808c8f94e3cb84977a53cfc1e40a3911edb9ee37",
+  "signature": "0xbf7797a4ba879d8917a98903ce265cbda8942a53505cc956b45a6e7d9a7ac0a41614c32da1f3bdb9e0d7de14d2a8eafd6617142f9125703936ec0567b0c52e511c"
+}

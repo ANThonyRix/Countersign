@@ -86,6 +86,8 @@ The [Solana Devnet video](https://countersign.ink/procurement.html#solana) walks
 
 The [Startup Investment Intelligence demo](https://countersign.ink/startup.html#solana) shows the Helio review, three Telegraph payments through x402 on Solana Devnet and a finalized report anchor. See the [walkthrough and signed results](examples/startup-investment.md) or [download the video](web/media/startup-solana-devnet.mp4).
 
+[Confidential Institutional Intelligence](https://countersign.ink/confidential.html) checks a fund's redemption liquidity on Solana Devnet. Arcium applies a 20% SOL stress to encrypted portfolio amounts, and a signed report links the resulting execution to two independent paid Telegraph prices. See the [workflow and reproduction guide](examples/confidential-liquidity.md).
+
 From the CLI:
 
 ```bash

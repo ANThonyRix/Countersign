@@ -6,3 +6,4 @@ data/
 .taste-skill/
 *.log
 .DS_Store
+/web/confidential-client.js

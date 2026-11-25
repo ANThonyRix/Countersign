@@ -556,6 +556,9 @@ async function renderMemo(id) {
         el("p", { class: `result ${v.ok ? "ok" : "bad"}`, text: v.ok ? "Memo verified." : "Memo failed verification." }),
         el("p", { class: "small muted", text: `Digest ${v.signature.digestMatches ? "matches" : "does not match"} content. Signer ${v.signature.signerMatches ? "is" : "is not"} the agent. ${okSignals} of ${v.signals.length} signals verified on the node and by local keccak256. Checked ${when(v.checkedAt)}.` }),
         ...(v.anchor ? [anchorResult(v.anchor)] : []),
+        ...(v.execution ? [el("p", { class: "small", text: v.execution.status === "finalized"
+          ? "Arcium: finalized Devnet callback and market binding verified."
+          : `Arcium: ${v.execution.error}` })] : []),
       );
     } catch (err) {
       verifyOut.replaceChildren(el("p", { class: "result bad", text: `Verification could not run: ${err.message}` }));
@@ -579,6 +582,7 @@ async function renderMemo(id) {
       memo.payment_conditions ? orderDecisionSummary(memo) : decisionBlock(memo.decision, memo.decision_label, memo.reasons),
       paymentConditionsBlock(memo),
       memo.payment_conditions ? settlementBlock(memo.id) : null,
+      memo.confidential_execution ? confidentialExecutionBlock(memo.confidential_execution) : null,
       el("dl", { class: "stats" },
         stat("Total cost", usd(memo.cost.total_usd, 4)),
         stat("Paid calls", String(memo.cost.paid_calls)),
@@ -651,6 +655,19 @@ function publicRecordLink(value) {
   const url = new URL(value);
   if (url.protocol !== "https:" || url.username || url.password) return null;
   return el("a", { href: url.href, target: "_blank", rel: "noopener noreferrer", text: "Open public record" });
+}
+
+function confidentialExecutionBlock(proof) {
+  const transaction = (label, signature) => el("a", {
+    href: `https://explorer.solana.com/tx/${encodeURIComponent(signature)}?cluster=devnet`,
+    target: "_blank", rel: "noopener noreferrer", text: label,
+  });
+  return el("section", { class: "card", "aria-labelledby": "m-execution" },
+    el("h2", { id: "m-execution", text: "Confidential execution on Solana Devnet" }),
+    el("p", { class: "small", text: `20% haircut · $${(proof.priceCents / 100).toFixed(2)} SOL/USD · ${proof.feesLamports} lamports in transaction fees` }),
+    el("p", { class: "small" }, transaction("Encrypted request", proof.queue), " · ", transaction("Signed Arcium callback", proof.callback), " · ",
+      el("a", { href: `#/memo/${encodeURIComponent(proof.marketId)}`, text: "Signed market evidence" })),
+  );
 }
 
 function startupFindingDetails(finding) {
