@@ -66,6 +66,11 @@ async function loadStatus() {
 
 function renderWallet() {
   const box = $("#wallet");
+  if (state.confidentialMemo) {
+    $("#network-chip").classList.remove("down");
+    $("#network-chip span:last-child").textContent = "Solana Devnet · Confidential report";
+    return box.replaceChildren();
+  }
   const s = state.status;
   $("#network-chip").classList.toggle("down", !!s?.error);
   if (!s || s.error) return box.replaceChildren(el("span", { class: "muted", text: "Node unreachable" }));
@@ -502,6 +507,8 @@ async function renderMemo(id) {
   } catch (err) {
     return stage.replaceChildren(el("div", { class: "error-box", role: "alert", text: `Could not load memo ${id}: ${err.message}` }));
   }
+  state.confidentialMemo = memo.pack === "confidential" || memo.pack === "confidential-market";
+  if (state.confidentialMemo) renderWallet();
   renderMemoList();
   const pack = packById(memo.pack);
   const evidenceById = new Map(memo.evidence.map((e) => [e.id, e]));
@@ -704,6 +711,10 @@ function corroborationText(c) {
 
 function route(e) {
   const h = location.hash;
+  if (state.confidentialMemo) {
+    state.confidentialMemo = false;
+    renderWallet();
+  }
   if (h.startsWith("#/memo/")) {
     // On a phone the stage sits below the form, even when opening a shared report.
     return renderMemo(decodeURIComponent(h.slice(7))).then(() => {
