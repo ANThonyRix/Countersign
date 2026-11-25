@@ -4,6 +4,7 @@ import type { LocalAccount } from "viem/accounts";
 import { config, engineUrl } from "../config.ts";
 import { Budget, atomicToUsd } from "../core/budget.ts";
 import { createPaidFetch, escrowAmount, escrowHeader, type PaymentIntent } from "./payment.ts";
+import { solanaDevnet, solanaPayTo, solanaUsdc, verifySolanaPayment, type SolanaPaymentSigner } from "./solana.ts";
 import {
   EngineError,
   type AskInput,
@@ -164,7 +165,7 @@ export interface SignalCheck {
   error?: string;
 }
 
-export async function verifySignal(hash: string, expectedPayer?: string): Promise<SignalCheck> {
+export async function verifySignal(hash: string, expectedPayer?: string, receipt?: TelegraphReceipt): Promise<SignalCheck> {
   try {
     const record = await getSignal(hash);
     const localHashMatch = record.payload ? computeSignalHash(record.payload).toLowerCase() === hash.toLowerCase() : false;
@@ -178,7 +179,12 @@ export async function verifySignal(hash: string, expectedPayer?: string): Promis
       miner: record.signal?.miner_slug,
       intent: record.signal?.intent_id,
     };
-    if (expectedPayer && payer?.toLowerCase() !== expectedPayer.toLowerCase()) {
+    if (expectedPayer && !expectedPayer.startsWith("0x")) {
+      const matches = (!payer || payer === expectedPayer) &&
+        await verifySolanaPayment(receipt, expectedPayer, record.signal?.tx_hash);
+      if (matches) check.payer = expectedPayer;
+      else check.error = "the signal receipt does not match a finalized Solana payment from the expected payer";
+    } else if (expectedPayer && payer?.toLowerCase() !== expectedPayer.toLowerCase()) {
       check.error = payer ? `signal was paid by ${payer}, expected ${expectedPayer}` : "signal does not identify its payer";
     }
     return check;
@@ -203,7 +209,7 @@ export interface QuoteResult {
  * Sends the request without a payment. The node validates params first, so a 400 here
  * costs nothing and a 402 tells the exact price that would be charged.
  */
-export async function quote(input: AskInput, minerId?: string): Promise<QuoteResult> {
+export async function quote(input: AskInput, minerId?: string, solana = false): Promise<QuoteResult> {
   const url = engineUrl(minerId ? `/v1/ask/${encodeURIComponent(minerId)}` : "/v1/ask");
   let res: Response | undefined;
   let body: unknown;
@@ -220,9 +226,12 @@ export async function quote(input: AskInput, minerId?: string): Promise<QuoteRes
   if (!res) return { ok: false, status: 0, code: "network_error" };
   if (res.status === 402) {
     const challenge = decodeBase64Json<{ accepts?: PaymentQuote[] }>(res.headers.get("payment-required"));
-    const payment = challenge?.accepts?.find((a) => a.scheme === config.paymentRail && a.network === config.network);
-    const amountAtomic = payment && (config.paymentRail === "escrow" ? escrowAmount(payment, url) : BigInt(payment.amount));
-    if (!payment || amountAtomic === undefined) return { ok: false, status: 402, code: `no_valid_${config.paymentRail}_scheme` };
+    const scheme = solana ? "exact" : config.paymentRail;
+    const payment = challenge?.accepts?.find((a) => a.scheme === scheme && a.network === (solana ? solanaDevnet : config.network) &&
+      (!solana || (a.asset === solanaUsdc && a.payTo === solanaPayTo)));
+    const amountAtomic = payment && (scheme === "escrow" ? escrowAmount(payment, url)
+      : /^[1-9][0-9]{0,17}$/.test(payment.amount) ? BigInt(payment.amount) : undefined);
+    if (!payment || amountAtomic === undefined) return { ok: false, status: 402, code: `no_valid_${scheme}_scheme` };
     return { ok: true, status: 402, amountAtomic, priceUsd: atomicToUsd(amountAtomic), quote: payment };
   }
   const problems = body && typeof body === "object" && "problems" in body ? (body as { problems: unknown }).problems : undefined;
@@ -244,6 +253,7 @@ export interface AskOutcome {
 
 export interface AskOptions {
   account: LocalAccount;
+  solana?: SolanaPaymentSigner;
   budget: Budget;
   /** Direct ask: skip routing and call this miner (id or slug). No fallback on the node. */
   minerId?: string;
@@ -258,7 +268,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
   for (let attempt = 1; attempt <= 4; attempt++) {
     let signed: PaymentIntent | undefined;
     let reserved: bigint | undefined;
-    const paidFetch = createPaidFetch(
+    const paidFetch = await createPaidFetch(
       opts.account,
       (p) => {
         const refusal = opts.budget.reserve(p.amountAtomic);
@@ -268,6 +278,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
       (p) => {
         signed = p;
       },
+      opts.solana,
     );
 
     let res: Response;
@@ -279,7 +290,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
         body: JSON.stringify(body),
         signal: requestSignal(opts.signal),
       };
-      if (config.paymentRail === "escrow") {
+      if (!opts.solana && config.paymentRail === "escrow") {
         request.redirect = "error";
         res = await fetch(url, request);
         if (res.status === 402) {
@@ -297,6 +308,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
           res = await fetch(url, { ...request, headers: { ...request.headers, "x-payment": header } });
         }
       } else {
+        if (opts.solana) request.redirect = "error";
         res = await paidFetch(url, request);
       }
       payload = await readBody(res);
@@ -312,7 +324,7 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
     const ok = res.status >= 200 && res.status < 300;
     // Payment settles only when the ask succeeds; engine errors are released from the budget.
     // A gateway timeout after signing is ambiguous, so it is counted as spent (conservative).
-    if (reserved !== undefined) opts.budget.settle(reserved, (ok || isGatewayError(res.status)) && signed !== undefined);
+    if (reserved !== undefined) opts.budget.settle(reserved, (ok || isGatewayError(res.status) || !!opts.solana) && signed !== undefined);
 
     if (ok) {
       const paidAtomic = signed?.amountAtomic ?? 0n;
@@ -341,16 +353,16 @@ export async function ask(input: AskInput, opts: AskOptions): Promise<AskOutcome
       res.status === 429 ||
       (isGatewayError(res.status) && !signed) ||
       (res.status === 503 && /extraction_unavailable|could not route/i.test(code));
-    if (retryable && attempt < 4) {
+    if (retryable && attempt < 4 && !(opts.solana && signed)) {
       await sleep(1500 * 2 ** (attempt - 1));
       continue;
     }
     throw new EngineError(
-      `${res.status} ${code}${signed && isGatewayError(res.status) ? " (payment was signed; settlement unknown, counted against spend caps)" : signed ? " (payment was signed; not settled on failure)" : ""}`,
+      `${res.status} ${code}${signed && (isGatewayError(res.status) || opts.solana) ? " (payment was signed; counted against spend caps)" : signed ? " (payment was signed; not settled on failure)" : ""}`,
       res.status,
       code,
       payload,
-      !!signed && isGatewayError(res.status),
+      !!signed && (isGatewayError(res.status) || !!opts.solana),
       signed?.amountAtomic,
     );
   }

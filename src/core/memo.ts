@@ -22,6 +22,7 @@ export interface MemoBody {
   cost: { total_usd: number; paid_calls: number; budget_usd: number; per_finding_usd: number };
   network: { node: string; chain: string; asset: string };
   agent: string;
+  payment_payer?: string;
 }
 
 export interface Memo extends MemoBody {
@@ -165,6 +166,19 @@ export function renderMarkdown(m: Memo): string {
       .join(", ");
     lines.push(`| ${f.title} | **${icon[f.verdict]}** ${f.summary.replace(/\|/g, "\\|")} | ${f.corroboration} | ${ev || (f.publicSource ? "Public record" : "—")} |`);
   }
+  if (m.pack === "startup") {
+    lines.push("", "## Follow-up for the investment committee", "");
+    for (const f of m.findings.filter((finding) => finding.checkId.startsWith("startup:"))) {
+      if (typeof f.facts?.claim === "string") lines.push(`- **${f.title}.** Submitted claim: ${f.facts.claim}`);
+      if (typeof f.facts?.nextStep === "string") lines.push(`  - ${f.facts.nextStep}`);
+      if (f.publicSource) {
+        const sourceDate = typeof f.facts?.checkedAt === "string" ? ` (checked ${f.facts.checkedAt})`
+          : typeof f.facts?.sourceDate === "string" ? ` (${f.facts.sourceDate})` : "";
+        lines.push(`  - [Primary record](${f.publicSource})${sourceDate}`);
+      }
+      if (typeof f.facts?.corroboratingSource === "string") lines.push(`  - [Corroborating source](${f.facts.corroboratingSource})`);
+    }
+  }
   const publicSources = new Set([
     ...m.findings.flatMap((f) => f.publicSource ? [f.publicSource] : []),
     ...(m.subject.fields["vessel-source"] ? [m.subject.fields["vessel-source"]] : []),
@@ -182,7 +196,12 @@ export function renderMarkdown(m: Memo): string {
   m.evidence.forEach((e, i) => {
     const v = e.verification ? (e.verification.nodeVerified && e.verification.localHashMatch && e.verification.payerMatches ? "yes" : "no") : "—";
     let receipt = e.receipt?.receipt_hash ? `\`${e.receipt.receipt_hash}\`` : "—";
-    if (e.receipt?.tx_hash) receipt += ` [Settlement](https://sepolia.etherscan.io/tx/${e.receipt.tx_hash})`;
+    if (e.receipt?.tx_hash) {
+      const url = m.network.chain.startsWith("solana:")
+        ? `https://explorer.solana.com/tx/${e.receipt.tx_hash}?cluster=devnet`
+        : `https://sepolia.etherscan.io/tx/${e.receipt.tx_hash}`;
+      receipt += ` [Settlement](${url})`;
+    }
     if (e.receipt?.rail === "escrow" && e.receipt.epoch_id != null) {
       receipt += ` [Epoch ${e.receipt.epoch_id}](${m.network.node}/v1/blocks/${e.receipt.epoch_id}/deliveries/${e.receipt.receipt_hash})`;
     }

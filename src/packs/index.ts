@@ -2,11 +2,13 @@ import type { PackDefinition } from "../core/types.ts";
 import { commoditiesPack } from "./commodities.ts";
 import { exchangePack } from "./exchange.ts";
 import { legalPack } from "./legal.ts";
+import { startupPack } from "./startup.ts";
 
 export const packs: Record<string, PackDefinition> = {
   exchange: exchangePack,
   commodities: commoditiesPack,
   legal: legalPack,
+  startup: startupPack,
 };
 
 export function getPack(id: string): PackDefinition {

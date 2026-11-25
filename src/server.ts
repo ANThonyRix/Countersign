@@ -10,6 +10,7 @@ import type { AgentEvent } from "./core/types.ts";
 import { walletStatus } from "./core/wallet.ts";
 import { getPack, normaliseSubject, packs } from "./packs/index.ts";
 import { verifySignal } from "./telegraph/client.ts";
+import { startupSolanaSigner, startupSolanaWallet } from "./telegraph/solana.ts";
 import { createRequestGuard } from "./http/guard.ts";
 import { settlementStatus } from "./settlement/status.ts";
 
@@ -156,10 +157,17 @@ async function verifyMemo(id: string) {
   if (!memo) throw Object.assign(new Error("memo not found"), { status: 404 });
   const signature = await verifyMemoSignature(memo);
   const signals = await Promise.all(
-    memo.evidence.filter((e) => e.signalHash).map(async (e) => ({ evidenceId: e.id, ...(await verifySignal(e.signalHash!, memo.agent)) })),
+    memo.evidence.filter((e) => e.signalHash).map(async (e) => ({
+      evidenceId: e.id, ...(await verifySignal(e.signalHash!, memo.payment_payer ?? memo.agent, e.receipt)),
+    })),
   );
-  const ok = signature.digestMatches && signature.signerMatches && signals.every((s) => s.found && s.nodeVerified && s.localHashMatch && !s.error);
-  return { ok, signature, signals, checkedAt: new Date().toISOString() };
+  const anchor = memo.pack === "startup"
+    ? await (await import("./settlement/startup-anchor.ts")).startupAnchorStatus(memo)
+    : undefined;
+  const anchorMatches = !anchor || anchor.status === "unanchored" || anchor.status === "finalized";
+  const ok = signature.digestMatches && signature.signerMatches && anchorMatches &&
+    signals.every((s) => s.found && s.nodeVerified && s.localHashMatch && !s.error);
+  return { ok, signature, signals, ...(anchor ? { anchor } : {}), checkedAt: new Date().toISOString() };
 }
 
 function videoRange(header: string, size: number) {
@@ -217,12 +225,18 @@ const server = createServer(async (req, res) => {
     guardRequest(req);
     if (req.method === "GET" && p === "/healthz") return send(res, 200, { ok: true });
     if (req.method === "GET" && p === "/api/status") {
-      const wallet = hasAgentKey() ? await walletStatus().catch((e: Error) => ({ error: e.message })) : null;
+      const [wallet, startupWallet] = await Promise.all([
+        hasAgentKey() ? walletStatus().catch((e: Error) => ({ error: e.message })) : null,
+        config.startupSolanaKeypairFile
+          ? startupSolanaSigner().then(startupSolanaWallet).catch(() => ({ error: "Solana Devnet wallet unavailable" }))
+          : undefined,
+      ]);
       return send(res, 200, {
         node: config.node,
         network: config.network,
         paymentRail: config.paymentRail,
         wallet,
+        ...(startupWallet ? { startupWallet } : {}),
         budget: { perRunUsd: config.maxUsdPerRun, ...daySpend() },
         running: activeRun ? { id: activeRun.id, pack: activeRun.pack, subject: activeRun.subject } : null,
       });

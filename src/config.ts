@@ -28,6 +28,7 @@ export const config = {
   rpcUrl: process.env.SEPOLIA_RPC ?? "https://ethereum-sepolia-rpc.publicnode.com",
   requestTimeoutMs,
   paymentRail,
+  startupSolanaKeypairFile: process.env.STARTUP_SOLANA_KEYPAIR_FILE?.trim() || undefined,
   network: "eip155:11155111" as const,
   chainId: 11155111,
   // Telegraph test USDC on Sepolia (6 decimals, public mint, EIP-3009).

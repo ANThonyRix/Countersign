@@ -11,6 +11,7 @@ import { agrees } from "./evaluators.ts";
 import { signMemo, saveMemo, type Memo } from "./memo.ts";
 import { decide } from "./policy.ts";
 import { requireFundedWallet } from "./wallet.ts";
+import { solanaDevnet, solanaUsdc, startupSolanaSigner, startupSolanaWallet, usesStartupSolana, type SolanaPaymentSigner } from "../telegraph/solana.ts";
 import type { AgentEvent, Assessment, CheckSpec, Evidence, Finding, PlannedCheck } from "./types.ts";
 
 const MAX_CHECKS = 16;
@@ -46,7 +47,7 @@ export async function dryRun(pack: PackDefinition, subject: Record<string, strin
       if ("recordAssessment" in c) {
         return { id: c.id, title: c.title, intent: checkIntent(c), critical: c.critical, ok: true, priceUsd: 0, local: true };
       }
-      const q = await quote(c.input).catch((err: Error) => ({ ok: false, status: 0, code: err.message }) as Awaited<ReturnType<typeof quote>>);
+      const q = await quote(c.input, undefined, usesStartupSolana(pack.id)).catch((err: Error) => ({ ok: false, status: 0, code: err.message }) as Awaited<ReturnType<typeof quote>>);
       return { id: c.id, title: c.title, intent: c.intent, critical: !!c.critical, ok: q.ok, priceUsd: q.priceUsd, status: q.status, code: q.code, problems: q.problems };
     }),
   );
@@ -67,6 +68,7 @@ class Runner {
     private readonly budget: Budget,
     private readonly emit: (e: AgentEvent) => void,
     private readonly opts: RunOptions,
+    private readonly solana?: SolanaPaymentSigner,
   ) {}
 
   private record(checkId: string, role: Evidence["role"], intent: string, outcome?: AskOutcome, error?: unknown): Evidence {
@@ -110,7 +112,7 @@ class Runner {
         this.emit({ type: "check_start", checkId: check.id, title: check.title, role, miner: m.slug });
         const input: AskInput = "query" in check.input ? { intent: check.intent, query: check.input.query } : check.input;
         try {
-          return { outcome: await ask(input, { account: this.account, budget: this.budget, minerId: m.id, signal: this.opts.signal }), tried };
+          return { outcome: await ask(input, { account: this.account, solana: this.solana, budget: this.budget, minerId: m.id, signal: this.opts.signal }), tried };
         } catch (err) {
           lastError = err;
           if (err instanceof EngineError && (err.code === "payment_refused" || err.paid)) return { error: err, tried };
@@ -121,7 +123,7 @@ class Runner {
     }
     this.emit({ type: "check_start", checkId: check.id, title: check.title, role });
     try {
-      return { outcome: await ask(check.input, { account: this.account, budget: this.budget, signal: this.opts.signal }), tried };
+      return { outcome: await ask(check.input, { account: this.account, solana: this.solana, budget: this.budget, signal: this.opts.signal }), tried };
     } catch (err) {
       return { error: err, tried };
     }
@@ -264,12 +266,12 @@ class Runner {
       this.evidence
         .filter((e) => e.signalHash)
         .map(async (e) => {
-          const v = await verifySignal(e.signalHash!, this.account.address);
+          const v = await verifySignal(e.signalHash!, this.solana?.address ?? this.account.address, e.receipt);
           e.verification = {
             found: v.found,
             nodeVerified: v.nodeVerified,
             localHashMatch: v.localHashMatch,
-            payerMatches: !!v.payer && v.payer.toLowerCase() === this.account.address.toLowerCase(),
+            payerMatches: !!v.payer && !v.error,
           };
           this.emit({ type: "verify", evidenceId: e.id, ok: v.nodeVerified && v.localHashMatch && !v.error });
         }),
@@ -284,14 +286,20 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
 
   const checks = await pack.plan(subject, planContext());
   const paidChecks = checks.filter((c) => "input" in c);
-  if (paidChecks.length && budget.canAfford(10_000n)) await requireFundedWallet(account.address);
+  const solana = usesStartupSolana(pack.id) ? await startupSolanaSigner() : undefined;
+  if (paidChecks.length && budget.canAfford(10_000n)) {
+    if (solana) {
+      const wallet = await startupSolanaWallet(solana);
+      if (Number(wallet.usdc) < 0.01) throw new Error("Fund the Startup wallet with Solana Devnet test USDC.");
+    } else await requireFundedWallet(account.address);
+  }
   emit({
     type: "plan",
     checks: checks.map((c) => ({ id: c.id, title: c.title, intent: checkIntent(c), critical: !!c.critical })),
     estimateUsd: paidChecks.length * 0.01,
   });
 
-  const runner = new Runner(pack, account, budget, emit, opts);
+  const runner = new Runner(pack, account, budget, emit, opts, solana);
   await runner.runAll(checks);
   // Signals are indexed a moment after the ask returns.
   await new Promise((r) => setTimeout(r, 1500));
@@ -300,7 +308,7 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
   const order = [...runner.findings.keys()];
   const findings = order.map((id) => runner.findings.get(id)!);
   const paymentConditions = pack.reviewPaymentConditions?.(subject, findings);
-  const policy = decide(findings);
+  const policy = decide(pack.decisionFindings?.(findings) ?? findings);
   const label = pack.labels[policy.decision];
   emit({ type: "decision", decision: policy.decision, label, reasons: policy.reasons });
 
@@ -327,8 +335,9 @@ export async function runPack(pack: PackDefinition, subject: Record<string, stri
         budget_usd: atomicToUsd(budget.runCap),
         per_finding_usd: findings.length ? round(total / findings.length) : 0,
       },
-      network: { node: config.node, chain: config.network, asset: config.usdc },
+      network: { node: config.node, chain: solana ? solanaDevnet : config.network, asset: solana ? solanaUsdc : config.usdc },
       agent: account.address,
+      ...(solana ? { payment_payer: solana.address } : {}),
     },
     account,
   );

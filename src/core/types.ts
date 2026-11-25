@@ -103,7 +103,7 @@ export interface PackField {
 }
 
 export interface PackDefinition {
-  id: "exchange" | "commodities" | "legal";
+  id: "exchange" | "commodities" | "legal" | "startup";
   mission: string;
   title: string;
   tagline: string;
@@ -114,6 +114,7 @@ export interface PackDefinition {
   caseStudy?: Record<string, string>;
   paymentCases?: Record<"hold" | "proceed", Record<string, string>>;
   reviewPaymentConditions?(subject: Record<string, string>, findings: Finding[]): PaymentConditionReview | undefined;
+  decisionFindings?(findings: Finding[]): Finding[];
   subjectName(subject: Record<string, string>): string;
   plan(subject: Record<string, string>, ctx: PlanContext): Promise<PlannedCheck[]> | PlannedCheck[];
 }

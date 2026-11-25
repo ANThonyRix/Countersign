@@ -1,7 +1,7 @@
 import bs58 from "bs58";
 import {
   clusterApiUrl, Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction,
-  type BlockhashWithExpiryBlockHeight, type TransactionResponse,
+  type BlockhashWithExpiryBlockHeight, type TransactionResponse, type VersionedTransactionResponse,
 } from "@solana/web3.js";
 import {
   ACCOUNT_SIZE, MULTISIG_SIZE, TOKEN_PROGRAM_ID,
@@ -50,7 +50,7 @@ export function amountAtomic(value: string): bigint {
   return amount;
 }
 
-function memoInstruction(text: string, signers: PublicKey[]): TransactionInstruction {
+export function memoInstruction(text: string, signers: PublicKey[]): TransactionInstruction {
   return new TransactionInstruction({
     programId: MEMO_PROGRAM, keys: signers.map((pubkey) => ({ pubkey, isSigner: true, isWritable: false })),
     data: Buffer.from(text, "utf8"),
@@ -161,7 +161,7 @@ export async function submitFunding(connection: Connection, request: FundingRequ
   await verifyFunding(connection, request.escrow);
 }
 
-function hasInstruction(tx: TransactionResponse, expected: TransactionInstruction): boolean {
+export function hasInstruction(tx: TransactionResponse | VersionedTransactionResponse, expected: TransactionInstruction): boolean {
   const message = tx.transaction.message;
   return message.compiledInstructions.some((instruction) =>
     message.staticAccountKeys[instruction.programIdIndex]?.equals(expected.programId) &&

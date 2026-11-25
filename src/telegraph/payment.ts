@@ -4,6 +4,7 @@ import { ExactEvmScheme } from "@x402/evm";
 import type { LocalAccount } from "viem/accounts";
 import { config } from "../config.ts";
 import type { PaymentQuote } from "./types.ts";
+import { solanaDevnet, solanaPayTo, solanaUsdc, type SolanaPaymentSigner } from "./solana.ts";
 
 export interface PaymentIntent {
   amountAtomic: bigint;
@@ -22,12 +23,20 @@ export type PaymentGuard = (payment: PaymentIntent) => Promise<string | void> | 
  * Returns a fetch that answers x402 challenges by signing an EIP-3009 USDC authorization
  * on Sepolia. A new client per call keeps the guard bound to exactly one request.
  */
-export function createPaidFetch(account: LocalAccount, guard: PaymentGuard, onSigned?: (p: PaymentIntent) => void): typeof fetch {
+export async function createPaidFetch(account: LocalAccount, guard: PaymentGuard, onSigned?: (p: PaymentIntent) => void,
+  solana?: SolanaPaymentSigner): Promise<typeof fetch> {
+  const network = solana ? solanaDevnet : config.network;
+  const asset = solana ? solanaUsdc : config.usdc;
+  const receiver = solana ? solanaPayTo : config.exactPayTo;
+  const equal = solana ? (a: string, b: string) => a === b : (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+  const scheme = solana
+    ? new (await import("@x402/svm/exact/client")).ExactSvmScheme(solana)
+    : new ExactEvmScheme(account);
   const client = x402Client.fromConfig({
-    schemes: [{ network: config.network, client: new ExactEvmScheme(account) }],
+    schemes: [{ network, client: scheme }],
     spendControls: {
       maxAmountPerPayment: false,
-      allowedAssets: [{ network: config.network, asset: config.usdc, maxAmountPerPayment: config.maxAtomicPerPayment }],
+      allowedAssets: [{ network, asset, maxAmountPerPayment: config.maxAtomicPerPayment }],
     },
   });
 
@@ -38,10 +47,10 @@ export function createPaidFetch(account: LocalAccount, guard: PaymentGuard, onSi
       asset: req.asset,
       network: req.network,
     };
-    if (payment.payTo.toLowerCase() !== config.exactPayTo.toLowerCase()) {
+    if (!equal(payment.payTo, receiver)) {
       return { abort: true, reason: `unexpected payTo ${payment.payTo}; refusing to pay an unknown address` };
     }
-    if (payment.asset.toLowerCase() !== config.usdc.toLowerCase()) {
+    if (payment.network !== network || !equal(payment.asset, asset)) {
       return { abort: true, reason: `unexpected asset ${payment.asset}` };
     }
     const refusal = await guard(payment);

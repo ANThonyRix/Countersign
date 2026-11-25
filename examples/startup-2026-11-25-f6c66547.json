@@ -1,0 +1,295 @@
+{
+  "memo_version": 1,
+  "id": "startup-2026-11-25-f6c66547",
+  "created_at": "2026-11-25T10:38:42.769Z",
+  "pack": "startup",
+  "mission": "Startup: investment intelligence",
+  "subject": {
+    "name": "Helio Fintech Ltd",
+    "fields": {
+      "entity": "Helio Fintech Ltd",
+      "jurisdiction": "United Kingdom",
+      "registration": "13836904",
+      "website": "https://commerce.moonpay.com/",
+      "controller": "Independent",
+      "partner": "MoonPay",
+      "metric": "USD 1.5 billion in processed transactions"
+    }
+  },
+  "decision": "REVIEW",
+  "decision_label": "NEEDS REVIEW",
+  "reasons": [
+    "The submitted claim conflicts with the filed accounts, which record that MoonPay Inc acquired 100% of Helio Fintech Ltd on 13 January 2025.",
+    "No usable answer: Usage or traction",
+    "Only 3 of 5 checks returned a usable answer."
+  ],
+  "findings": [
+    {
+      "checkId": "startup:registered-entity",
+      "title": "Companies House record",
+      "why": "Check the submitted company name and number against the official UK register.",
+      "verdict": "clear",
+      "summary": "Companies House confirms \"HELIO FINTECH LTD\" (13836904) is Active.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "registryName": "HELIO FINTECH LTD",
+        "registration": "13836904",
+        "registryStatus": "Active",
+        "checkedAt": "2026-11-25T10:38:10.990Z"
+      },
+      "publicSource": "https://find-and-update.company-information.service.gov.uk/company/13836904"
+    },
+    {
+      "checkId": "startup:controller",
+      "title": "Controlling party",
+      "why": "Compare the submitted claim with the available primary records.",
+      "verdict": "flag",
+      "summary": "The submitted claim conflicts with the filed accounts, which record that MoonPay Inc acquired 100% of Helio Fintech Ltd on 13 January 2025.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "claim": "Independent",
+        "sourceDate": "2025-12-11",
+        "corroboratingSource": "https://www.moonpay.com/newsroom/helio-acquisition",
+        "nextStep": "Ask for a current cap table, the legal entity raising capital and evidence of rights to the product."
+      },
+      "publicSource": "https://find-and-update.company-information.service.gov.uk/company/13836904/filing-history/MzQ5MzUzOTE4MWFkaXF6a2N4/document"
+    },
+    {
+      "checkId": "startup:integration",
+      "title": "Product integration",
+      "why": "Compare the submitted claim with the available primary records.",
+      "verdict": "clear",
+      "summary": "MoonPay announced its integration with Helio Wallet on 4 September 2024.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "claim": "MoonPay",
+        "sourceDate": "2024-09-04",
+        "nextStep": "Ask for a current listing or technical documentation showing which product and entity operate the integration."
+      },
+      "publicSource": "https://www.moonpay.com/newsroom/helio"
+    },
+    {
+      "checkId": "startup:metric",
+      "title": "Usage or traction",
+      "why": "Compare the submitted claim with the available primary records.",
+      "verdict": "unknown",
+      "summary": "MoonPay reported over USD 1.5 billion in processed transactions at acquisition. The published announcement provides no independently reconciled total.",
+      "critical": true,
+      "corroboration": "not_needed",
+      "evidence": [],
+      "facts": {
+        "claim": "USD 1.5 billion in processed transactions",
+        "sourceDate": "2025-01-13",
+        "nextStep": "Ask for the measurement period, calculation method and independently reconcilable transaction data."
+      },
+      "publicSource": "https://www.moonpay.com/newsroom/helio-acquisition"
+    },
+    {
+      "checkId": "news:adverse:helio-fintech-ltd",
+      "title": "Adverse media: Helio Fintech Ltd",
+      "why": "Public reporting of fraud, enforcement or litigation changes the risk picture.",
+      "verdict": "unknown",
+      "summary": "Adverse-media search for \"Helio Fintech Ltd\": the miner's answer did not contain a usable `answer` (status: missing).",
+      "critical": false,
+      "corroboration": "single",
+      "evidence": [
+        "ev2"
+      ]
+    },
+    {
+      "checkId": "registry:united-kingdom:helio-fintech-ltd",
+      "title": "Telegraph registry lookup",
+      "why": "Confirms the legal entity exists and is in good standing in United Kingdom.",
+      "verdict": "unknown",
+      "summary": "The miner did not identify a registry record for \"Helio Fintech Ltd\" in United Kingdom.",
+      "critical": true,
+      "corroboration": "single",
+      "evidence": [
+        "ev1",
+        "ev3"
+      ],
+      "facts": {
+        "legal_name": null,
+        "registration_id": null,
+        "jurisdiction": "GB",
+        "registered_address": null,
+        "incorporated": null,
+        "active": false
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev1",
+      "checkId": "registry:united-kingdom:helio-fintech-ltd",
+      "role": "primary",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "6164",
+      "minerName": "Praman Desk Compliance & Procurement Auditor",
+      "signalHash": "0xb36abde8da4ad19333c80e5387897e1c40f6fdb8fae11369cc6c50446260c767",
+      "receipt": {
+        "receipt_hash": "0xc6c59f2f64282323d12aafd98896d39fb1ed2b11b69ec7e88c85d29c87daa257",
+        "rail": "x402",
+        "payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+        "miner": "6169",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 0,
+        "settlement": "onchain",
+        "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "tx_hash": "2TBpdvU5j1vNKcF5qKNZcMkG1MZwEdC9Fyeqrkz9vHQW3kXtwyCBHADmnYsXW1TmB9o4t6PGFCWJK2QYdapxyKHP",
+        "timestamp": 1795603134
+      },
+      "costUsd": 0.01,
+      "durationMs": 4265,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "legal_name": "missing",
+        "registration_id": "missing",
+        "active": "ok",
+        "jurisdiction": "ok",
+        "registered_address": "missing",
+        "incorporated": "missing"
+      },
+      "result": {
+        "legal_name": null,
+        "registration_id": null,
+        "active": false,
+        "jurisdiction": "GB",
+        "registered_address": null,
+        "incorporated": null
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: input schema v3 mapped in code to GET /api/miner/corporate-registry",
+      "at": "2026-11-25T10:38:31.594Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev2",
+      "checkId": "news:adverse:helio-fintech-ltd",
+      "role": "primary",
+      "intent": "NEWS_SEARCH_GENERAL",
+      "routedIntent": "NEWS_SEARCH_GENERAL",
+      "minerId": "20260828",
+      "minerName": "PREFLIGHT Infrastructure Signals",
+      "signalHash": "0x01ed489376876da0d0e07c508b56172b2b14e59b048f737e49f2b5ca3470c731",
+      "receipt": {
+        "receipt_hash": "0x65dc64be0b93ba333f754891ce530ad1c82eb12c40acec729bf6c2f0b31d1dc8",
+        "rail": "x402",
+        "payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+        "miner": "5311",
+        "intent": "NEWS_SEARCH_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 0,
+        "settlement": "onchain",
+        "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "tx_hash": "4u169mcEzbBV3LQNhDLHxMhJgC1BP1UCJq1au8EgJ3yWKixMHZRiMWc5uT9EqC8jUAv8hqssqzXHASLnyVruojTe",
+        "timestamp": 1795603142
+      },
+      "costUsd": 0.01,
+      "durationMs": 12371,
+      "resultShape": "intent",
+      "fieldStatus": {
+        "answer": "missing",
+        "result_count": "missing",
+        "sources": "ok",
+        "brief": "ok"
+      },
+      "result": {
+        "answer": null,
+        "result_count": null,
+        "sources": [
+          "Spaceflight News API",
+          "Google News RSS",
+          "Bing News RSS",
+          "GDELT DOC API",
+          "Hacker News"
+        ],
+        "brief": "false"
+      },
+      "reasoning": "Intent: intent given by the caller\nMiner: input schema v3 mapped in code to GET /news-search",
+      "at": "2026-11-25T10:38:39.275Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    },
+    {
+      "id": "ev3",
+      "checkId": "registry:united-kingdom:helio-fintech-ltd",
+      "role": "crosscheck",
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "routedIntent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "signalHash": "0x9048d8c499a581248eafc3b2fb98f6712a10bbc0f3f9a7b77bcfded397e89b98",
+      "receipt": {
+        "receipt_hash": "0x38a9d9b4884bc25d57bda6a57733c9d9d91e7072d25724430f7d8a8c8dc31853",
+        "rail": "x402",
+        "payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+        "miner": "6121",
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 0,
+        "settlement": "onchain",
+        "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "tx_hash": "5KkkVyg8Z1m4tqfiiwPJytHi7aEcDP9GcQemxuLJZSEQU5kCjZJ2FKBgthm6MkASsgqT7n1AGYAz8QsDm6Sod88Q",
+        "timestamp": 1795603142
+      },
+      "costUsd": 0.01,
+      "durationMs": 190,
+      "resultShape": "raw",
+      "result": {
+        "answer": "Insufficient information to answer. I cannot look up a company because no company name was supplied. Pass the legal name as the name parameter. Nothing is estimated or invented: send the missing input and the live source is queried straight away.",
+        "confidence": 0.1,
+        "status": "invalid_input",
+        "summary": "Insufficient information to answer. I cannot look up a company because no company name was supplied. Pass the legal name as the name parameter. Nothing is estimated or invented: send the missing input and the live source is queried straight away."
+      },
+      "reasoning": "Intent: miner txlens given by the caller\nMiner: The user is asking for information about a company's registration status and details, which falls under the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. The TxLens miner's /corporate-registry endpoint is designed for this purpose and accepts a 'query' parameter. The provided company name and jurisdiction are combined into a single query string as per the endpoint's documentation.",
+      "at": "2026-11-25T10:38:40.092Z",
+      "verdict": "unknown",
+      "verification": {
+        "found": true,
+        "nodeVerified": true,
+        "localHashMatch": true,
+        "payerMatches": true
+      }
+    }
+  ],
+  "coverage": {
+    "total": 5,
+    "answered": 3,
+    "unknown": 2,
+    "skipped": 0
+  },
+  "cost": {
+    "total_usd": 0.03,
+    "paid_calls": 3,
+    "budget_usd": 0.04,
+    "per_finding_usd": 0.005
+  },
+  "network": {
+    "node": "https://devnode.telegraphprotocol.com",
+    "chain": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+    "asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+  },
+  "agent": "0x77301A935d97F9c08d1F50829060B0Eb31346d5E",
+  "payment_payer": "5PAFXNbwdrjouwC7Qz8XpAntkoRgDEcD2iZXiZXG4WP3",
+  "digest": "0x50017bf3acac2848f76e5c21304cbc6942a23a0a52bec70b1002d5a28ac2acf1",
+  "signature": "0xf1b0e599a72edd3c4977d514b9313bf38388b5aa710c9415bbd0deb2c479d4d720e4f318d03a118d92c83e90dc7f39f5e60dc43d469f357ec1b7abb4e392cc911b"
+}

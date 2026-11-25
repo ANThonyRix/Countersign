@@ -8,13 +8,14 @@ Telegraph miner using an x402 challenge and test USDC in Ethereum Sepolia escrow
 whenever a critical answer is not clean. It then decides GO / REVIEW / STOP with a deterministic rule
 and signs a memo. Anyone can re-verify the memo against the node.
 
-One core, three mission packs:
+One core, four mission packs:
 
 | Pack | Mission | What it checks |
 |---|---|---|
 | `exchange` | Exchange: token listing desk | issuer sanctions, smart-contract audit, adverse media; optional: X account bot detection, on-chain treasury balance, source code review |
 | `commodities` | Commodities: cargo and counterparty | seller registry and sanctions, vessel sanctions and telemetry, discharge port congestion; optional: bill of lading authenticity, screening of shipping parties, and public record comparisons |
 | `legal` | Legal: multi-jurisdiction diligence | registry standing in each jurisdiction, sanctions on the entity and each officer, regulatory filings, adverse media, B2B identity |
+| `startup` | Startup Investment Intelligence | registry and adverse media, controlling party, product integrations, usage claims, and a verifiable Solana Devnet memo anchor |
 
 Questions about usage, costs, safety or the memo format: see [FAQ.md](FAQ.md).
 
@@ -23,7 +24,7 @@ audience makes the agent buy a targeted news search.
 
 ## Run it in 10 minutes
 
-Needs Node 20.12+ (tested on Node 24).
+Needs Node 20.18+ (tested on Node 24).
 
 ```bash
 npm install
@@ -83,6 +84,8 @@ The [procurement demo](https://countersign.ink/procurement.html) includes a live
 
 The [Solana Devnet video](https://countersign.ink/procurement.html#solana) walks through both payment holds and verifies the finalized release of 1 test USDC from a separate supplier escrow. The [settlement guide](examples/solana-settlement.md) covers reviewing the recorded proof and reproducing a run with your own test wallets. Telegraph intelligence purchases continue to use the existing Sepolia escrow. [Download the MP4 from this repository](web/media/solana-devnet-live.mp4).
 
+The [Startup Investment Intelligence demo](https://countersign.ink/startup.html#solana) shows the Helio review, three Telegraph payments through x402 on Solana Devnet and a finalized report anchor. See the [walkthrough and signed results](examples/startup-investment.md) or [download the video](web/media/startup-solana-devnet.mp4).
+
 From the CLI:
 
 ```bash
@@ -120,7 +123,7 @@ subject ──► pack.plan() ──► free quote (POST /v1/ask, 402 + PAYMENT-
 | `src/core/policy.ts` | The decision rule. No model decides the outcome |
 | `src/core/budget.ts` | Per-run and per-day spend caps. A payment is reserved before signing and charged only on success |
 | `src/core/memo.ts` | Canonical memo, digest, signature, Markdown |
-| `src/packs/` | The three mission packs on shared check builders |
+| `src/packs/` | Mission packs on shared check builders |
 | `src/server.ts`, `web/` | Local API with an SSE run stream, and the web UI (no framework) |
 
 ### Decision rule

@@ -39,6 +39,12 @@ paid runs, use the same service wallet to fund the [current escrow contract](htt
 with `npm run cs -- escrow:deposit --amount 0.25` or an operator-selected test USDC amount.
 Confirm available credit with `npm run cs -- wallet`.
 
+For Startup x402 payments on Solana Devnet, add
+`STARTUP_SOLANA_KEYPAIR_FILE=/var/lib/countersign/startup-devnet-keypair.json` to the service
+environment. The file is a JSON keypair readable by the service account, with mode `0600`.
+Fund its public address with Circle test USDC on Devnet. The app shows the balance and payment
+network when Startup is selected. Report anchoring uses a Solana Devnet keypair with test SOL.
+
 ## Updates and operations
 
 Back up `/etc/countersign.env` and `/var/lib/countersign` securely. Keep both out of source archives

@@ -69,13 +69,15 @@ function renderWallet() {
   const s = state.status;
   $("#network-chip").classList.toggle("down", !!s?.error);
   if (!s || s.error) return box.replaceChildren(el("span", { class: "muted", text: "Node unreachable" }));
-  const w = s.wallet;
+  const useSolana = state.pack?.id === "startup" && !!s.startupWallet;
+  $("#network-chip span:last-child").textContent = useSolana ? "Solana Devnet · Telegraph x402" : "Sepolia · Telegraph devnode";
+  const w = useSolana ? s.startupWallet : s.wallet;
   if (!w) return box.replaceChildren(el("span", { class: "muted", text: "No agent wallet" }));
   if (w.error) return box.replaceChildren(el("span", { class: "muted", text: "Wallet RPC unavailable" }));
   box.replaceChildren(
     el("dl", {},
-      el("div", { class: "w-addr" }, el("dt", { text: "Agent" }), el("dd", {}, el("a", { href: w.explorer, target: "_blank", rel: "noopener", text: short(w.address) }))),
-      el("div", {}, el("dt", { text: s.paymentRail === "escrow" ? "Test USDC in escrow" : "Test USDC" }), el("dd", { text: Number(s.paymentRail === "escrow" ? w.escrowCredit : w.usdc).toFixed(2) })),
+      el("div", { class: "w-addr" }, el("dt", { text: useSolana ? "Devnet payer" : "Agent" }), el("dd", {}, el("a", { href: w.explorer, target: "_blank", rel: "noopener", text: short(w.address) }))),
+      el("div", {}, el("dt", { text: !useSolana && s.paymentRail === "escrow" ? "Test USDC in escrow" : "Test USDC" }), el("dd", { text: Number(!useSolana && s.paymentRail === "escrow" ? w.escrowCredit : w.usdc).toFixed(2) })),
       el("div", { class: "w-day" }, el("dt", { text: "Spent today" }), el("dd", { text: `${usd(s.budget.spentUsd)} / ${usd(s.budget.capUsd)}` })),
     ),
   );
@@ -86,6 +88,12 @@ function runBlocker() {
   if (!s || s.error) return "The server cannot reach the Telegraph node right now.";
   if (s.running) return "A run is already in progress.";
   if (!s.wallet) return "No agent wallet yet. Run `npm run wallet:new` on the server.";
+  if (state.pack?.id === "startup" && s.startupWallet) {
+    if (s.startupWallet.error) return s.startupWallet.error;
+    if (Number(s.startupWallet.usdc) < 0.01) return "Fund the Startup wallet with Solana Devnet test USDC.";
+    if (s.budget.spentUsd >= s.budget.capUsd) return "Today's spend cap is used up.";
+    return null;
+  }
   if (s.wallet.error) return "Cannot read the wallet balance from Sepolia.";
   if (s.paymentRail === "escrow" && Number(s.wallet.escrowCredit) <= 0) return "Telegraph escrow needs test USDC. Run `npm run cs -- escrow:deposit --amount 0.25` on the server.";
   if (s.paymentRail !== "escrow" && Number(s.wallet.usdc) < 0.1) return "The agent wallet needs test USDC. Run `npm run cs -- mint` on the server.";
@@ -128,9 +136,14 @@ function selectPack(id) {
   state.pack = packById(id);
   $("#pack-tagline").textContent = state.pack.tagline;
   $("#estimate").textContent = "";
-  $("#fill-case-study").hidden = !state.pack.caseStudy;
+  const caseButton = $("#fill-case-study");
+  caseButton.hidden = !state.pack.caseStudy;
+  caseButton.textContent = id === "startup" ? "Load Helio ownership conflict" : "Load cross-border case";
+  $("#fill-example").textContent = id === "startup" ? "Load Helio reference case" : "Fill example subject";
   for (const button of document.querySelectorAll("[data-payment-case]")) button.hidden = !state.pack.paymentCases;
   renderFields();
+  renderWallet();
+  updateRunAvailability();
 }
 
 function renderFields() {
@@ -167,13 +180,13 @@ function renderFields() {
   }
   box.replaceChildren(
     ...basic,
-    trade.length ? el("details", {
+    ...(trade.length ? [el("details", {
       class: "trade-details",
       open: state.pack.fields.some((f) => f.tradeDetail && draft[f.name]),
     },
     el("summary", { text: "Trade details and public records" }),
     el("p", { class: "small muted", text: "Use public data only. Enter values from the cited records for comparison." }),
-    ...trade) : null,
+    ...trade)] : []),
   );
 }
 
@@ -499,7 +512,9 @@ async function renderMemo(id) {
     if (e.signalHash) verifyCells.set(e.id, vCell);
     const receipt = e.receipt;
     const epoch = receipt?.rail === "escrow" && /^\d+$/.test(String(receipt.epoch_id)) && /^0x[\da-f]{64}$/i.test(receipt.receipt_hash);
-    const settlement = receipt?.tx_hash ? `https://sepolia.etherscan.io/tx/${receipt.tx_hash}`
+    const settlement = receipt?.tx_hash ? (memo.network.chain.startsWith("solana:")
+      ? `https://explorer.solana.com/tx/${encodeURIComponent(receipt.tx_hash)}?cluster=devnet`
+      : `https://sepolia.etherscan.io/tx/${receipt.tx_hash}`)
       : epoch ? `${state.status?.node ?? "https://devnode.telegraphprotocol.com"}/v1/blocks/${receipt.epoch_id}/deliveries/${receipt.receipt_hash}` : null;
     return el("tr", {},
       el("td", {}, el("div", { text: memo.findings.find((f) => f.checkId === e.checkId)?.title ?? e.checkId }), el("div", { class: "small muted mono", text: e.routedIntent ?? e.intent })),
@@ -540,6 +555,7 @@ async function renderMemo(id) {
       verifyOut.replaceChildren(
         el("p", { class: `result ${v.ok ? "ok" : "bad"}`, text: v.ok ? "Memo verified." : "Memo failed verification." }),
         el("p", { class: "small muted", text: `Digest ${v.signature.digestMatches ? "matches" : "does not match"} content. Signer ${v.signature.signerMatches ? "is" : "is not"} the agent. ${okSignals} of ${v.signals.length} signals verified on the node and by local keccak256. Checked ${when(v.checkedAt)}.` }),
+        ...(v.anchor ? [anchorResult(v.anchor)] : []),
       );
     } catch (err) {
       verifyOut.replaceChildren(el("p", { class: "result bad", text: `Verification could not run: ${err.message}` }));
@@ -575,7 +591,9 @@ async function renderMemo(id) {
           el("ul", { class: "findings" },
             ...memo.findings.map((f) =>
               el("li", {},
-                f.skipped ? tag("unknown", "skipped") : tag(f.verdict),
+                f.skipped ? tag("unknown", "skipped") : tag(f.verdict,
+                  memo.pack === "startup" && f.checkId.startsWith("startup:")
+                    ? { clear: "Confirmed", flag: "Mismatch", unknown: "Unverified" }[f.verdict] : undefined),
                 el("div", {},
                   el("h3", { text: f.title }),
                   el("p", { class: "f-sum", text: f.skipped ? f.skipped : f.summary }),
@@ -586,6 +604,7 @@ async function renderMemo(id) {
                     publicRecordLink(f.publicSource),
                     f.evidence.length ? el("span", { text: `${f.evidence.filter((id) => evidenceById.has(id)).length} evidence` }) : null,
                   ),
+                  memo.pack === "startup" && f.checkId.startsWith("startup:") ? startupFindingDetails(f) : null,
                 ),
               ),
             ),
@@ -602,6 +621,7 @@ async function renderMemo(id) {
               ];
             }),
             el("dt", { text: "Agent" }), el("dd", {}, el("a", { href: `https://sepolia.etherscan.io/address/${memo.agent}`, target: "_blank", rel: "noopener", text: memo.agent })),
+            memo.payment_payer ? [el("dt", { text: "Devnet payer" }), el("dd", { text: memo.payment_payer })] : null,
             el("dt", { text: "Digest" }), el("dd", { text: memo.digest }),
             el("dt", { text: "Signature" }), el("dd", { text: short(memo.signature, 26, 12) }),
             el("dt", { text: "Network" }), el("dd", { text: `${memo.network.chain} · ${memo.network.node}` }),
@@ -631,6 +651,32 @@ function publicRecordLink(value) {
   const url = new URL(value);
   if (url.protocol !== "https:" || url.username || url.password) return null;
   return el("a", { href: url.href, target: "_blank", rel: "noopener noreferrer", text: "Open public record" });
+}
+
+function startupFindingDetails(finding) {
+  const facts = finding.facts ?? {};
+  return el("div", {},
+    facts.claim ? el("p", { class: "small muted", text: "Submitted claim: " + facts.claim }) : null,
+    facts.sourceDate ? el("p", { class: "small muted", text: "Source date: " + facts.sourceDate }) : null,
+    facts.checkedAt ? el("p", { class: "small muted", text: "Registry checked " + when(facts.checkedAt) }) : null,
+    facts.corroboratingSource ? publicRecordLink(facts.corroboratingSource) : null,
+    Array.isArray(facts.sourceCandidates)
+      ? el("ul", {}, ...facts.sourceCandidates.map((source) => el("li", {}, publicRecordLink(source)))) : null,
+    facts.nextStep ? el("p", { class: "small", text: facts.nextStep }) : null,
+  );
+}
+
+function anchorResult(anchor) {
+  const label = {
+    finalized: "Solana Devnet: finalized anchor matches the report digest.",
+    unanchored: "Solana Devnet: no anchor recorded for this memo.",
+    pending: "Solana Devnet: awaiting finalization.",
+    mismatch: "Solana Devnet: anchor does not match this report.",
+    unavailable: "Solana Devnet: anchor verification is unavailable.",
+  }[anchor.status];
+  return el("p", { class: "small" }, label + " ",
+    anchor.explorer ? el("a", { href: anchor.explorer, target: "_blank", rel: "noopener noreferrer", text: "View transaction" }) : null,
+  );
 }
 
 function corroborationText(c) {

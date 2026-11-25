@@ -85,7 +85,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .stage { min-width: 0; outline: none; }
 
 /* ---------- pack picker ---------- */
-.packs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin: 0; padding: 0; border: 0; }
+.packs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); margin: 0; padding: 0; border: 0; }
 .pack-opt { position: relative; }
 .pack-opt input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 .pack-opt label {

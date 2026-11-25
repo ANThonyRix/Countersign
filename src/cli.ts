@@ -21,6 +21,7 @@ Usage: npm run cs -- <command> [options]
   run <pack> [fields]            Run the agent for real: pays per check, writes a signed memo
   verify <memo-id|file>          Re-check a memo: signature, digest, every signal hash
   show <memo-id>                 Print a memo as Markdown
+  anchor <memo-id> <keypair>     Record a signed Startup memo digest on Solana Devnet
 
 Fields are passed as --field value, e.g.
   npm run cs -- run commodities --seller "Trafigura Pte Ltd" --jurisdiction Singapore \\
@@ -28,6 +29,7 @@ Fields are passed as --field value, e.g.
 Add --example to use the pack's built-in example subject.
 Use commodities --case-study for the historical cross-border sourcing case.
 Use commodities --payment-case hold or --payment-case proceed for the illustrative order comparison.
+Use startup --example for the Helio reference claims or startup --case-study for the illustrative ownership conflict.
 `;
 
 const color = {
@@ -44,7 +46,7 @@ function subjectFrom(packId: string, argv: string[]) {
   const options = Object.fromEntries(pack.fields.map((f) => [f.name, { type: "string" as const }]));
   const { values } = parseArgs({ args: argv, options: { ...options, example: { type: "boolean" }, "case-study": { type: "boolean" }, "payment-case": { type: "string" }, "no-crosscheck": { type: "boolean" } }, strict: true });
   if (values["case-study"] && (!pack.caseStudy || values.example)) {
-    throw new Error("--case-study is available for commodities and cannot be used with --example");
+    throw new Error("--case-study requires a pack with a case study and cannot be used with --example");
   }
   const paymentCase = values["payment-case"];
   if (paymentCase !== undefined && (
@@ -101,12 +103,18 @@ async function verifyMemo(memo: Memo) {
   console.log(`  signed by agent ${memo.agent}: ${sig.signerMatches ? color.green("yes") : color.red(`NO (recovered ${sig.signer})`)}`);
   let ok = sig.digestMatches && sig.signerMatches;
   for (const e of memo.evidence.filter((x) => x.signalHash)) {
-    const v = await verifySignal(e.signalHash!, memo.agent);
+    const v = await verifySignal(e.signalHash!, memo.payment_payer ?? memo.agent, e.receipt);
     const good = v.found && v.nodeVerified && v.localHashMatch && !v.error;
     ok &&= good;
     console.log(
       `  ${good ? color.green("ok ") : color.red("BAD")} ${e.intent.padEnd(36)} ${e.signalHash!.slice(0, 18)}… node:${v.nodeVerified} keccak:${v.localHashMatch} payer:${v.payer ?? "?"}${v.error ? ` ${v.error}` : ""}`,
     );
+  }
+  if (memo.pack === "startup") {
+    const { startupAnchorStatus } = await import("./settlement/startup-anchor.ts");
+    const anchor = await startupAnchorStatus(memo);
+    console.log(`  Solana Devnet anchor: ${anchor.status}${"explorer" in anchor ? ` · ${anchor.explorer}` : ""}`);
+    ok &&= anchor.status === "unanchored" || anchor.status === "finalized";
   }
   console.log(ok ? color.green("Memo verified.") : color.red("Memo FAILED verification."));
   return ok;
@@ -185,6 +193,20 @@ async function main() {
       const memo = loadMemo(rest[0] ?? "");
       if (!memo) throw new Error(`memo ${rest[0]} not found`);
       console.log(renderMarkdown(memo));
+      break;
+    }
+    case "anchor": {
+      const [id, keyPath] = rest;
+      const memo = loadMemo(id ?? "");
+      if (!memo || memo.pack !== "startup" || !keyPath || rest.length !== 2) {
+        throw new Error("Usage: anchor <startup-memo-id> <devnet-keypair.json>");
+      }
+      const [{ Keypair }, { anchorStartupMemo }] = await Promise.all([
+        import("@solana/web3.js"), import("./settlement/startup-anchor.ts"),
+      ]);
+      const key = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(keyPath, "utf8"))));
+      const result = await anchorStartupMemo(memo, key);
+      console.log(JSON.stringify(result, null, 2));
       break;
     }
     default:
